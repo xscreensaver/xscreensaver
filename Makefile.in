@@ -373,7 +373,7 @@ www::
   fi ;									    \
 									    \
   git commit -m "$$VERS" . ;						    \
-  git tag -a "v$$VERS" -m "$$VERS" . ;					    \
+  git tag -a "v$$VERS" -m "$$VERS" ;					    \
   git push ;								    \
 
 

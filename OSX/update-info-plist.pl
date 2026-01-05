@@ -27,7 +27,7 @@ use IO::Compress::Gzip qw(gzip $GzipError);
 
 my ($exec_dir, $progname) = ($0 =~ m@^(.*?)/([^/]+)$@);
 
-my ($version) = ('$Revision: 1.31 $' =~ m/\s(\d[.\d]+)\s/s);
+my ($version) = ('$Revision: 1.33 $' =~ m/\s(\d[.\d]+)\s/s);
 
 $ENV{PATH} = "/usr/local/bin:$ENV{PATH}";   # for seticon
 
