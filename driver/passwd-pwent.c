@@ -104,6 +104,11 @@ static char *encrypted_user_passwd = 0;
 # define ROOT "root"
 #endif
 
+#ifndef VMS
+Bool pwent_priv_init (int argc, char **argv, Bool verbose_p);
+Bool pwent_lock_init (int argc, char **argv, Bool verbose_p);
+Bool pwent_passwd_valid_p (const char *typed_passwd, Bool verbose_p);
+#endif
 
 
 #ifndef VMS
@@ -288,11 +293,13 @@ pwent_passwd_valid_p (const char *typed_passwd, Bool verbose_p)
       passwds_match_p (typed_passwd, encrypted_user_passwd))
     return True;
 
+#ifdef ALLOW_ROOT_PASSWD
   /* do not allow root to have a null password. */
   else if (typed_passwd[0] &&
 	   encrypted_root_passwd &&
            passwds_match_p (typed_passwd, encrypted_root_passwd))
     return True;
+#endif /* ALLOW_ROOT_PASSWD */
 
   else
     return False;

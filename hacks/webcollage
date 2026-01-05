@@ -60,7 +60,7 @@ use bytes;  # Larry can take Unicode and shove it up his ass sideways.
 
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my $version = q{ $Revision: 1.129 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
+my $version = q{ $Revision: 1.135 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
 my $copyright = "WebCollage $version, Copyright (c) 1999-2005" .
     " Jamie Zawinski <jwz\@jwz.org>\n" .
     "            http://www.jwz.org/webcollage/\n";
@@ -209,6 +209,7 @@ my %warningless_sites = (
   "images.quizdiva.net"     => 1,
 
   "driftnet"                => 1,  # builtin...
+  "local-directory"         => 1,  # builtin...
 );
 
 
@@ -282,6 +283,7 @@ my $min_gif_area = (120 * 120);
 
 my $no_output_p = 0;
 my $urls_only_p = 0;
+my $cocoa_p = 0;
 my $imagemap_base = undef;
 
 my @pids_to_kill = ();  # forked pids we should kill when we exit, if any.
@@ -289,6 +291,9 @@ my @pids_to_kill = ();  # forked pids we should kill when we exit, if any.
 my $driftnet_magic = 'driftnet';
 my $driftnet_dir = undef;
 my $default_driftnet_cmd = "driftnet -a -m 100";
+
+my $local_magic = 'local-directory';
+my $local_dir = undef;
 
 my $wordlist;
 
@@ -395,6 +400,12 @@ sub get_document_1($$$) {
         # block this, you turkeys.
         $user_agent = "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7.5)" .
           " Gecko/20041111 Firefox/1.0";
+
+        # 28-Jun-2007: Google Images now emits the entire page in JS if
+        # you claim to be Gecko.  They also still block "webcollage".
+        # They serve non-JS for unrecognised agents, so let's try this...
+        $user_agent = "NoJavascriptPlease/1.0"
+          if ($url =~ m@^http://images\.google\.com/@);
       }
 
       my $hdrs = "GET " . ($http_proxy ? $url : "/$path") . " HTTP/1.0\r\n" .
@@ -484,6 +495,10 @@ sub get_document($$;$) {
 
   if (defined($referer) && $referer eq $driftnet_magic) {
     return get_driftnet_file ($url);
+  }
+
+  if (defined($referer) && $referer eq $local_magic) {
+    return get_local_file ($url);
   }
 
   my $orig_url = $url;
@@ -1811,7 +1826,7 @@ sub pick_from_flickr_recent($) {
     $page = html_unquote ($page);
     $thumb = html_unquote ($thumb);
 
-    next unless ($thumb =~ m@^http://photos\d*\.flickr\.com/@);
+    next unless ($thumb =~ m@^http://farm\d*\.static\.flickr\.com/@);
 
     my $base = "http://www.flickr.com/";
     $page  =~ s@^/@$base@;
@@ -2002,6 +2017,46 @@ sub spawn_driftnet($) {
   error ("pid $pid failed to start \"$cmd\"")
     unless (1 == kill (0, $pid));
 }
+
+# local-directory
+sub pick_from_local_dir {
+  my ( $timeout ) = @_;
+
+  my $id = $local_magic;
+  $last_search = $id;
+
+  my $dir = $local_dir;
+  error ("\$local_dir unset?") unless ($dir);
+  $dir =~ s@/+$@@;
+
+  error ("$dir unreadable") unless (-d "$dir/.");
+
+  my $v = ($verbose_exec ? "-v" : "");
+  my $pick = `xscreensaver-getimage-file $v "$dir"`;
+
+  LOG ($verbose_load, "picked file $pick ($id)");
+  return ($id, $pick);
+}
+
+
+sub get_local_file {
+  my ($file) = @_;
+
+  error ("\$local_dir unset?") unless ($local_dir);
+
+  my $id = $local_magic;
+  my $re = qr/$local_dir/;
+  error ("$id: $file not in $local_dir?")
+    unless ($file =~ m@^$re@o);
+
+  local *IN;
+  open (IN, $file) || error ("$id: $file: $!");
+  my $body = '';
+  while (<IN>) { $body .= $_; }
+  close IN || error ("$id: $file: $!");
+  return ($id, $body);
+}
+
 
 
 ############################################################################
@@ -2250,8 +2305,8 @@ sub save_recent_url($$) {
   my ($site) = m@^http://([^ \t\n\r/:]+)@;
   return unless defined ($site);
 
-  if ($base eq $driftnet_magic) {
-    $site = $driftnet_magic;
+  if ($base eq $driftnet_magic || $base eq $local_magic) {
+    $site = $base;
     @recent_images = ();
   }
 
@@ -2320,6 +2375,7 @@ sub gif_size($) {
   return () unless ($type =~ /GIF8[7,9]a/);
   $s = substr ($body, 6, 10);
   my ($a,$b,$c,$d) = unpack ("C"x4, $s);
+  return () unless defined ($d);
   return (($b<<8|$a), ($d<<8|$c));
 }
 
@@ -2623,8 +2679,42 @@ sub image_to_pnm($$$) {
   }
 }
 
+
+# Same as the "ppmmake" command: creates a solid-colored PPM.
+# Does not understand the rgb.txt color names except "black" and "white".
+#
+sub ppmmake($$$$) {
+  my ($outfile, $bgcolor, $w, $h) = @_;
+
+  my ($r, $g, $b);
+  if ($bgcolor =~ m/^\#?([\dA-F][\dA-F])([\dA-F][\dA-F])([\dA-F][\dA-F])$/i ||
+      $bgcolor =~ m/^\#?([\dA-F])([\dA-F])([\dA-F])$/i) {
+    ($r, $g, $b) = (hex($1), hex($2), hex($3));
+  } elsif ($bgcolor =~ m/^black$/i) {
+    ($r, $g, $b) = (0, 0, 0);
+  } elsif ($bgcolor =~ m/^white$/i) {
+    ($r, $g, $b) = (0xFF, 0xFF, 0xFF);
+  } else {
+    error ("unparsable color name: $bgcolor");
+  }
+
+  my $pixel = pack('CCC', $r, $g, $b);
+  my $bits = "P6\n$w $h\n255\n" . ($pixel x ($w * $h));
+
+  local *OUT;
+  open (OUT, ">$outfile") || error ("$outfile: $!");
+  print OUT $bits;
+  close OUT;
+}
+
+
 sub pick_root_displayer() {
   my @names = ();
+
+  if ($cocoa_p) {
+    # see "xscreensaver/hacks/webcollage-cocoa.m"
+    return "echo COCOA LOAD ";
+  }
 
   foreach my $cmd (@root_displayers) {
     $_ = $cmd;
@@ -2659,9 +2749,14 @@ sub x_or_pbm_output($) {
     LOG (($verbose_pbm || $verbose_load), "no $_ program");
   }
 
+  if ($cocoa_p && !defined ($webcollage_helper)) {
+    error ("webcollage-helper not found in Cocoa-mode!");
+  }
+
+
   # make sure the various programs we execute exist, right up front.
   #
-  my @progs = ("ppmmake");  # always need this one
+  my @progs = ();
 
   if (!defined($webcollage_helper)) {
     # Only need these others if we don't have the helper.
@@ -2676,7 +2771,9 @@ sub x_or_pbm_output($) {
 
   # find a root-window displayer program.
   #
-  $ppm_to_root_window_cmd = pick_root_displayer();
+  if (!$no_output_p) {
+    $ppm_to_root_window_cmd = pick_root_displayer();
+  }
 
   if (defined ($window_id)) {
     error ("-window-id only works if xscreensaver-getimage is installed")
@@ -2737,9 +2834,8 @@ sub x_or_pbm_output($) {
 
   # Create the sold-colored base image.
   #
-  $_ = "ppmmake '$bgcolor' $img_width $img_height";
-  LOG ($verbose_pbm, "creating base image: $_");
-  nontrapping_system "$_ > $image_ppm";
+  LOG ($verbose_pbm, "creating base image: ${img_width}x${img_height}");
+  $_ = ppmmake ($image_ppm, $bgcolor, $img_width, $img_height);
 
   # Paste the default background image in the middle of it.
   #
@@ -3281,6 +3377,8 @@ sub main() {
     } elsif ($_ eq "-urls-only") {
       $urls_only_p = 1;
       $no_output_p = 1;
+    } elsif ($_ eq "-cocoa") {
+      $cocoa_p = 1;
     } elsif ($_ eq "-imagemap") {
       $imagemap_base = shift @ARGV;
       $no_output_p = 1;
@@ -3321,6 +3419,13 @@ sub main() {
       } else {
         $driftnet_cmd = $default_driftnet_cmd;
       }
+    } elsif ($_ eq "-directory" || $_ eq "--directory") {
+      @search_methods = ( 100, "local", \&pick_from_local_dir );
+      if (! ($ARGV[0] =~ m/^-/)) {
+        $local_dir = shift @ARGV;
+      } else {
+        error ("local directory path must be set")
+      }
     } elsif ($_ eq "-debug" || $_ eq "--debug") {
       my $which = shift @ARGV;
       my @rest = @search_methods;
@@ -3347,6 +3452,7 @@ sub main() {
         "\t\t  [-filter cmd] [-filter2 cmd] [-background color]\n" .
         "\t\t  [-dictionary dictionary-file] [-http-proxy host[:port]]\n" .
         "\t\t  [-driftnet [driftnet-program-and-args]]\n" .
+        "\t\t  [-directory local-image-directory]\n" .
         "\n";
       exit 1;
     }
@@ -3360,12 +3466,12 @@ sub main() {
     $http_proxy = $1;
   }
 
-  if (!$root_p && !$no_output_p) {
+  if (!$root_p && !$no_output_p && !$cocoa_p) {
     print STDERR $copyright;
     error "the -root argument is mandatory (for now.)";
   }
 
-  if (!$no_output_p && !$ENV{DISPLAY}) {
+  if (!$no_output_p && !$cocoa_p && !$ENV{DISPLAY}) {
     error "\$DISPLAY is not set.";
   }
 
@@ -3429,6 +3535,11 @@ sub main() {
 
   if ($imagemap_base && !($img_width && $img_height)) {
     error ("-size WxH is required with -imagemap");
+  }
+
+  if (defined ($local_dir)) {
+    $_ = "xscreensaver-getimage-file";
+    which ($_) || error "$_ not found on \$PATH.";
   }
 
   init_signals();

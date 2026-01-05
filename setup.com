@@ -24,6 +24,7 @@ $ compass	:== $'mydir'compass
 $ coral		:== $'mydir'coral
 $ critical	:== $'mydir'critical
 $ crystal	:== $'mydir'crystal
+$ cwaves	:== $'mydir'cwaves
 $ cynosure	:== $'mydir'cynosure
 $ decayscreen	:== $'mydir'decayscreen
 $ deco		:== $'mydir'deco
@@ -71,6 +72,7 @@ $ lisa		:== $'mydir'lisa
 $ lissie	:== $'mydir'lissie
 $ lmorph	:== $'mydir'lmorph
 $ loop		:== $'mydir'loop
+$ m6502		:== $'mydir'm6502
 $ maze		:== $'mydir'maze
 $ memscroller	:== $'mydir'memscroller
 $ metaballs	:== $'mydir'metaballs
@@ -121,7 +123,6 @@ $ twang		:== $'mydir'twang
 $ vermiculate	:== $'mydir'vermiculate
 $ vines		:== $'mydir'vines
 $ wander	:== $'mydir'wander
-$ webcollage-helper	:== $'mydir'webcollage-helper
 $ whirlwindwarp	:== $'mydir'whirlwindwarp
 $ whirlygig	:== $'mydir'whirlygig
 $ worm		:== $'mydir'worm
@@ -134,7 +135,6 @@ $ xmatrix	:== $'mydir'xmatrix
 $ xrayswarm	:== $'mydir'xrayswarm
 $ xspirograph	:== $'mydir'xspirograph
 $ xsublim	:== $'mydir'xsublim
-$ xteevee	:== $'mydir'xteevee
 $ zoom		:== $'mydir'zoom
 $ set def [-.DRIVER]
 $ mydir  = mydisk+f$directory()

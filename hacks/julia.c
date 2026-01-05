@@ -20,6 +20,7 @@ static const char sccsid[] = "@(#)julia.c	4.03 97/04/10 xlockmore";
  * other special, indirect and consequential damages.
  *
  * Revision History:
+ * 10-Jun-06: j.grahl@ucl.ac.uk: tweaked functions for parameter of Julia set
  * 28-May-97: jwz@jwz.org: added interactive frobbing with the mouse.
  * 10-May-97: jwz@jwz.org: turned into a standalone program.
  * 02-Dec-95: snagged boilerplate from hop.c
@@ -37,15 +38,13 @@ static const char sccsid[] = "@(#)julia.c	4.03 97/04/10 xlockmore";
  */
 
 #ifdef STANDALONE
-# define PROGCLASS					"Julia"
-# define HACK_INIT					init_julia
-# define HACK_DRAW					draw_julia
-# define julia_opts					xlockmore_opts
 # define DEFAULTS	"*count:		1000  \n"			\
 					"*cycles:		20    \n"			\
 					"*delay:		10000 \n"			\
 					"*ncolors:		200   \n"
 # define UNIFORM_COLORS
+# define reshape_julia 0
+# define julia_handle_event 0
 # include "xlockmore.h"				/* in xscreensaver distribution */
 #else  /* !STANDALONE */
 # include "xlock.h"					/* in xlockmore distribution */
@@ -70,7 +69,7 @@ static OptionStruct desc[] =
 	{"-/+mouse", "turn on/off mouse tracking"},
 };
 
-ModeSpecOpt julia_opts = { 2, opts, 1, vars, desc };
+ENTRYPOINT ModeSpecOpt julia_opts = { 2, opts, 1, vars, desc };
 
 
 #define numpoints ((0x2<<jp->depth)-1)
@@ -90,7 +89,9 @@ typedef struct {
 	int         nbuffers;
 	int         redrawing, redrawpos;
 	Pixmap      pixmap;
+#ifndef HAVE_COCOA
 	Cursor      cursor;
+#endif
 	GC          stippledGC;
 	XPoint    **pointBuffer;	/* pointer for XDrawPoints */
 
@@ -159,6 +160,7 @@ incr(ModeInfo * mi, juliastruct * jp)
 	else
 	  {
 	  NOTRACK:
+#if 0
 		jp->cr = 1.5 * (sin(M_PI * (jp->inc / 300.0)) *
 						sin(jp->inc * M_PI / 200.0));
 		jp->ci = 1.5 * (cos(M_PI * (jp->inc / 300.0)) *
@@ -166,10 +168,19 @@ incr(ModeInfo * mi, juliastruct * jp)
 
 		jp->cr += 0.5 * cos(M_PI * jp->inc / 400.0);
 		jp->ci += 0.5 * sin(M_PI * jp->inc / 400.0);
+#else
+        jp->cr = 1.5 * (sin(M_PI * (jp->inc / 290.0)) *
+                        sin(jp->inc * M_PI / 210.0));
+        jp->ci = 1.5 * (cos(M_PI * (jp->inc / 310.0)) *
+                        cos(jp->inc * M_PI / 190.0));
+
+        jp->cr += 0.5 * cos(M_PI * jp->inc / 395.0);
+        jp->ci += 0.5 * sin(M_PI * jp->inc / 410.0);
+#endif
 	  }
 }
 
-void
+ENTRYPOINT void
 init_julia(ModeInfo * mi)
 {
 	Display    *display = MI_DISPLAY(mi);
@@ -193,6 +204,7 @@ init_julia(ModeInfo * mi)
 		jp->depth = 10;
 
 
+#ifndef HAVE_COCOA
 	if (track_p && !jp->cursor)
 	  {
 		Pixmap bit;
@@ -206,6 +218,7 @@ init_julia(ModeInfo * mi)
 										  0, 0);
 		XFreePixmap (display, bit);
 	  }
+#endif /* HAVE_COCOA */
 
 	if (jp->pixmap != None &&
 	    jp->circsize != (MIN(jp->centerx, jp->centery) / 60) * 2 + 1) {
@@ -234,12 +247,14 @@ init_julia(ModeInfo * mi)
 			XFreeGC(display, bg_gc);
 	}
 
+#ifndef HAVE_COCOA
 	if (MI_WIN_IS_INROOT(mi))
 	  ;
 	else if (jp->circsize > 0)
 	  XDefineCursor (display, window, jp->cursor);
 	else
 	  XUndefineCursor (display, window);
+#endif /* HAVE_COCOA */
 
 	if (!jp->stippledGC) {
 		gcv.foreground = MI_WIN_BLACK_PIXEL(mi);
@@ -283,8 +298,8 @@ else if (xl>x) \
 XFillRectangle(d,w,g,xl,yl,xs,ys)
 
 
-void
-draw_julia(ModeInfo * mi)
+ENTRYPOINT void
+draw_julia (ModeInfo * mi)
 {
 	Display    *display = MI_DISPLAY(mi);
 	Window      window = MI_WINDOW(mi);
@@ -305,13 +320,14 @@ draw_julia(ModeInfo * mi)
 		    old_circle.x, old_circle.y, jp->circsize, jp->circsize);
 	/* draw a circle at the c-parameter so you can see it's effect on the
 	   structure of the julia set */
-	XSetTSOrigin(display, jp->stippledGC, new_circle.x, new_circle.y);
 	XSetForeground(display, jp->stippledGC, MI_WIN_WHITE_PIXEL(mi));
+#ifndef HAVE_COCOA
+	XSetTSOrigin(display, jp->stippledGC, new_circle.x, new_circle.y);
 	XSetStipple(display, jp->stippledGC, jp->pixmap);
 	XSetFillStyle(display, jp->stippledGC, FillOpaqueStippled);
+#endif /* HAVE_COCOA */
 	XFillRectangle(display, window, jp->stippledGC, new_circle.x, new_circle.y,
 		       jp->circsize, jp->circsize);
-	XFlush(display);
 	if (jp->erase == 1) {
 		XDrawPoints(display, window, gc,
 		    jp->pointBuffer[jp->buffer], numpoints, CoordModeOrigin);
@@ -381,8 +397,8 @@ draw_julia(ModeInfo * mi)
 	}
 }
 
-void
-release_julia(ModeInfo * mi)
+ENTRYPOINT void
+release_julia (ModeInfo * mi)
 {
 	if (julias != NULL) {
 		int         screen;
@@ -402,19 +418,23 @@ release_julia(ModeInfo * mi)
 				XFreeGC(display, jp->stippledGC);
 			if (jp->pixmap != None)
 				XFreePixmap(display, jp->pixmap);
+#ifndef HAVE_COCOA
 			if (jp->cursor)
 			  XFreeCursor (display, jp->cursor);
+#endif
 		}
 		(void) free((void *) julias);
 		julias = NULL;
 	}
 }
 
-void
-refresh_julia(ModeInfo * mi)
+ENTRYPOINT void
+refresh_julia (ModeInfo * mi)
 {
 	juliastruct *jp = &julias[MI_SCREEN(mi)];
 
 	jp->redrawing = 1;
 	jp->redrawpos = 0;
 }
+
+XSCREENSAVER_MODULE ("Julia", julia)

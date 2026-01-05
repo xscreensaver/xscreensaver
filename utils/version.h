@@ -1,2 +1,2 @@
 static const char screensaver_id[] =
-	"@(#)xscreensaver 4.24 (21-Oct-2005), by Jamie Zawinski (jwz@jwz.org)";
+	"@(#)xscreensaver 5.03 (17-Jul-2007), by Jamie Zawinski (jwz@jwz.org)";

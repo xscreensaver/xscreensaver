@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1991-2005 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1991-2006 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -152,6 +152,8 @@
 #include <time.h>
 #include <sys/time.h>
 #include <netdb.h>	/* for gethostbyname() */
+#include <sys/types.h>
+#include <pwd.h>
 #ifdef HAVE_XMU
 # ifndef VMS
 #  include <X11/Xmu/Error.h>
@@ -176,6 +178,7 @@
 #include "resources.h"
 #include "visual.h"
 #include "usleep.h"
+#include "auth.h"
 
 saver_info *global_si_kludge = 0;	/* I hate C so much... */
 
@@ -202,36 +205,6 @@ static XrmOptionDescRec options [] = {
 
   /* useful for debugging */
   { "-no-capture-stderr",  ".captureStderr",	XrmoptionNoArg, "off" },
-
-  /* There's really no reason to have these command-line args; they just
-     lead to confusion when the .xscreensaver file has conflicting values.
-   */
-#if 0
-  { "-splash",		   ".splash",		XrmoptionNoArg, "on" },
-  { "-capture-stderr",	   ".captureStderr",	XrmoptionNoArg, "on" },
-  { "-timeout",		   ".timeout",		XrmoptionSepArg, 0 },
-  { "-cycle",		   ".cycle",		XrmoptionSepArg, 0 },
-  { "-lock-mode",	   ".lock",		XrmoptionNoArg, "on" },
-  { "-no-lock-mode",	   ".lock",		XrmoptionNoArg, "off" },
-  { "-no-lock",		   ".lock",		XrmoptionNoArg, "off" },
-  { "-lock-timeout",	   ".lockTimeout",	XrmoptionSepArg, 0 },
-  { "-lock-vts",	   ".lockVTs",		XrmoptionNoArg, "on" },
-  { "-no-lock-vts",	   ".lockVTs",		XrmoptionNoArg, "off" },
-  { "-visual",		   ".visualID",		XrmoptionSepArg, 0 },
-  { "-install",		   ".installColormap",	XrmoptionNoArg, "on" },
-  { "-no-install",	   ".installColormap",	XrmoptionNoArg, "off" },
-  { "-timestamp",	   ".timestamp",	XrmoptionNoArg, "on" },
-  { "-xidle-extension",	   ".xidleExtension",	XrmoptionNoArg, "on" },
-  { "-no-xidle-extension", ".xidleExtension",	XrmoptionNoArg, "off" },
-  { "-mit-extension",	   ".mitSaverExtension",XrmoptionNoArg, "on" },
-  { "-no-mit-extension",   ".mitSaverExtension",XrmoptionNoArg, "off" },
-  { "-sgi-extension",	   ".sgiSaverExtension",XrmoptionNoArg, "on" },
-  { "-no-sgi-extension",   ".sgiSaverExtension",XrmoptionNoArg, "off" },
-  { "-proc-interrupts",	   ".procInterrupts",	XrmoptionNoArg, "on" },
-  { "-no-proc-interrupts", ".procInterrupts",	XrmoptionNoArg, "off" },
-  { "-idelay",		   ".initialDelay",	XrmoptionSepArg, 0 },
-  { "-nice",		   ".nice",		XrmoptionSepArg, 0 },
-#endif /* 0 */
 };
 
 #ifdef __GNUC__
@@ -255,7 +228,7 @@ do_help (saver_info *si)
   fflush (stdout);
   fflush (stderr);
   fprintf (stdout, "\
-xscreensaver %s, copyright (c) 1991-2005 by Jamie Zawinski <jwz@jwz.org>\n\
+xscreensaver %s, copyright (c) 1991-2006 by Jamie Zawinski <jwz@jwz.org>\n\
 \n\
   All xscreensaver configuration is via the `~/.xscreensaver' file.\n\
   Rather than editing that file by hand, just run `xscreensaver-demo':\n\
@@ -712,14 +685,15 @@ print_banner (saver_info *si)
      whether to print the banner (and so that the banner gets printed before
      any resource-database-related error messages.)
    */
-  p->verbose_p = (p->debug_p || get_boolean_resource ("verbose", "Boolean"));
+  p->verbose_p = (p->debug_p || 
+                  get_boolean_resource (si->dpy, "verbose", "Boolean"));
 
   /* Ditto, for the locking_disabled_p message. */
-  p->lock_p = get_boolean_resource ("lock", "Boolean");
+  p->lock_p = get_boolean_resource (si->dpy, "lock", "Boolean");
 
   if (p->verbose_p)
     fprintf (stderr,
-	     "%s %s, copyright (c) 1991-2005 "
+	     "%s %s, copyright (c) 1991-2006 "
 	     "by Jamie Zawinski <jwz@jwz.org>.\n",
 	     progname, si->version);
 
@@ -847,6 +821,7 @@ initialize_per_screen_info (saver_info *si, Widget toplevel_shell)
     }
 
 
+# ifdef QUAD_MODE
   /* In "quad mode", we use the Xinerama code to pretend that there are 4
      screens for every physical screen, and run four times as many hacks...
    */
@@ -894,6 +869,7 @@ initialize_per_screen_info (saver_info *si, Widget toplevel_shell)
       si->default_screen = &si->screens[DefaultScreen(si->dpy) * 4];
       si->xinerama_p = True;
     }
+# endif /* QUAD_MODE */
 
   /* finish initializing the screens.
    */
@@ -1126,7 +1102,7 @@ maybe_reload_init_file (saver_info *si)
 	fprintf (stderr, "%s: file \"%s\" has changed, reloading.\n",
 		 blurb(), init_file_name());
 
-      load_init_file (p);
+      load_init_file (si->dpy, p);
 
       /* If a server extension is in use, and p->timeout has changed,
 	 we need to inform the server of the new timeout. */
@@ -1410,6 +1386,7 @@ main (int argc, char **argv)
   saver_info the_si;
   saver_info *si = &the_si;
   saver_preferences *p = &si->prefs;
+  struct passwd *spasswd;
   int i;
 
   memset(si, 0, sizeof(*si));
@@ -1425,11 +1402,26 @@ main (int argc, char **argv)
   privileged_initialization (si, &argc, argv);
   hack_environment (si);
 
+  spasswd = getpwuid(getuid());
+  if (!spasswd)
+    {
+      fprintf(stderr, "Could not figure out who the current user is!\n");
+      fprintf(stderr, "spasswd is %x\n", (unsigned int) spasswd);
+      return 1;
+    }
+
+  si->user = strdup(spasswd->pw_name ? spasswd->pw_name : "(unknown)");
+
+# ifndef NO_LOCKING
+  si->unlock_cb = gui_auth_conv;
+  si->auth_finished_cb = auth_finished_cb;
+# endif /* !NO_LOCKING */
+
   shell = connect_to_server (si, &argc, argv);
   process_command_line (si, &argc, argv);
   print_banner (si);
 
-  load_init_file (p);  /* must be before initialize_per_screen_info() */
+  load_init_file(si->dpy, p); /* must be before initialize_per_screen_info() */
   blurb_timestamp_p = p->timestamp_p;  /* kludge */
   initialize_per_screen_info (si, shell); /* also sets si->fading_possible_p */
 
@@ -1873,7 +1865,7 @@ handle_clientmessage (saver_info *si, XEvent *event, Bool until_idle_p)
   else if (type == XA_DEMO)
     {
       long arg = event->xclient.data.l[1];
-      Bool demo_one_hack_p = (arg == 300);
+      Bool demo_one_hack_p = (arg == 5000);
 
       if (demo_one_hack_p)
 	{

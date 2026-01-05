@@ -12,6 +12,9 @@
  */
 
 
+/* Define this to allow the root password to unlock the screen. */
+#undef ALLOW_ROOT_PASSWD
+
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
    */
@@ -212,6 +215,10 @@
    lock/unlock the screen, instead of standard /etc/passwd authentication. */
 #undef HAVE_PAM
 
+/* Define this if you have pam_fail_delay function. see driver/passwd-pam.c.
+   */
+#undef HAVE_PAM_FAIL_DELAY
+
 /* Define this if you have a Linux-like /proc/interrupts file which can be
    examined to determine when keyboard activity has occurred. */
 #undef HAVE_PROC_INTERRUPTS
@@ -327,14 +334,6 @@
 /* Define to 1 if you have the <util.h> header file. */
 #undef HAVE_UTIL_H
 
-/* Define this if you are on a system that supports the VT_LOCKSWITCH and
-   VT_UNLOCKSWITCH ioctls. If this is defined, then when the screen is locked,
-   switching to another virtual terminal will also be prevented. That is, the
-   whole console will be locked, rather than just the VT on which X is
-   running. (Well, that's the theory anyway -- in practice, I haven't yet
-   figured out how to make that work.) */
-#undef HAVE_VT_LOCKSWITCH
-
 /* Define this if you have the XF86MiscSetGrabKeysState function (which allows
    the Ctrl-Alt-KP_star and Ctrl-Alt-KP_slash key sequences to be temporarily
    disabled. Sadly, it doesn't affect Ctrl-Alt-BS or Ctrl-Alt-F1.) */
@@ -443,7 +442,7 @@
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
-   automatically deduced at run-time.
+   automatically deduced at runtime.
 	STACK_DIRECTION > 0 => grows toward higher addresses
 	STACK_DIRECTION < 0 => grows toward lower addresses
 	STACK_DIRECTION = 0 => direction of growth unknown */
@@ -473,11 +472,11 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef mode_t
 
-/* Define to `long' if <sys/types.h> does not define. */
+/* Define to `long int' if <sys/types.h> does not define. */
 #undef off_t
 
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
 
-/* Define to `unsigned' if <sys/types.h> does not define. */
+/* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef size_t

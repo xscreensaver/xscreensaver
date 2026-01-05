@@ -1,5 +1,5 @@
 /* subprocs.c --- choosing, spawning, and killing screenhacks.
- * xscreensaver, Copyright (c) 1991-2005 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright (c) 1991-2006 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -25,6 +25,7 @@
 #endif
 
 #include <sys/time.h>		/* sys/resource.h needs this for timeval */
+#include <sys/param.h>		/* for PATH_MAX */
 
 #ifdef HAVE_SYS_WAIT_H
 # include <sys/wait.h>		/* for waitpid() and associated macros */
@@ -65,6 +66,7 @@ extern int kill (pid_t, int);		/* signal() is in sys/signal.h... */
 #define Widget       void*
 
 #include "xscreensaver.h"
+#include "exec.h"
 #include "yarandom.h"
 #include "visual.h"    /* for id_to_visual() */
 
@@ -216,7 +218,10 @@ struct screenhack_job {
 
 static struct screenhack_job *jobs = 0;
 
-/* for debugging -- nothing calls this, but it's useful to invoke from gdb. */
+/* for debugging -- nothing calls this, but it's useful to invoke from gdb.
+ */
+void show_job_list (void);
+
 void
 show_job_list (void)
 {
@@ -355,12 +360,20 @@ static int block_sigchld_handler = 0;
 block_sigchld (void)
 {
 #ifdef HAVE_SIGACTION
+  struct sigaction sa;
   sigset_t child_set;
+
+  memset (&sa, 0, sizeof (sa));
+  sa.sa_handler = SIG_IGN;
+  sigaction (SIGPIPE, &sa, NULL);
+
   sigemptyset (&child_set);
   sigaddset (&child_set, SIGCHLD);
-  sigaddset (&child_set, SIGPIPE);
   sigprocmask (SIG_BLOCK, &child_set, 0);
-#endif /* HAVE_SIGACTION */
+
+#else  /* !HAVE_SIGACTION */
+  signal (SIGPIPE, SIG_IGN);
+#endif /* !HAVE_SIGACTION */
 
   block_sigchld_handler++;
 
@@ -375,12 +388,20 @@ void
 unblock_sigchld (void)
 {
 #ifdef HAVE_SIGACTION
+  struct sigaction sa;
   sigset_t child_set;
+
+  memset(&sa, 0, sizeof (sa));
+  sa.sa_handler = SIG_DFL;
+  sigaction(SIGPIPE, &sa, NULL);
+
   sigemptyset(&child_set);
   sigaddset(&child_set, SIGCHLD);
-  sigaddset(&child_set, SIGPIPE);
   sigprocmask(SIG_UNBLOCK, &child_set, 0);
-#endif /* HAVE_SIGACTION */
+
+#else /* !HAVE_SIGACTION */
+  signal(SIGPIPE, SIG_DFL);
+#endif /* !HAVE_SIGACTION */
 
   block_sigchld_handler--;
 }
@@ -1135,14 +1156,17 @@ hack_subproc_environment (saver_screen_info *ssi)
   const char *odpy = DisplayString (si->dpy);
   char *ndpy = (char *) malloc (strlen(odpy) + 20);
   char *nssw = (char *) malloc (40);
-  char *s;
+  char *s, *c;
 
   strcpy (ndpy, "DISPLAY=");
   s = ndpy + strlen(ndpy);
   strcpy (s, odpy);
 
-  while (*s && *s != ':') s++;			/* skip to colon */
-  while (*s == ':') s++;			/* skip over colons */
+  /* We have to find the last colon since it is the boundary between
+     hostname & screen - IPv6 numeric format addresses may have many
+     colons before that point, and DECnet addresses always have two colons */
+  c = strrchr(s,':');				/* skip to last colon */
+  if (c != NULL) s = c+1;
   while (isdigit(*s)) s++;			/* skip over dpy number */
   while (*s == '.') s++;			/* skip over dot */
   if (s[-1] != '.') *s++ = '.';			/* put on a dot */

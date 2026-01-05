@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2001-2004 by Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 2001-2006 by Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -100,6 +100,8 @@ typedef enum {
 #define GETIMAGE_VIDEO_PROGRAM   "xscreensaver-getimage-video"
 #define GETIMAGE_FILE_PROGRAM    "xscreensaver-getimage-file"
 #define GETIMAGE_SCREEN_PROGRAM  "xscreensaver-getimage-desktop"
+
+extern const char *blurb (void);
 
 const char *
 blurb (void)
@@ -297,7 +299,7 @@ compute_image_scaling (int src_w, int src_h,
    If out of memory, returns False, and the XImage will have been
    destroyed and freed.
  */
-#ifndef USE_EXTERNAL_SCREEN_GRABBER
+#if !defined(USE_EXTERNAL_SCREEN_GRABBER) || defined(HAVE_JPEGLIB)
 static Bool
 scale_ximage (Screen *screen, Visual *visual,
               XImage *ximage, int new_width, int new_height)
@@ -345,7 +347,7 @@ scale_ximage (Screen *screen, Visual *visual,
 
   return True;
 }
-#endif /* ! USE_EXTERNAL_SCREEN_GRABBER */
+#endif /* !USE_EXTERNAL_SCREEN_GRABBER || HAVE_JPEGLIB */
 
 
 #ifdef HAVE_GDK_PIXBUF
@@ -1440,6 +1442,19 @@ display_desktop (Screen *screen, Window window, Drawable drawable,
 }
 
 
+/* Whether the given Drawable is unreasonably small.
+ */
+static Bool
+drawable_miniscule_p (Display *dpy, Drawable drawable)
+{
+  Window root;
+  int xx, yy;
+  unsigned int bw, d, w = 0, h = 0;
+  XGetGeometry (dpy, drawable, &root, &xx, &yy, &w, &h, &bw, &d);
+  return (w < 32 || h < 32);
+}
+
+
 /* Grabs an image (from a file, video, or the desktop) and renders it on
    the Drawable.  If `file' is specified, always use that file.  Otherwise,
    select randomly, based on the other arguments.
@@ -1523,6 +1538,15 @@ get_image (Screen *screen,
       image_p = False;
     }
 
+  /* If the target drawable is really small, no good can come of that.
+     Always do colorbars in that case.
+   */
+  if (drawable_miniscule_p (dpy, drawable))
+    {
+      desk_p  = False;
+      video_p = False;
+      image_p = False;
+    }
 
 # ifndef _VROOT_H_
 #  error Error!  This file definitely needs vroot.h!
@@ -1773,7 +1797,7 @@ main (int argc, char **argv)
 
   memset (&P, 0, sizeof(P));
   P.db = db;
-  load_init_file (&P);
+  load_init_file (dpy, &P);
 
   progname = argv[0] = oprogname;
 
