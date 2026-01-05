@@ -12,17 +12,23 @@
 
 
 /* Documentation on the PDB file format:
+   http://en.wikipedia.org/wiki/Protein_Data_Bank_%28file_format%29
+   http://www.wwpdb.org/docs.html
+   http://www.wwpdb.org/documentation/format32/v3.2.html
+   http://www.wwpdb.org/documentation/format32/sect9.html
    http://www.rcsb.org/pdb/file_formats/pdb/pdbguide2.2/guide2.2_frame.html
 
    Good source of PDB files:
    http://www.sci.ouc.bc.ca/chem/molecule/molecule.html
+   http://www.umass.edu/microbio/rasmol/whereget.htm
+   http://www.wwpdb.org/docs.html
  */
 
 #define DEFAULTS	"*delay:	10000         \n" \
 			"*showFPS:      False         \n" \
 			"*wireframe:    False         \n" \
-			"*atomFont:   -*-times-bold-r-normal-*-240-*\n" \
-			"*titleFont:  -*-times-bold-r-normal-*-180-*\n" \
+			"*atomFont:   -*-helvetica-medium-r-normal-*-240-*\n" \
+			"*titleFont:  -*-helvetica-medium-r-normal-*-180-*\n" \
 			"*noLabelThreshold:    30     \n" \
 			"*wireframeThreshold:  150    \n" \
 
@@ -53,7 +59,7 @@
 #define DEF_TITLES      "True"
 #define DEF_ATOMS       "True"
 #define DEF_BONDS       "True"
-#define DEF_SHELLS      "True"
+#define DEF_ESHELLS     "True"
 #define DEF_BBOX        "False"
 #define DEF_SHELL_ALPHA "0.3"
 #define DEF_MOLECULE    "(default)"
@@ -215,7 +221,7 @@ static argtype vars[] = {
   {&do_wander,	  "wander",	"Wander",	DEF_WANDER,   t_Bool},
   {&do_atoms,	  "atoms",	"Atoms",	DEF_ATOMS,    t_Bool},
   {&do_bonds,	  "bonds",	"Bonds",	DEF_BONDS,    t_Bool},
-  {&do_shells,	  "eshells",	"EShells",	DEF_SHELLS,   t_Bool},
+  {&do_shells,	  "eshells",	"EShells",	DEF_ESHELLS,  t_Bool},
   {&do_labels,	  "labels",	"Labels",	DEF_LABELS,   t_Bool},
   {&do_titles,	  "titles",	"Titles",	DEF_TITLES,   t_Bool},
   {&do_bbox,	  "bbox",	"BBox",		DEF_BBOX,     t_Bool},
@@ -574,11 +580,10 @@ build_molecule (ModeInfo *mi, Bool transparent_p)
             if (thickness > 0.3)
               thickness = 0.3;
 
-            tube (from->x, from->y, from->z,
-                  to->x,   to->y,   to->z,
-                  thickness, cap_size,
-                  faces, smooth, (!do_atoms || do_shells), wire);
-            polys += faces;
+            polys += tube (from->x, from->y, from->z,
+                           to->x,   to->y,   to->z,
+                           thickness, cap_size,
+                           faces, smooth, (!do_atoms || do_shells), wire);
           }
       }
 
@@ -749,13 +754,26 @@ parse_pdb_data (molecule *m, const char *data, const char *filename, int line)
       else if (!strncmp (s, "ATOM   ", 7))
         {
           int id;
+          const char *end = strchr (s, '\n');
+          int L = end - s;
           char *name = (char *) calloc (1, 4);
           GLfloat x = -999, y = -999, z = -999;
 
           if (1 != sscanf (s+7, " %d ", &id))
             parse_error (filename, line, s);
 
+          /* Use the "atom name" field if that is all that is available. */
           strncpy (name, s+12, 3);
+
+          /* But prefer the "element" field. */
+          if (L > 77 && !isspace(s[77])) {
+            /* fprintf(stderr, "  \"%s\" -> ", name); */
+            name[0] = s[76];
+            name[1] = s[77];
+            name[2] = 0;
+            /* fprintf(stderr, "\"%s\"\n", name); */
+          }
+
           while (isspace(*name)) name++;
           ss = name + strlen(name)-1;
           while (isspace(*ss) && ss > name)
@@ -1180,7 +1198,7 @@ startup_blurb (ModeInfo *mi)
   print_gl_string (mi->dpy, mc->xfont2, mc->font2_dlist,
                    mi->xgwa.width, mi->xgwa.height,
                    10, mi->xgwa.height - 10,
-                   s);
+                   s, False);
   glFinish();
   glXSwapBuffers(MI_DISPLAY(mi), MI_WINDOW(mi));
 }
@@ -1207,7 +1225,9 @@ molecule_handle_event (ModeInfo *mi, XEvent *event)
     }
   else if (event->xany.type == ButtonPress &&
            (event->xbutton.button == Button4 ||
-            event->xbutton.button == Button5))
+            event->xbutton.button == Button5 ||
+            event->xbutton.button == Button6 ||
+            event->xbutton.button == Button7))
     {
       gltrackball_mousewheel (mc->trackball, event->xbutton.button, 10,
                               !!event->xbutton.state);
@@ -1392,7 +1412,7 @@ draw_labels (ModeInfo *mi)
       /* Before drawing the string, shift the origin to center
          the text over the origin of the sphere. */
       glBitmap (0, 0, 0, 0,
-                -string_width (mc->xfont1, a->label) / 2,
+                -string_width (mc->xfont1, a->label, 0) / 2,
                 -mc->xfont1->descent,
                 NULL);
 
@@ -1596,7 +1616,7 @@ draw_molecule (ModeInfo *mi)
           print_gl_string (mi->dpy, mc->xfont2, mc->font2_dlist,
                            mi->xgwa.width, mi->xgwa.height,
                            10, mi->xgwa.height - 10,
-                           m->label);
+                           m->label, False);
         }
     }
   glPopMatrix();

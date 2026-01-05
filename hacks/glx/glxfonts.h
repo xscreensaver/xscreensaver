@@ -1,4 +1,4 @@
-/* glxfonts, Copyright (c) 2001-2004 Jamie Zawinski <jwz@jwz.org>
+/* glxfonts, Copyright (c) 2001-2009 Jamie Zawinski <jwz@jwz.org>
  * Loads X11 fonts for use with OpenGL.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -9,11 +9,17 @@
  * software for any purpose.  It is provided "as is" without express or 
  * implied warranty.
  *
- * Compute normal vectors for arbitrary triangles.
+ * Loads X11 fonts for use with OpenGL.
  */
 
 #ifndef __GLXFONTS_H__
 #define __GLXFONTS_H__
+
+/* This is basically the same as glXUseXFont().
+   We have our own version of it for portability.
+ */
+extern void xscreensaver_glXUseXFont (Display *dpy, Font font, 
+                                      int first, int count, int listbase);
 
 /* Loads the font named by the X resource "res".
    Returns an XFontStruct.
@@ -23,8 +29,9 @@ extern void load_font (Display *, char *resource,
                        XFontStruct **font_ret,
                        GLuint *dlist_ret);
 
-/* Width of the string in pixels. */
-extern int string_width (XFontStruct *f, const char *c);
+/* Bounding box of the string in pixels.
+ */
+extern int string_width (XFontStruct *f, const char *c, int *height_ret);
 
 /* Draws the string on the window at the given pixel position.
    Newlines and tab stops are honored.
@@ -35,6 +42,7 @@ void print_gl_string (Display *dpy,
                       GLuint font_dlist,
                       int window_width, int window_height,
                       GLfloat x, GLfloat y,
-                      const char *string);
+                      const char *string,
+                      Bool clear_background_p);
 
 #endif /* __GLXFONTS_H__ */

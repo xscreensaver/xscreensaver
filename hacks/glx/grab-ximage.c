@@ -1,5 +1,5 @@
 /* grab-ximage.c --- grab the screen to an XImage for use with OpenGL.
- * xscreensaver, Copyright (c) 2001-2006 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright (c) 2001-2008 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -141,11 +141,10 @@ convert_ximage_to_rgba32 (Screen *screen, XImage *image)
   unsigned int srpos=0, sgpos=0, sbpos=0;
   unsigned int srmsk=0, sgmsk=0, sbmsk=0;
   unsigned int srsiz=0, sgsiz=0, sbsiz=0;
-  int i;
   XColor *colors = 0;
   unsigned char spread_map[3][256];
 
-  /* Note: height+2 in "to" to be to work around an array bounds overrun
+  /* Note: height+2 in "to" to work around an array bounds overrun
      in gluBuild2DMipmaps / gluScaleImage.
    */
   XImage *from = image;
@@ -193,6 +192,7 @@ convert_ximage_to_rgba32 (Screen *screen, XImage *image)
 
   if (colors == 0)  /* truecolor */
     {
+      int i;
       for (i = 0; i < 256; i++)
         {
           spread_map[0][i] = spread_bits (i, srsiz);
@@ -200,6 +200,10 @@ convert_ximage_to_rgba32 (Screen *screen, XImage *image)
           spread_map[2][i] = spread_bits (i, sbsiz);
         }
     }
+
+  /* trying to track down an intermittent crash in ximage_putpixel_32 */
+  if (to->width  < from->width)  abort();
+  if (to->height < from->height) abort();
 
   for (y = 0; y < from->height; y++)
     for (x = 0; x < from->width; x++)
@@ -318,6 +322,9 @@ pixmap_to_gl_ximage (Screen *screen, Window window, Pixmap pixmap)
     unsigned int bw;
     XGetGeometry (dpy, pixmap, &root, &x, &y, &width, &height, &bw, &depth);
   }
+
+  if (width < 5 || height < 5)  /* something's gone wrong somewhere... */
+    return 0;
 
   /* Convert the server-side Pixmap to a client-side GL-ordered XImage.
    */

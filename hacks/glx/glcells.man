@@ -64,9 +64,7 @@ Specifies the minimum distance between cells. Default 1.4
 How long to pause between frames.  Default is 20000, or 0.02 second.
 .TP 8
 .B \-fps
-Display a running tally of how many frames per second are being rendered.
-In conjunction with \fB\-delay 0\fP, this can be a useful benchmark of 
-your GL performance.
+Display the current frame rate, CPU load, and polygon count.
 .TP 8
 .B \-wireframe
 Draw wireframe only.
@@ -95,5 +93,5 @@ appear in supporting documentation.  No representations are made about the
 suitability of this software for any purpose.  It is provided "as is" without
 express or implied warranty.
 .SH AUTHOR
-Matthias Toussaint <glcells@mtoussaint.de>, 17-Jun-2007.
+Matthias Toussaint <glcells@mtoussaint.de>, 17-Jun-2007, http://www.mtoussaint.de/bits.html.
  

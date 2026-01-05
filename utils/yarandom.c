@@ -1,5 +1,5 @@
 /* yarandom.c -- Yet Another Random Number Generator.
- * Copyright (c) 1997, 1998, 2003 by Jamie Zawinski <jwz@jwz.org>
+ * Copyright (c) 1997-2010 by Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -17,7 +17,7 @@
 
    I don't understand how it works at all, but he says "look at Knuth,
    Vol. 2 (original edition), page 26, Algorithm A.  In this case n=55,
-   k=20 and m=2^32."
+   k=24 and m=2^32."
 
    So there you have it.
 
@@ -109,17 +109,31 @@ ya_rand_init(unsigned int seed)
 #else
       gettimeofday(&tp);
 #endif
-      /* ignore overflow */
-      seed = (999*tp.tv_sec) + (1001*tp.tv_usec) + (1003 * getpid());
+      /* Since the multiplications will have a larger effect on the
+         upper bits than the lower bits, after every addition in the
+         seed, perform a bitwise rotate by an odd number, resulting
+         in a better distribution of randomness throughout the bits.
+         -- Brian Carlson, 2010.
+       */
+#define ROT(X,N) (((X)<<(N)) | ((X)>>((sizeof(unsigned int)*8)-(N))))
+      seed = (999 * tp.tv_sec);
+      seed = ROT (seed, 11);
+      seed += (1001 * tp.tv_usec);
+      seed = ROT (seed, 7);
+      seed += (1003 * getpid());
+      seed = ROT (seed, 13);
     }
 
   a[0] += seed;
   for (i = 1; i < VectorSize; i++)
     {
-      seed = a[i-1]*1001 + seed*999;
+      seed = seed*999;
+      seed = ROT (seed, 9);
+      seed += a[i-1]*1001;
+      seed = ROT (seed, 15);
       a[i] += seed;
     }
 
   i1 = a[0] % VectorSize;
-  i2 = (i1 + 024) % VectorSize;
+  i2 = (i1 + 24) % VectorSize;
 }

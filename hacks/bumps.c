@@ -28,7 +28,110 @@
  * 							 for code optimization.
  */
 
-#include "bumps.h"
+
+#include <math.h>
+#include "screenhack.h"
+
+#ifdef HAVE_XSHM_EXTENSION
+#include "xshm.h"
+#endif /* HAVE_XSHM_EXTENSION */
+
+
+/* Defines: */
+/* #define VERBOSE */
+#define RANDOM() ((int) (random() & 0X7FFFFFFFL))
+
+typedef signed char		int8_;
+typedef unsigned char	uint8_;
+typedef short			int16_;
+typedef unsigned short	uint16_;
+typedef long			int32_;
+typedef unsigned long	uint32_;
+typedef unsigned char	BOOL;
+
+
+/* Globals: */
+
+static const char *bumps_defaults [] = {
+  ".background: black",
+  ".foreground: white",
+  "*fpsSolid:	true",
+  "*color:		random",
+  "*colorcount:	64",
+  "*delay:		30000",
+  "*duration:	120",
+  "*soften:		1",
+  "*invert:		FALSE",
+#ifdef __sgi    /* really, HAVE_READ_DISPLAY_EXTENSION */
+  "*visualID:	Best",
+#endif
+#ifdef HAVE_XSHM_EXTENSION
+  "*useSHM:		True",
+#endif /* HAVE_XSHM_EXTENSION */
+  0
+};
+
+static XrmOptionDescRec bumps_options [] = {
+  { "-color",		".color",		XrmoptionSepArg, 0 },
+  { "-colorcount",	".colorcount",	XrmoptionSepArg, 0 },
+  { "-duration",	".duration",	XrmoptionSepArg, 0 },
+  { "-delay",		".delay",		XrmoptionSepArg, 0 },
+  { "-soften",		".soften",		XrmoptionSepArg, 0 },
+  { "-invert",		".invert",		XrmoptionNoArg, "TRUE" },
+#ifdef HAVE_XSHM_EXTENSION
+  { "-shm",			".useSHM",		XrmoptionNoArg, "True" },
+  { "-no-shm",		".useSHM",		XrmoptionNoArg, "False" },
+#endif /* HAVE_XSHM_EXTENSION */
+
+  { 0, 0, 0, 0 }
+};
+
+
+/* This structure handles everything to do with the spotlight, and is designed to be
+ * a member of TBumps. */
+typedef struct
+{
+	uint8_ *aLightMap;
+	uint16_ nFalloffDiameter, nFalloffRadius;
+	uint16_ nLightDiameter, nLightRadius;
+	float nAccelX, nAccelY;
+	float nAccelMax;
+	float nVelocityX, nVelocityY;
+	float nVelocityMax;
+	float nXPos, nYPos;
+} SSpotLight;
+
+
+/* The entire program's operation is contained within this structure. */
+typedef struct
+{
+	/* XWindows specific variables. */
+	Display *dpy;
+	Window Win;
+	Screen *screen;
+        Pixmap source;
+	GC GraphicsContext;
+	XColor *xColors;
+	uint32_ *aColors;
+	XImage *pXImage;
+#ifdef HAVE_XSHM_EXTENSION
+	XShmSegmentInfo XShmInfo;
+	Bool	bUseShm;
+#endif /* HAVE_XSHM_EXTENSION */
+
+	uint8_ nColorCount;				/* Number of colors used. */
+	uint8_ bytesPerPixel;
+	uint16_ iWinWidth, iWinHeight;
+	uint16_ *aBumpMap;				/* The actual bump map. */
+	SSpotLight SpotLight;
+
+        int delay;
+        int duration;
+        time_t start_time;
+
+        async_load_state *img_loader;
+} SBumps;
+
 
 static void SetPalette(Display *, SBumps *, XWindowAttributes * );
 static void InitBumpMap(Display *, SBumps *, XWindowAttributes * );
@@ -161,6 +264,7 @@ static void CreateBumps( SBumps *pBumps, Display *dpy, Window NewWin )
 	pBumps->SpotLight.nAccelMax = pBumps->SpotLight.nVelocityMax / 10.0f;
 	pBumps->dpy = dpy;
 	pBumps->Win = NewWin;
+    pBumps->screen = XWinAttribs.screen;
 	pBumps->pXImage = NULL;
 	
 	iDiameter = ( ( pBumps->iWinWidth < pBumps->iWinHeight ) ? pBumps->iWinWidth : pBumps->iWinHeight ) / 2;
@@ -330,11 +434,13 @@ static void InitBumpMap_2(Display *dpy, SBumps *pBumps)
     XWindowAttributes XWinAttribs;
     XGetWindowAttributes( pBumps->dpy, pBumps->Win, &XWinAttribs );
 
+    pBumps->start_time = time ((time_t) 0);
+
 	pScreenImage = XGetImage( pBumps->dpy, pBumps->source, 0, 0, 
                               pBumps->iWinWidth, pBumps->iWinHeight,
                               ~0L, ZPixmap );
-    XFreePixmap (pBumps->dpy, pBumps->source);
-    pBumps->source = 0;
+/*    XFreePixmap (pBumps->dpy, pBumps->source);
+    pBumps->source = 0;*/
 
 	XSetWindowBackground( pBumps->dpy, pBumps->Win, pBumps->aColors[ 0 ] );
 	XClearWindow (pBumps->dpy, pBumps->Win);
@@ -389,8 +495,8 @@ static void InitBumpMap_2(Display *dpy, SBumps *pBumps)
 	while( nSoften-- )
 		SoftenBumpMap( pBumps );
 
-	free( pBumps->xColors );
-    pBumps->xColors = 0;
+/*	free( pBumps->xColors );
+    pBumps->xColors = 0;*/
 }
 
 /* Soften the bump map.  This is to avoid pixelated-looking ridges.
@@ -558,6 +664,10 @@ bumps_init (Display *dpy, Window Win)
 	
 	CreateBumps( Bumps, dpy, Win );
 	Bumps->delay = get_integer_resource(dpy,  "delay", "Integer" );
+    Bumps->duration = get_integer_resource (dpy, "duration", "Seconds");
+    if (Bumps->delay < 0) Bumps->delay = 0;
+    if (Bumps->duration < 1) Bumps->duration = 1;
+    Bumps->start_time = time ((time_t) 0);
     return Bumps;
 }
 
@@ -574,7 +684,12 @@ bumps_draw (Display *dpy, Window window, void *closure)
       return Bumps->delay;
     }
 
-
+  if (!Bumps->img_loader &&
+      Bumps->start_time + Bumps->duration < time ((time_t) 0)) {
+    Bumps->img_loader = load_image_async_simple (0, Bumps->screen,
+                                                 Bumps->Win, Bumps->source, 
+                                                 0, 0);
+  }
 
   Execute( Bumps );
 

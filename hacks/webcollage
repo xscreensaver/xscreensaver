@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# webcollage, Copyright (c) 1999-2005 by Jamie Zawinski <jwz@jwz.org>
+# webcollage, Copyright (c) 1999-2008 by Jamie Zawinski <jwz@jwz.org>
 # This program decorates the screen with random images from the web.
 # One satisfied customer described it as "a nonstop pop culture brainbath."
 #
@@ -60,21 +60,31 @@ use bytes;  # Larry can take Unicode and shove it up his ass sideways.
 
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my $version = q{ $Revision: 1.135 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
-my $copyright = "WebCollage $version, Copyright (c) 1999-2005" .
+my $version = q{ $Revision: 1.150 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
+my $copyright = "WebCollage $version, Copyright (c) 1999-2008" .
     " Jamie Zawinski <jwz\@jwz.org>\n" .
     "            http://www.jwz.org/webcollage/\n";
 
 
 
-my @search_methods = (  56, "altavista",    \&pick_from_alta_vista_random_link,
-                        11, "livejournal",  \&pick_from_livejournal_images,
-                         5, "yahoorand",    \&pick_from_yahoo_random_link,
-                        10, "googlephotos", \&pick_from_google_image_photos,
-                         5, "googleimgs",   \&pick_from_google_images,
-                         3, "googlenums",   \&pick_from_google_image_numbers,
-                         2, "flickr_recent", \&pick_from_flickr_recent,
-                         8, "flickr_random", \&pick_from_flickr_random,
+my @search_methods = ( 20, "googlephotos",  \&pick_from_google_image_photos,
+                       10, "googleimgs",    \&pick_from_google_images,
+                       10, "googlenums",    \&pick_from_google_image_numbers,
+
+                       19, "altavista",     \&pick_from_alta_vista_random_link,
+                       12, "flickr_recent", \&pick_from_flickr_recent,
+                       10, "flickr_random", \&pick_from_flickr_random,
+                       10, "livejournal",   \&pick_from_livejournal_images,
+                        5, "twitter",       \&pick_from_twitter_images,
+                        4, "yahoorand",     \&pick_from_yahoo_random_link,
+
+
+                     # This is a cute way to search for a certain webcams.
+                     # Not included in default methods, since these images
+                     # aren't terribly interesting by themselves.
+                     # See also "SurveillanceSaver".
+                     #
+                        0, "securitycam",   \&pick_from_security_camera,
 
                      # In Apr 2002, Google asked me to stop searching them.
                      # I asked them to add a "random link" url.  They said
@@ -181,6 +191,11 @@ my %poisoners = (
                                    # (I don't see how they did it, though!)
   "alwayshotels.com"        => 1,  # Poisoned Lycos pretty heavily.
   "nextag.com"              => 1,  # Poisoned Alta Vista real good.
+  "ghettodriveby.com"       => 1,  # Poisoned Google Images.
+  "crosswordsolver.org"     => 1,  # Poisoned Google Images.
+  "xona.com"                => 1,  # Poisoned Google Images.
+  "freepatentsonline.com"   => 1,  # Poisoned Google Images.
+  "herbdatanz.com"          => 1,  # Poisoned Google Images.
 );
 
 
@@ -199,6 +214,12 @@ my %warningless_sites = (
   "pics.livejournal.com"    => 1,
   "tinypic.com"             => 1,
   "flickr.com"              => 1,
+  "pbase.com"               => 1,
+  "blogger.com"             => 1,
+  "multiply.com"            => 1,
+  "wikimedia.org"           => 1,
+  "twitpic.com"             => 1,
+  "amazonaws.com"           => 1,  # used by twitpic.com
 
   "yimg.com"                => 1,  # This is where dailynews.yahoo.com stores
   "eimg.com"                => 1,  # its images, so pick_from_yahoo_news_text()
@@ -242,7 +263,19 @@ my %entity_table = (
    "ocirc"  => 'ô', "otilde" => 'õ', "ouml"   => 'ö', "divide" => '÷',
    "oslash" => 'ø', "ugrave" => 'ù', "uacute" => 'ú', "ucirc"  => 'û',
    "uuml"   => 'ü', "yacute" => 'ý', "thorn"  => 'þ', "yuml"   => 'ÿ',
-   "ndash"  => '-', "mdash"  => "--"
+
+   # HTML 4 entities that do not have 1:1 Latin1 mappings.
+   "bull"  => "*",   "hellip"=> "...",  "prime" => "'",  "Prime" => "\"",
+   "frasl" => "/",   "trade" => "[tm]", "larr"  => "<-", "rarr"  => "->",
+   "harr"  => "<->", "lArr"  => "<=",   "rArr"  => "=>", "hArr"  => "<=>",
+   "empty" => "Ø",   "minus" => "-",    "lowast"=> "*",  "sim"   => "~",
+   "cong"  => "=~",  "asymp" => "~",    "ne"    => "!=", "equiv" => "==",
+   "le"    => "<=",  "ge"    => ">=",   "lang"  => "<",  "rang"  => ">",
+   "loz"   => "<>",  "OElig" => "OE",   "oelig" => "oe", "Yuml"  => "Y",
+   "circ"  => "^",   "tilde" => "~",    "ensp"  => " ",  "emsp"  => " ",
+   "thinsp"=> " ",   "ndash" => "-",    "mdash" => "--", "lsquo" => "`",
+   "rsquo" => "'",   "sbquo" => "'",    "ldquo" => "\"", "rdquo" => "\"",
+   "bdquo" => "\"",  "lsaquo"=> "<",    "rsaquo"=> ">",
 );
 
 
@@ -396,16 +429,17 @@ sub get_document_1($$$) {
 
       if ($url =~ m@^http://www\.altavista\.com/@ ||
           $url =~ m@^http://random\.yahoo\.com/@ ||
-          $url =~ m@^http://images\.google\.com/@) {
+          $url =~ m@^http://images\.google\.com/@ ||
+          $url =~ m@^http://www\.google\.com/@) {
         # block this, you turkeys.
-        $user_agent = "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7.5)" .
-          " Gecko/20041111 Firefox/1.0";
+        $user_agent = "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.7)" .
+          " Gecko/20070914 Firefox/2.0.0.7";
 
         # 28-Jun-2007: Google Images now emits the entire page in JS if
         # you claim to be Gecko.  They also still block "webcollage".
         # They serve non-JS for unrecognised agents, so let's try this...
         $user_agent = "NoJavascriptPlease/1.0"
-          if ($url =~ m@^http://images\.google\.com/@);
+          if ($url =~ m@^http://[a-z]+\.google\.com/@);
       }
 
       my $hdrs = "GET " . ($http_proxy ? $url : "/$path") . " HTTP/1.0\r\n" .
@@ -854,7 +888,10 @@ sub pick_image_from_rss($$) {
 sub pick_dictionary() {
   my @dicts = ("/usr/dict/words",
                "/usr/share/dict/words",
-               "/usr/share/lib/dict/words");
+               "/usr/share/lib/dict/words",
+               "/usr/share/dict/cracklib-small",
+               "/usr/share/dict/cracklib-words"
+               );
   foreach my $f (@dicts) {
     if (-f $f) {
       $wordlist = $f;
@@ -1189,6 +1226,7 @@ sub pick_from_yahoo_random_link($) {
 ############################################################################
 #
 # Pick images from random pages returned by the Alta Vista Random Link
+# Note: this seems to have gotten a *lot* less random lately (2007).
 #
 ############################################################################
 
@@ -1286,6 +1324,55 @@ sub pick_from_alta_vista_images($) {
                                 $timeout, @candidates);
 }
 
+
+
+############################################################################
+#
+# Pick images from Aptix security cameras
+# Cribbed liberally from google image search code.
+# By Jason Sullivan <jasonsul@us.ibm.com>
+#
+############################################################################
+
+my $aptix_images_url = ("http://www.google.com/search" .
+                        "?q=inurl:%22jpg/image.jpg%3Fr%3D%22");
+
+# securitycam
+sub pick_from_security_camera($) {
+  my ($timeout) = @_;
+
+  my $page = (int(rand(9)) + 1);
+  my $num = 20;					# 20 images per page
+  my $search_url = $aptix_images_url;
+
+  if ($page > 1) {
+    $search_url .= "&start=" . $page*$num;	# page number
+    $search_url .= "&num="   . $num;		#images per page
+  }
+
+  my ($search_hit_count, @subpages) =
+    pick_from_search_engine ($timeout, $search_url, '');
+
+  my @candidates = ();
+  my %referers;
+  foreach my $u (@subpages) {
+    next if ($u =~ m@[/.]google\.com\b@i);        # skip google builtins (most links)
+    next unless ($u =~ m@jpg/image.jpg\?r=@i);    #  All pics contain this
+
+    LOG ($verbose_filter, "  candidate: $u");
+    push @candidates, $u;
+    $referers{$u} = $u;
+    }
+
+  @candidates = depoison (@candidates);
+  return () if ($#candidates < 0);
+  my $i = int(rand($#candidates+1));
+  my $img = $candidates[$i];
+  my $ref = $referers{$img};
+
+  LOG ($verbose_load, "picked image " . ($i+1) . ": $img (on $ref)");
+  return ($ref, $img);
+}
 
 
 ############################################################################
@@ -1780,6 +1867,105 @@ sub pick_from_ircimages($) {
 
   $search_url = $img;  # hmm...
   return ($search_url, $img);
+}
+
+
+############################################################################
+#
+# Pick images from Twitter's list of recently-posted images.
+#
+############################################################################
+
+my $twitter_img_url = "http://twitpic.com/public_timeline/feed.rss";
+
+# With most of our image sources, we get a random page and then select
+# from the images on it.  However, in the case of Twitter, the page
+# of images tends to update slowly; so we'll remember the last N entries
+# on it and randomly select from those, to get a wider variety each time.
+
+my $twit_cache_size = 1000;
+my @twit_cache = (); # fifo, for ordering by age
+my %twit_cache = (); # hash, for detecting dups
+
+# twitter
+sub pick_from_twitter_images($) {
+  my ($timeout) = @_;
+
+  $last_search = $twitter_img_url;   # for warnings
+
+  my ( $base, $body ) = get_document ($twitter_img_url, undef, $timeout);
+
+  # Update the cache.
+
+  if ($body) {
+    $body =~ s/\n/ /gs;
+    $body =~ s/(<item)\b/\n$1/gsi;
+
+    my @items = split (/\n/, $body);
+    shift @items;
+    foreach (@items) {
+      next unless (m@<link>([^<>]*)</link>@si);
+      my $page = html_unquote ($1);
+
+      $page =~ s@/$@@s;
+      $page .= '/full';
+
+      next if ($twit_cache{$page}); # already have it
+
+      LOG ($verbose_filter, "  candidate: $page");
+      push @twit_cache, $page;
+      $twit_cache{$page} = $page;
+    }
+  }
+
+  # Pull from the cache.
+
+  return () if ($#twit_cache == -1);
+
+  my $n = $#twit_cache+1;
+  my $i = int(rand($n));
+  my $page = $twit_cache[$i];
+
+  # delete this one from @twit_cache and from %twit_cache.
+  #
+  @twit_cache = ( @twit_cache[0 .. $i-1],
+                  @twit_cache[$i+1 .. $#twit_cache] );
+  delete $twit_cache{$page};
+
+  # Keep the size of the cache under the limit by nuking older entries
+  #
+  while ($#twit_cache >= $twit_cache_size) {
+    my $page = shift @twit_cache;
+    delete $twit_cache{$page};
+  }
+
+  ( $base, $body ) = get_document ($page, undef, $timeout);
+  my $img = undef;
+
+  foreach (split (/<img\s+/, $body)) {
+    my ($src) = m/\bsrc=[\"\'](.*?)[\"\']/si;
+    next unless $src;
+    next if m@/js/@s;
+    next if m@/images/@s;
+
+    $img = $src;
+
+    # Sometimes these images are hosted on twitpic, sometimes on Amazon.
+    if ($img =~ m@^/@) {
+      $base =~ s@^(https?://[^/]+)/.*@$1@s;
+      $img = $base . $img;
+    }
+    last;
+  }
+
+  if (!$img) {
+    LOG ($verbose_load, "no matching images on $page\n");
+    return ();
+  }
+
+  LOG ($verbose_load, "picked image " .($i+1) . "/$n: $img");
+
+  return ($page, $img);
 }
 
 
@@ -2283,8 +2469,9 @@ sub report_performance() {
     my $suc = $stats_successes{$name} || 0;
     my $pct = int($suc * 100 / $try);
     my $secs = $stats_elapsed{$name};
-    my $secs_link = int($secs / $try);
-    print STDERR sprintf ("$blurb   %-12s %4s (%d/%d);\t %2d secs/link\n",
+    my $secs_link = $secs / $try;
+    print STDERR sprintf ("$blurb %-14s %4s (%d/%d);" .
+                          "       \t %.1f secs/link\n",
                           "$name:", "$pct%", $suc, $try, $secs_link);
   }
 }
@@ -3192,7 +3379,7 @@ sub paste_image($$$$) {
       # the next network retrieval, which is probably a better thing
       # to do anyway.
       #
-      $cmd .= " &";
+      $cmd .= " &" unless ($cocoa_p);
 
       $rc = nontrapping_system ($cmd);
 
@@ -3325,6 +3512,40 @@ sub update_imagemap($$$$$$$$) {
 }
 
 
+# Figure out what the proxy server should be, either from environment
+# variables or by parsing the output of the (MacOS) program "scutil",
+# which tells us what the system-wide proxy settings are.
+#
+sub set_proxy() {
+
+  if (! $http_proxy) {
+    # historical suckage: the environment variable name is lower case.
+    $http_proxy = $ENV{http_proxy} || $ENV{HTTP_PROXY};
+  }
+
+  if (defined ($http_proxy)) {
+    if ($http_proxy && $http_proxy =~ m@^http://([^/]*)/?$@ ) {
+      # historical suckage: allow "http://host:port" as well as "host:port".
+      $http_proxy = $1;
+    }
+
+  } else {
+    my $proxy_data = `scutil --proxy 2>/dev/null`;
+    my ($server) = ($proxy_data =~ m/\bHTTPProxy\s*:\s*([^\s]+)/s);
+    my ($port)   = ($proxy_data =~ m/\bHTTPPort\s*:\s*([^\s]+)/s);
+    # Note: this ignores the "ExceptionsList".
+    if ($server) {
+      $http_proxy = $server;
+      $http_proxy .= ":$port" if $port;
+    }
+  }
+
+  if ($http_proxy) {
+    LOG ($verbose_net, "proxy server: $http_proxy");
+  }
+}
+
+
 sub init_signals() {
 
   $SIG{HUP}  = \&signal_cleanup;
@@ -3354,9 +3575,6 @@ sub main() {
 
   my $root_p = 0;
   my $window_id = undef;
-
-  # historical suckage: the environment variable name is lower case.
-  $http_proxy = $ENV{http_proxy} || $ENV{HTTP_PROXY};
 
   while ($_ = $ARGV[0]) {
     shift @ARGV;
@@ -3426,6 +3644,9 @@ sub main() {
       } else {
         error ("local directory path must be set")
       }
+    } elsif ($_ eq "-fps") {
+      # -fps only works on MacOS, via "webcollage-cocoa.m".
+      # Ignore it if passed to this script in an X11 context.
     } elsif ($_ eq "-debug" || $_ eq "--debug") {
       my $which = shift @ARGV;
       my @rest = @search_methods;
@@ -3449,21 +3670,14 @@ sub main() {
               "[-root] [-display dpy] [-verbose] [-debug which]\n" .
         "\t\t  [-timeout secs] [-delay secs] [-size WxH]\n" .
         "\t\t  [-no-output] [-urls-only] [-imagemap filename]\n" .
-        "\t\t  [-filter cmd] [-filter2 cmd] [-background color]\n" .
+        "\t\t  [-background color] [-opacity f]\n" .
+        "\t\t  [-filter cmd] [-filter2 cmd]\n" .
         "\t\t  [-dictionary dictionary-file] [-http-proxy host[:port]]\n" .
         "\t\t  [-driftnet [driftnet-program-and-args]]\n" .
         "\t\t  [-directory local-image-directory]\n" .
         "\n";
       exit 1;
     }
-  }
-
-  if ($http_proxy && $http_proxy eq "") {
-    $http_proxy = undef;
-  }
-  if ($http_proxy && $http_proxy =~ m@^http://([^/]*)/?$@ ) {
-    # historical suckage: allow "http://host:port" as well as "host:port".
-    $http_proxy = $1;
   }
 
   if (!$root_p && !$no_output_p && !$cocoa_p) {
@@ -3543,6 +3757,7 @@ sub main() {
   }
 
   init_signals();
+  set_proxy();
 
   spawn_driftnet ($driftnet_cmd) if ($driftnet_cmd);
 

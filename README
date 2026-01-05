@@ -25,7 +25,7 @@ To compile on a Unix system with X11:
 
 To compile on MacOS X:
 
-    Use the included XCode project.  Requires XCode 2.2 and MacOS X 10.4.0
+    Use the included XCode project.  Requires XCode 3.1 and MacOS X 10.4.0
     or newer.
 
 Interested in writing a new screen saver?
@@ -38,20 +38,121 @@ XScreenSaver has an extensive manual -- please read it!
 
 ===============================================================================
 
+Changes since 5.10:   * New versions of `photopile', `strange'.
+                      * Worked around MacOS 10.6 garbage collector bug that
+                        caused the screen saver process to become enormous.
+                      * Fixed flicker in `pipes', `cubestorm', and `noof'.
+                      * Fixed EXIF rotation on MacOS 10.6.
+                      * Fixed desktop-grabbing when screen locked on MacOS.
+                      * Minor fixes to `circuit', `polyhedra', `tangram',
+                        `gears', `pinion', `substrate', `xanalogtv'.
+                      * Fixed some leaks in `xanalogtv' and `apple2'.
+                      * Better seeding of the RNG.
+Changes since 5.09:   * Fixed some crashes and color problems on MacOS 10.6.
+                      * Retired `hypercube' and `hyperball', which are
+                        redundant with `polytopes'.
+Changes since 5.08:   * Ported to MacOS 10.6, including various 64-bit fixes.
+                      * New hack, `rubikblocks'.
+                      * Fixed another potential RANDR crash.
+                      * Use correct proxy server on MacOS.
+                      * `molecule' now correctly displays PDB 3.2 files.
+                      * Updates to `mirrorblob', `glhanoi', and `sonar'.
+                      * Rewritten version of `klein' hack.
+                      * New hack, `surfaces', incorporating objects from old
+                        `klein' hack, plus new ones.
+                      * Merged `juggle' and `juggler3d' hacks.
+                      * Fixed compilation under gcc 4.4.0 (strict aliasing).
+                      * Fixed intermittent failure in `xscreensaver-command'.
+Changes since 5.07:   * New hack, `photopile'.
+                      * Rewrote `sonar' and `jigsaw' as OpenGL programs.
+                      * Minor tweaks to `maze', `m6502', `hypnowheel', and
+                        `timetunnel'.
+                      * Savers that load images now obey EXIF rotation tags.
+                      * Arrgh, more RANDR noise!  Fixes this time for rotated
+                        screens, and for systems where RANDR lies and says the
+                        screen size is 0x0.
+                      * When the password dialog has timed out or been
+                        cancelled, don't pop it right back up a second time.
+                      * Password timeouts/cancels don't count as
+                        "failed logins".
+                      * Retired some of the older, less interesting savers:
+                        say goodbye to `bubbles', `critical', `flag', `forest',
+                        `glforestfire', `lmorph', `laser', `lightning', `lisa',
+                        `lissie', `rotor', `sphere', `spiral', `t3d', `vines',
+                        `whirlygig', and `worm'.
+                      * Merged `munch' and `mismunch'.
+                      * Updated `webcollage' to use twitpic.com as well.
+Changes since 5.06:   * Xinerama/RANDR tweaks for old-style multi-screen.
+                      * Added bumpy skin and cel shading to `skytentacles'.
+                      * `flipflop' can load images onto the tiles.
+                      * Fixed the bouncing ball in `stairs'.
+                      * Added the missing Utah Teapotahedron to `polyhedra'.
+                      * `blitspin' works with color images on MacOS now.
+                      * Added transparency to `stonerview'.
+                      * Improved layout of the preferences dialogs: they
+                        should all now be usable even on ridiculously tiny
+                        laptop screens.
+                      * MacOS preferences text fields now prevent you from
+                        entering numbers that are out of range.
+                      * Added "Reset to Defaults" button on X11.
+                      * Added relevant Wikipedia links to many of the screen
+                        saver descriptions.
+                      * All hacks support the `-fps' option, not just GL ones.
+                      * The `-fps' option now shows CPU load.
+Changes since 5.05:   * Xinerama/RANDR fixes: this time for sure.  It should
+                        now work to add/remove monitors or resize screens at
+                        any time.
+                      * New hack, `skytentacles'.
+                      * New version of `gleidescope'.
+                      * Added the `-log' option to the xscreensaver daemon,
+                        since a truly shocking number of Linux users seem to
+                        have no idea how to redirect output to a file.
+                      * Added `-duration' arg to most image-loading hacks,
+                        so that they pick a new image every few minutes.
+                      * Added an ATM crash to BSOD.
+Changes since 5.04:   * New hacks, `cubicgrid', `hypnowheel', and
+                        `lcdscrub' (which isn't really a screen saver).
+                      * Updates to `m6502' and `gears'.
+                      * Fixed double-buffering problems in `cubestorm' and
+                        `noof'.
+                      * Better handling of horizontal scroll wheels.
+                      * Attempt to work around latest Xinerama braindamage:
+                        if the server reports overlapping screens, use the
+                        largest non-overlapping rectangles available.
+                      * Don't warning about receipt of bogus ClientMessages,
+                        since Gnome's just never going to stop sending those.
+                      * Worked around MacOS 10.5 perl bug that caused the
+                        text-displaying hacks to fail on some systems.
+                      * Hopefully fixed font-related System Preferences crashes
+                        in MacOS savers.
+                      * The recent PAM changes broke the "Caps Lock" warning
+                        in the password dialog, the failed login warnings, and
+                        syslogging.  Fixed all that.
+Changes since 5.03:   * Fixed a possible crash in the unlock dialog (more
+                        fallout from the recent PAM changes...)
+                      * New hacks, `moebiusgears', `abstractile', and
+                        `lockward'.
+                      * Rewrote `gears' to use better (involute) gear models,
+                        and to be more random.
+                      * Minor updates to `cwaves', `voronoi', `deco',
+                        `glcells', `rd-bomb', `fireworkx' and `webcollage'.
+                      * `pong' can now display the current time as the score.
+                      * `xmatrix -mode pipe' works better.
+                      * Minor tweaks for compilation on MacOS 10.5.0.
 Changes since 5.02:   * New hacks, `cwaves', `glcells', `m6502', and `voronoi'.
                       * Minor fixes to `bsod'.
                       * Fixed possible crash with PAM USB-dongle auth.
                       * Updated `webcollage' to track recent Google Images
                         and Flickr changes.
 Changes since 5.01:   * Reworked PAM code to support fingerprint readers, etc.
-                      * Ported 'webcollage' to OSX.
-                      * Added OSX 10.2 and 10.3 kernel panics to `bsod'.
+                      * Ported 'webcollage' to MacOS.
+                      * Added MacOS 10.2 and 10.3 kernel panics to `bsod'.
                       * Fixed a Xinerama crash when changing the screen count.
                       * New blobbier `mirrorblob'.
                       * Minor updates to `lisa', `bsod', `ifs', `hypertorus',
                         `polytopes', `circuit', `endgame', `crackberg',
                         `flipflop', `flipscreen3d', `fliptext', and `carousel'.
-                      * Enabled multi-threaded OpenGL on OSX.
+                      * Enabled multi-threaded OpenGL on MacOS.
 Changes since 5.00:   * Backed out recent locale-related changes, since they
                         broke far more things than they fixed.
                       * Fail gracefully with ridiculously small window sizes.
@@ -78,7 +179,7 @@ Changes since 4.24:   * Ported to MacOS X! (10.4.0 or newer)
                       * Changes to the defaults and command-line options of
                         many hacks to make the .xml files more consistent.
                       * Reap zombies in `glslideshow' and `carousel'.
-                      * `sonar' works without setuid on OSX (dgram icmp).
+                      * `sonar' works without setuid on MacOS (dgram icmp).
                       * `xmatrix -mode pipe' displays the text of a subprocess.
                       * `endgame' has higher resolution chess-piece models.
                       * `webcollage' takes a -directory option to get images

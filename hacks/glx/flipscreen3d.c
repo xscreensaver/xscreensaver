@@ -42,6 +42,7 @@
 #  define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 # endif
 
+#define DEF_ROTATE "True"
 static int rotate;
 
 #define QW 12
@@ -58,7 +59,7 @@ static XrmOptionDescRec opts[] = {
 
 
 static argtype vars[] = {
-  {&rotate, "rotate", "Rotate", "True", t_Bool},
+  {&rotate, "rotate", "Rotate", DEF_ROTATE, t_Bool},
 };
 
 
@@ -140,7 +141,9 @@ screenflip_handle_event (ModeInfo *mi, XEvent *event)
     }
   else if (event->xany.type == ButtonPress &&
            (event->xbutton.button == Button4 ||
-            event->xbutton.button == Button5))
+            event->xbutton.button == Button5 ||
+            event->xbutton.button == Button6 ||
+            event->xbutton.button == Button7))
     {
       gltrackball_mousewheel (c->trackball, event->xbutton.button, 10,
                               !!event->xbutton.state);

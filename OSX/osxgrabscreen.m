@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1992-2006 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1992-2010 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -13,6 +13,7 @@
  */
 
 #import <stdlib.h>
+#import <stdint.h>
 #import <Cocoa/Cocoa.h>
 #import "jwxyz.h"
 #import "grabscreen.h"
@@ -20,6 +21,20 @@
 #import "resources.h"
 #import "usleep.h"
 
+
+#ifndef  MAC_OS_X_VERSION_10_6
+# define MAC_OS_X_VERSION_10_6 1060  /* undefined in 10.4 SDK, grr */
+#endif
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
+
+     /* 10.4 code.
+
+        This version of the code works on 10.4, but is flaky.  There is
+        a better way to do it on 10.5 and newer, but taking this path,
+        then we are being compiled against the 10.4 SDK instead of the
+        10.5 SDK, and the newer API is not available to us.
+      */
 
 static void
 copy_framebuffer_to_ximage (CGDirectDisplayID cgdpy, XImage *xim,
@@ -36,7 +51,7 @@ copy_framebuffer_to_ximage (CGDirectDisplayID cgdpy, XImage *xim,
   int ximw = xim->width;
   int ximh = xim->height;
 
-  unsigned long *odata = (unsigned long *) xim->data;
+  uint32_t *odata = (uint32_t *) xim->data;
 
   switch (bpp) {
   case 32:
@@ -56,10 +71,10 @@ copy_framebuffer_to_ximage (CGDirectDisplayID cgdpy, XImage *xim,
     if (spp != 3) abort();
     if (bps != 5) abort();
     for (y = 0; y < ximh; y++) {
-      unsigned short *ip = (unsigned short *) data;
+      uint16_t *ip = (uint16_t *) data;
       int x;
       for (x = 0; x < ximw; x++) {
-        unsigned short p = *ip++;
+        uint16_t p = *ip++;
         // This should be ok on both PPC and Intel (ARGB, word order)
         unsigned char r = (p >> 10) & 0x1F;
         unsigned char g = (p >>  5) & 0x1F;
@@ -67,7 +82,7 @@ copy_framebuffer_to_ximage (CGDirectDisplayID cgdpy, XImage *xim,
         r = (r << 3) | (r >> 2);
         g = (g << 3) | (g >> 2);
         b = (b << 3) | (b >> 2);
-        unsigned long pixel = 0xFF000000 | (r << 16) | (g << 8) | b;
+        uint32_t pixel = 0xFF000000 | (r << 16) | (g << 8) | b;
         // XPutPixel (xim, x, y, pixel);
         *odata++ = pixel;
       }
@@ -81,13 +96,13 @@ copy_framebuffer_to_ximage (CGDirectDisplayID cgdpy, XImage *xim,
       CGDirectPaletteRef pal = CGPaletteCreateWithDisplay (cgdpy);
 
       /* Map it to 32bpp pixels */
-      unsigned long map[256];
+      uint32_t map[256];
       for (y = 0; y < 256; y++) {
         CGDeviceColor c = CGPaletteGetColorAtIndex (pal, y);
         unsigned char r = c.red   * 255.0;
         unsigned char g = c.green * 255.0;
         unsigned char b = c.blue  * 255.0;
-        unsigned long pixel = 0xFF000000 | (r << 16) | (g << 8) | b;
+        uint32_t pixel = 0xFF000000 | (r << 16) | (g << 8) | b;
         map[y] = pixel;
       }
 
@@ -116,18 +131,18 @@ void
 osx_grab_desktop_image (Screen *screen, Window xwindow, Drawable drawable)
 {
   Display *dpy = DisplayOfScreen (screen);
-  XWindowAttributes xgwa;
   NSView *nsview = jwxyz_window_view (xwindow);
   NSWindow *nswindow = [nsview window];
+  XWindowAttributes xgwa;
   int window_x, window_y;
   Window unused;
 
-  // figure out where this window is on the screen
+  // Figure out where this window is on the screen.
   //
   XGetWindowAttributes (dpy, xwindow, &xgwa);
   XTranslateCoordinates (dpy, xwindow, RootWindowOfScreen (screen), 0, 0, 
                          &window_x, &window_y, &unused);
-  
+
   // Use the size of the Drawable, not the Window.
   {
     Window r;
@@ -207,6 +222,135 @@ osx_grab_desktop_image (Screen *screen, Window xwindow, Drawable drawable)
 }
 
 
+#else /* MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
+
+         10.5+ code.
+
+         This version of the code is simpler and more reliable, but
+         uses an API that only exist on 10.5 and newer, so we can only
+         use it if when being compiled against the 10.5 SDK or later.
+       */
+
+/* Loads an image into the Drawable, returning once the image is loaded.
+ */
+void
+osx_grab_desktop_image (Screen *screen, Window xwindow, Drawable drawable)
+{
+  Display *dpy = DisplayOfScreen (screen);
+  NSView *nsview = jwxyz_window_view (xwindow);
+  XWindowAttributes xgwa;
+  int window_x, window_y;
+  Window unused;
+
+  // Figure out where this window is on the screen.
+  //
+  XGetWindowAttributes (dpy, xwindow, &xgwa);
+  XTranslateCoordinates (dpy, xwindow, RootWindowOfScreen (screen), 0, 0, 
+                         &window_x, &window_y, &unused);
+
+  // Grab only the rectangle of the screen underlying this window.
+  //
+  CGRect cgrect;
+  cgrect.origin.x    = window_x;
+  cgrect.origin.y    = window_y;
+  cgrect.size.width  = xgwa.width;
+  cgrect.size.height = xgwa.height;
+
+  /* If a password is required to unlock the screen, a large black
+     window will be on top of all of the desktop windows by the time
+     we reach here, making the screen-grab rather uninteresting.  If
+     we move ourselves temporarily below the login-window windows
+     before capturing the image, we capture the real desktop as
+     intended.
+   */
+
+  // save our current level so we can restore it later
+  int oldLevel = [[nsview window] level]; 
+
+  [[nsview window] setLevel:CGWindowLevelForKey(kCGPopUpMenuWindowLevelKey)];
+
+  // Grab a screen shot of those windows below this one
+  // (hey, X11 can't do that!)
+  //
+  CGImageRef img = 
+    CGWindowListCreateImage (cgrect,
+                             kCGWindowListOptionOnScreenBelowWindow,
+                             [[nsview window] windowNumber],
+                             kCGWindowImageDefault);
+
+  // put us back above the login windows so the screensaver is visible.
+  [[nsview window] setLevel:oldLevel];
+
+  // Render the grabbed CGImage into the Drawable.
+  if (img) {
+    jwxyz_draw_NSImage_or_CGImage (DisplayOfScreen (screen), drawable, 
+                                   False, img, NULL, 0);
+    CGImageRelease (img);
+  }
+}
+
+#endif /* 10.5+ code */
+
+
+/* Returns the EXIF rotation property of the image, if any.
+ */
+static int
+exif_rotation (const char *filename)
+{
+  /* As of 10.6, NSImage rotates according to EXIF by default:
+     http://developer.apple.com/mac/library/releasenotes/cocoa/appkit.html
+     So this function should return -1 when *running* on 10.6 systems.
+     But when running against older systems, we need to examine the image
+     to figure out its rotation.
+   */
+
+# if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6  /* 10.6 SDK */
+
+  /* When we have compiled against the 10.6 SDK, we know that we are 
+     running on a 10.6 or later system.
+   */
+  return -1;
+
+# else /* Compiled against 10.5 SDK or earlier */
+
+  /* If this selector exists, then we are running against a 10.6 runtime
+     that does automatic EXIF rotation (despite the fact that we were
+     compiled against the 10.5 or earlier SDK).  So in that case, this
+     function should no-op.
+   */
+  if ([NSImage instancesRespondToSelector:
+                 @selector(initWithDataIgnoringOrientation:)])
+    return -1;
+
+  /* Otherwise, go ahead and figure out what the rotational characteristics
+     of this image are. */
+
+
+
+  /* This is a ridiculous amount of rigamarole to go through, but for some
+     reason the "Orientation" tag does not exist in the "NSImageEXIFData"
+     dictionary inside the NSBitmapImageRep of the NSImage.  Several other
+     EXIF tags are there (e.g., shutter speed) but not orientation.  WTF?
+   */
+  CFStringRef s = CFStringCreateWithCString (NULL, filename, 
+                                             kCFStringEncodingUTF8);
+  CFURLRef url = CFURLCreateWithFileSystemPath (NULL, s, 
+                                                kCFURLPOSIXPathStyle, 0);
+  CGImageSourceRef cgimg = CGImageSourceCreateWithURL (url, NULL);
+  if (! cgimg) return -1;
+
+  NSDictionary *props = (NSDictionary *)
+    CGImageSourceCopyPropertiesAtIndex (cgimg, 0, NULL);
+  int rot = [[props objectForKey:@"Orientation"] intValue];
+  CFRelease (cgimg);
+  CFRelease (url);
+  CFRelease (s);
+  return rot;
+
+# endif /* 10.5 */
+}
+
+
 /* Loads an image file and splats it onto the drawable.
    The image is drawn as large as possible while preserving its aspect ratio.
    If geom_ret is provided, the actual rectangle the rendered image takes
@@ -222,7 +366,10 @@ osx_load_image_file (Screen *screen, Window xwindow, Drawable drawable,
   if (!img)
     return False;
 
-  jwxyz_draw_NSImage (DisplayOfScreen (screen), drawable, img, geom_ret);
+  jwxyz_draw_NSImage_or_CGImage (DisplayOfScreen (screen), drawable, 
+                                 True, img, geom_ret, 
+                                 exif_rotation (filename));
   [img release];
   return True;
 }
+

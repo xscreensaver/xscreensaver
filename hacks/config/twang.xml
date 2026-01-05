@@ -4,10 +4,17 @@
 
   <command arg="-root"/>
 
+  <hgroup>
+   <vgroup>
+
   <number id="delay" type="slider" arg="-delay %"
-          _label="Speed" _low-label="Slow" _high-label="Fast"
-          low="0" high="50000" default="10000"
+          _label="Frame rate" _low-label="Low" _high-label="High"
+          low="0" high="100000" default="10000"
           convert="invert"/>
+
+  <number id="duration" type="slider" arg="-duration %"
+          _label="Duration" _low-label="10 seconds" _high-label="10 minutes"
+          low="10" high="600" default="120"/>
 
   <number id="event-chance" type="slider" arg="-event-chance %"
           _label="Randomness" _low-label="Slow" _high-label="Jumpy"
@@ -16,6 +23,9 @@
   <number id="friction" type="slider" arg="-friction %"
           _label="Friction" _low-label="Low" _high-label="High"
           low="0.0" high="0.2" default="0.05"/>
+
+  </vgroup>
+  <vgroup>
 
   <number id="springiness" type="slider" arg="-springiness %"
           _label="Springiness" _low-label="Low" _high-label="High"
@@ -26,13 +36,16 @@
           low="0.0" high="0.1" default="0.025"/>
 
   <number id="tile-size" type="slider" arg="-tile-size %"
-         _label="Tile Size" _low-label="Small" _high-label="Large"
+         _label="Tile size" _low-label="Small" _high-label="Large"
          low="10" high="512" default="120"/>
 
   <number id="border-width" type="spinbutton" arg="-border-width %"
-         _label="Border Width" low="0" high="20" default="3"/>
+         _label="Border width" low="0" high="20" default="3"/>
 
-<!--  <boolean id="shm" _label="Use Shared Memory" arg-unset="-no-shm"/> -->
+  <boolean id="showfps" _label="Show frame rate" arg-set="-fps"/>
+
+  </vgroup>
+  </hgroup>
 
   <xscreensaver-image />
 

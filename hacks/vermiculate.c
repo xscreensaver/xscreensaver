@@ -795,7 +795,7 @@ vermiculate_init (Display *d, Window w)
     st->mygc = XCreateGC (st->dpy, st->window, 0, &mygcv);
   }
 
-  st->point = (unsigned char *) malloc (st->wid * st->hei);
+  st->point = (unsigned char *) calloc (1, st->wid * st->hei);
   maininit (st);
   palupdate (st, True);
   consume_instring(st);
@@ -1198,6 +1198,7 @@ vermiculate_free (Display *dpy, Window window, void *closure)
 static const char *vermiculate_defaults[] = {
   ".background: Black",
   "*ticks: 20000",
+  "*fpsSolid:	true",
   "*speed: 0",
   "*instring: ",
   0

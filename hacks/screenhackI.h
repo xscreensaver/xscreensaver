@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1992-2006 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1992-2008 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -85,6 +85,11 @@
 # define M_PI_2 1.5707963267
 #endif
 
+#ifndef Button6
+# define Button6 6
+# define Button7 7
+#endif
+
 #include "yarandom.h"
 #include "usleep.h"
 #include "resources.h"
@@ -92,6 +97,7 @@
 #include "colors.h"
 #include "grabscreen.h"
 #include "visual.h"
+#include "fps.h"
 
 /* Be Posixly correct */
 #undef  bzero
@@ -120,6 +126,7 @@ struct xscreensaver_function_table {
                                 unsigned int w, unsigned int h);
   Bool           (*event_cb)   (Display *, Window, void *, XEvent *);
   void           (*free_cb)    (Display *, Window, void *);
+  void           (*fps_cb)     (Display *, Window, fps_state *, void *);
 
   Visual *       (*pick_visual_hook) (Screen *);
   Bool           (*validate_visual_hook) (Screen *, const char *, Visual *);

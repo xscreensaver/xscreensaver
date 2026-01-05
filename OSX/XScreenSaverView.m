@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2006 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 2006-2010 Jamie Zawinski <jwz@jwz.org>
 *
 * Permission to use, copy, modify, distribute, and sell this software and its
 * documentation for any purpose is hereby granted without fee, provided that
@@ -20,6 +20,17 @@
 #import "screenhackI.h"
 #import "xlockmoreI.h"
 #import "jwxyz-timers.h"
+
+/* Garbage collection only exists if we are being compiled against the 
+   10.6 SDK or newer, not if we are building against the 10.4 SDK.
+ */
+#ifndef  MAC_OS_X_VERSION_10_6
+# define MAC_OS_X_VERSION_10_6 1060  /* undefined in 10.4 SDK, grr */
+#endif
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6  /* 10.6 SDK */
+# import <objc/objc-auto.h>
+# define DO_GC_HACKERY
+#endif
 
 extern struct xscreensaver_function_table *xscreensaver_function_table;
 
@@ -81,7 +92,8 @@ int mono_p = 0;
     perror ("putenv");
     abort();
   }
-  free (npath);
+
+  /* Don't free (npath) -- MacOS's putenv() does not copy it. */
 }
 
 
@@ -101,7 +113,7 @@ int mono_p = 0;
     perror ("putenv");
     abort();
   }
-  free (env);
+  /* Don't free (env) -- MacOS's putenv() does not copy it. */
 }
 
 
@@ -126,9 +138,13 @@ add_default_options (const XrmOptionDescRec *opts,
     { "-choose-random-images",   ".chooseRandomImages",XrmoptionNoArg, "True" },
     { "-no-choose-random-images",".chooseRandomImages",XrmoptionNoArg, "False"},
     { "-image-directory",        ".imageDirectory",    XrmoptionSepArg, 0 },
+    { "-fps",                    ".doFPS",             XrmoptionNoArg, "True" },
+    { "-no-fps",                 ".doFPS",             XrmoptionNoArg, "False"},
     { 0, 0, 0, 0 }
   };
   static const char *default_defaults [] = {
+    ".doFPS:              False",
+    ".doubleBuffer:       True",  // for most OpenGL hacks
     ".textMode:           date",
  // ".textLiteral:        ",
  // ".textFile:           ",
@@ -262,6 +278,13 @@ add_default_options (const XrmOptionDescRec *opts,
 
     [self lockFocus];       // in case something tries to draw from here
     [self prepareContext];
+
+    /* I considered just not even calling the free callback at all...
+       But webcollage-cocoa needs it, to kill the inferior webcollage
+       processes (since the screen saver framework never generates a
+       SIGPIPE for them...)  Instead, I turned off the free call in
+       xlockmore.c, which is where all of the bogus calls are anyway.
+     */
     xsft->free_cb (xdpy, xwindow, xdata);
     [self unlockFocus];
 
@@ -285,6 +308,15 @@ add_default_options (const XrmOptionDescRec *opts,
 - (void) resizeContext
 {
 }
+
+
+static void
+screenhack_do_fps (Display *dpy, Window w, fps_state *fpst, void *closure)
+{
+  fps_compute (fpst, 0);
+  fps_draw (fpst);
+}
+
 
 - (void) animateOneFrame
 {
@@ -313,7 +345,18 @@ add_default_options (const XrmOptionDescRec *opts,
     XClearWindow (xdpy, xwindow);
     
     [[self window] setAcceptsMouseMovedEvents:YES];
-    
+
+    /* In MacOS 10.5, this enables "QuartzGL", meaning that the Quartz
+       drawing primitives will run on the GPU instead of the CPU.
+       It seems like it might make things worse rather than better,
+       though...  Plus it makes us binary-incompatible with 10.4.
+
+# if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
+    [[self window] setPreferredBackingLocation:
+                     NSWindowBackingLocationVideoMemory];
+# endif
+     */
+
     /* Kludge: even though the init_cb functions are declared to take 2 args,
       actually call them with 3, for the benefit of xlockmore_init() and
       xlockmore_setup().
@@ -322,6 +365,11 @@ add_default_options (const XrmOptionDescRec *opts,
       (void *(*) (Display *, Window, void *)) xsft->init_cb;
     
     xdata = init_cb (xdpy, xwindow, xsft->setup_arg);
+
+    if (get_boolean_resource (xdpy, "doFPS", "DoFPS")) {
+      fpst = fps_init (xdpy, xwindow);
+      if (! xsft->fps_cb) xsft->fps_cb = screenhack_do_fps;
+    }
   }
 
   /* I don't understand why we have to do this *every frame*, but we do,
@@ -329,6 +377,18 @@ add_default_options (const XrmOptionDescRec *opts,
    */
   if (![self isPreview])
     [NSCursor setHiddenUntilMouseMoves:YES];
+
+
+  if (fpst)
+    {
+      /* This is just a guess, but the -fps code wants to know how long
+         we were sleeping between frames.
+       */
+      unsigned long usecs = 1000000 * [self animationTimeInterval];
+      usecs -= 200;  // caller apparently sleeps for slightly less sometimes...
+      fps_slept (fpst, usecs);
+    }
+
 
   /* It turns out that [ScreenSaverView setAnimationTimeInterval] does nothing.
      This is bad, because some of the screen hacks want to delay for long 
@@ -373,13 +433,46 @@ add_default_options (const XrmOptionDescRec *opts,
 
   // And finally:
   //
+  NSDisableScreenUpdates();
   unsigned long delay = xsft->draw_cb (xdpy, xwindow, xdata);
-  
+  if (fpst) xsft->fps_cb (xdpy, xwindow, fpst, xdata);
   XSync (xdpy, 0);
-  
+  NSEnableScreenUpdates();
+
   gettimeofday (&tv, 0);
   now = tv.tv_sec + (tv.tv_usec / 1000000.0);
   next_frame_time = now + (delay / 1000000.0);
+
+
+# ifdef DO_GC_HACKERY
+  /* Current theory is that the 10.6 garbage collector sucks in the
+     following way:
+
+     It only does a collection when a threshold of outstanding
+     collectable allocations has been surpassed.  However, CoreGraphics
+     creates lots of small collectable allocations that contain pointers
+     to very large non-collectable allocations: a small CG object that's
+     collectable referencing large malloc'd allocations (non-collectable)
+     containing bitmap data.  So the large allocation doesn't get freed
+     until GC collects the small allocation, which triggers its finalizer
+     to run which frees the large allocation.  So GC is deciding that it
+     doesn't really need to run, even though the process has gotten
+     enormous.  GC eventually runs once pageouts have happened, but by
+     then it's too late, and the machine's resident set has been
+     sodomized.
+
+     So, we force an exhaustive garbage collection in this process
+     approximately every 5 seconds whether the system thinks it needs 
+     one or not.
+  */
+  {
+    static int tick = 0;
+    if (++tick > 5*30) {
+      tick = 0;
+      objc_collect (OBJC_EXHAUSTIVE_COLLECTION);
+    }
+  }
+# endif // DO_GC_HACKERY
 }
 
 
@@ -488,7 +581,11 @@ add_default_options (const XrmOptionDescRec *opts,
       xe.xbutton.y = y;
       xe.xbutton.state = state;
       if ([e type] == NSScrollWheel)
-        xe.xbutton.button = ([e deltaY] > 0 ? Button4 : Button5);
+        xe.xbutton.button = ([e deltaY] > 0 ? Button4 :
+                             [e deltaY] < 0 ? Button5 :
+                             [e deltaX] > 0 ? Button6 :
+                             [e deltaX] < 0 ? Button7 :
+                             0);
       else
         xe.xbutton.button = [e buttonNumber] + 1;
       break;
@@ -501,7 +598,7 @@ add_default_options (const XrmOptionDescRec *opts,
     case KeyRelease:
       {
         NSString *nss = [e characters];
-        const char *s = [nss cStringUsingEncoding:NSUTF8StringEncoding];
+        const char *s = [nss cStringUsingEncoding:NSISOLatin1StringEncoding];
         xe.xkey.keycode = (s && *s ? *s : 0);
         xe.xkey.state = state;
         break;

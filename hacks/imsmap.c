@@ -1,4 +1,4 @@
-/* imsmap, Copyright (c) 1992 Juergen Nickelsen <nickel@cs.tu-berlin.de>
+/* imsmap, Copyright (c) 1992-2008 Juergen Nickelsen and Jamie Zawinski.
  * Derived from code by Markus Schirmer, TU Berlin.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -161,23 +161,23 @@ init_map (struct state *st)
 
   if (mono_p)
     st->flip_xy = 0;
+  else if (st->colors)
+    free_colors (st->dpy, st->cmap, st->colors, st->ncolors);
+  st->colors = 0;
 
-  if (!st->ncolors)
-    {
-      st->ncolors = get_integer_resource (st->dpy, "ncolors", "Integer");
-      st->delay = get_integer_resource (st->dpy, "delay", "Integer");
-      st->delay2 = get_integer_resource (st->dpy, "delay2", "Integer");
-      st->iterations = get_integer_resource (st->dpy, "iterations", "Integer");
-      if (st->iterations < 0) st->iterations = 0;
-      else if (st->iterations > 7) st->iterations = 7;
+  st->ncolors = get_integer_resource (st->dpy, "ncolors", "Integer");
+  st->delay = get_integer_resource (st->dpy, "delay", "Integer");
+  st->delay2 = get_integer_resource (st->dpy, "delay2", "Integer");
+  st->iterations = get_integer_resource (st->dpy, "iterations", "Integer");
+  if (st->iterations < 0) st->iterations = 0;
+  else if (st->iterations > 7) st->iterations = 7;
 
-      if (st->ncolors <= 2) st->ncolors = 0;
-      if (st->ncolors == 0) mono_p = True;
-      if (st->ncolors > 255) st->ncolors = 255;  /* too many look bad */
+  if (st->ncolors <= 2) st->ncolors = 0;
+  if (st->ncolors == 0) mono_p = True;
+  if (st->ncolors > 255) st->ncolors = 255;  /* too many look bad */
 
-      st->gc  = XCreateGC (st->dpy, st->window, 0, &gcv);
-      st->gc2 = XCreateGC (st->dpy, st->window, 0, &gcv);
-    }
+  if (!st->gc)  st->gc  = XCreateGC (st->dpy, st->window, 0, &gcv);
+  if (!st->gc2) st->gc2 = XCreateGC (st->dpy, st->window, 0, &gcv);
 
   if (mono_p)
     st->extra_krinkly_p = !(random() % 15);
@@ -186,10 +186,7 @@ init_map (struct state *st)
 
   if (!mono_p)
     {
-      if (st->colors)
-	free_colors (st->dpy, st->cmap, st->colors, st->ncolors);
-      else
-	st->colors = (XColor *) malloc (st->ncolors * sizeof(*st->colors));
+      st->colors = (XColor *) malloc (st->ncolors * sizeof(*st->colors));
 
       make_smooth_colormap (st->dpy, st->xgwa.visual, st->cmap,
                             st->colors, &st->ncolors,
@@ -218,7 +215,8 @@ init_map (struct state *st)
     }
 
   XSetForeground (st->dpy, st->gc, st->colors[1].pixel);
-  XFillRectangle (st->dpy, st->window, st->gc, 0, 0, st->xgwa.width, st->xgwa.height);
+  XFillRectangle (st->dpy, st->window, st->gc, 0, 0, 
+                  st->xgwa.width, st->xgwa.height);
 
   if (st->flip_xy)
     {
@@ -397,6 +395,7 @@ imsmap_free (Display *dpy, Window window, void *closure)
 static const char *imsmap_defaults [] = {
   ".background:	#000066",
   ".foreground:	#FF00FF",
+  "*fpsSolid:	true",
   "*mode:	random",
   "*ncolors:	50",
   "*iterations:	7",
@@ -414,4 +413,4 @@ static XrmOptionDescRec imsmap_options [] = {
   { 0, 0, 0, 0 }
 };
 
-XSCREENSAVER_MODULE ("IMSMAP", imsmap)
+XSCREENSAVER_MODULE ("IMSMap", imsmap)

@@ -1,4 +1,4 @@
-/* texfonts, Copyright (c) 2005-2007 Jamie Zawinski <jwz@jwz.org>
+/* texfonts, Copyright (c) 2005-2010 Jamie Zawinski <jwz@jwz.org>
  * Loads X11 fonts into textures for use with OpenGL.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -140,8 +140,8 @@ load_texture_font (Display *dpy, char *res)
 
   texture_font_data *data = 0;
   char *font = get_string_resource (dpy, res, "Font");
-  const char *def1 = "-*-times-bold-r-normal-*-240-*";
-  const char *def2 = "-*-times-bold-r-normal-*-180-*";
+  const char *def1 = "-*-helvetica-medium-r-normal-*-240-*";
+  const char *def2 = "-*-helvetica-medium-r-normal-*-180-*";
   const char *def3 = "fixed";
   XFontStruct *f;
   int which;
@@ -257,13 +257,13 @@ load_texture_font (Display *dpy, char *res)
 
           /* See comment in print_texture_string for bit layout explanation.
            */
-          int lbearing = (f->per_char
+          int lbearing = (f->per_char && ii >= f->min_char_or_byte2
                           ? f->per_char[ii - f->min_char_or_byte2].lbearing
                           : f->min_bounds.lbearing);
-          int ascent   = (f->per_char
+          int ascent   = (f->per_char && ii >= f->min_char_or_byte2
                           ? f->per_char[ii - f->min_char_or_byte2].ascent
                           : f->max_bounds.ascent);
-          int width    = (f->per_char
+          int width    = (f->per_char && ii >= f->min_char_or_byte2
                           ? f->per_char[ii - f->min_char_or_byte2].width
                           : f->max_bounds.width);
 
@@ -334,7 +334,7 @@ texture_string_width (texture_font_data *data, const char *c,
   while (*c)
     {
       int cc = *((unsigned char *) c);
-      w += (f->per_char
+      w += (f->per_char && cc >= f->min_char_or_byte2
             ? f->per_char[cc-f->min_char_or_byte2].width
             : f->max_bounds.width);
       c++;
@@ -430,23 +430,23 @@ print_texture_string (texture_font_data *data, const char *string)
              We want to make a quad from point A to point C.
              We want to position that quad so that point B lies at x,y.
            */
-          int lbearing = (f->per_char
+          int lbearing = (f->per_char && c >= f->min_char_or_byte2
                           ? f->per_char[c - f->min_char_or_byte2].lbearing
                           : f->min_bounds.lbearing);
-          int rbearing = (f->per_char
+          int rbearing = (f->per_char && c >= f->min_char_or_byte2
                           ? f->per_char[c - f->min_char_or_byte2].rbearing
                           : f->max_bounds.rbearing);
-          int ascent   = (f->per_char
+          int ascent   = (f->per_char && c >= f->min_char_or_byte2
                           ? f->per_char[c - f->min_char_or_byte2].ascent
                           : f->max_bounds.ascent);
-          int descent  = (f->per_char
+          int descent  = (f->per_char && c >= f->min_char_or_byte2
                           ? f->per_char[c - f->min_char_or_byte2].descent
                           : f->max_bounds.descent);
-          int cwidth   = (f->per_char
+          int cwidth   = (f->per_char && c >= f->min_char_or_byte2
                           ? f->per_char[c - f->min_char_or_byte2].width
                           : f->max_bounds.width);
 
-          char cc = c % (256 / data->ntextures);
+          unsigned char cc = c % (256 / data->ntextures);
 
           int gs = (16 / data->grid_mag);		  /* grid size */
 

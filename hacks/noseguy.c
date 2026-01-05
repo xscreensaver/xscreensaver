@@ -1,5 +1,4 @@
-/* xscreensaver, Copyright (c) 1992, 1996, 1997, 1998, 2005, 2006
- *  Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1992-2008 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -71,13 +70,7 @@ static void talk_1 (struct state *);
 static int think (struct state *);
 static unsigned long look (struct state *); 
 
-#define FROM_ARGV    1
-#define FROM_PROGRAM 2
-#define FROM_FILE    3
-#define FROM_RESRC   4
-
 #define IS_MOVING  1
-#define GET_PASSWD 2
 
 #if defined(HAVE_GDK_PIXBUF) || defined(HAVE_XPM)
 # include "images/noseguy/nose-f1.xpm"
@@ -569,6 +562,7 @@ static const char *noseguy_defaults [] = {
   ".foreground:	    #CCCCCC",
   "*textForeground: black",
   "*textBackground: #CCCCCC",
+  "*fpsSolid:	true",
   "*program:	 xscreensaver-text --cols 40 | head -n15",
   ".font:	 -*-new century schoolbook-*-r-*-*-*-180-*-*-*-*-*-*",
   0
@@ -608,8 +602,10 @@ noseguy_init (Display *d, Window w)
   if (!fontname || !*fontname)
     fprintf (stderr, "%s: no font specified.\n", progname);
   st->font = XLoadQueryFont(st->dpy, fontname);
-  if (!st->font)
+  if (!st->font) {
     fprintf (stderr, "%s: could not load font %s.\n", progname, fontname);
+    exit(1);
+  }
 
   fg = get_pixel_resource (st->dpy, cmap, "foreground", "Foreground");
   bg = get_pixel_resource (st->dpy, cmap, "background", "Background");

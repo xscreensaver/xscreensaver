@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2006 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 2006-2009 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -483,7 +483,7 @@ do_file_selector (NSTextField *txt, BOOL dirs_p)
                                      types:nil];
   if (result == NSOKButton) {
     NSArray *files = [panel filenames];
-    NSString *file = ([files count] > 0 ? [files objectAtIndex:0] : @"");
+    file = ([files count] > 0 ? [files objectAtIndex:0] : @"");
     file = [file stringByAbbreviatingWithTildeInPath];
     [txt setStringValue:file];
 
@@ -606,12 +606,21 @@ make_number_selector (NSUserDefaultsController *prefs,
                label);
   }
     
+  // If either the min or max field contains a decimal point, then this
+  // option may have a floating point value; otherwise, it is constrained
+  // to be an integer.
+  //
+  NSCharacterSet *dot =
+    [NSCharacterSet characterSetWithCharactersInString:@"."];
+  BOOL float_p = ([low rangeOfCharacterFromSet:dot].location != NSNotFound ||
+                  [high rangeOfCharacterFromSet:dot].location != NSNotFound);
+
   if ([type isEqualToString:@"slider"]) {
 
     NSRect rect;
     rect.origin.x = rect.origin.y = 0;    
     rect.size.width = 150;
-    rect.size.height = 20;
+    rect.size.height = 23;  // apparent min height for slider with ticks...
     NSSlider *slider;
     if (cvt)
       slider = [[InvertedSlider alloc] initWithFrame:rect];
@@ -621,6 +630,31 @@ make_number_selector (NSUserDefaultsController *prefs,
     [slider setMaxValue:[high doubleValue]];
     [slider setMinValue:[low  doubleValue]];
     
+    int range = [slider maxValue] - [slider minValue] + 1;
+    int range2 = range;
+    int max_ticks = 21;
+    while (range2 > max_ticks)
+      range2 /= 10;
+
+    // If we have elided ticks, leave it at the max number of ticks.
+    if (range != range2 && range2 < max_ticks)
+      range2 = max_ticks;
+
+    // If it's a float, always display the max number of ticks.
+    if (float_p && range2 < max_ticks)
+      range2 = max_ticks;
+
+    [slider setNumberOfTickMarks:range2];
+
+    [slider setAllowsTickMarkValuesOnly:
+              (range == range2 &&  // we are showing the actual number of ticks
+               !float_p)];         // and we want integer results
+
+    // #### Note: when the slider's range is large enough that we aren't
+    //      showing all possible ticks, the slider's value is not constrained
+    //      to be an integer, even though it should be...
+    //      Maybe we need to use a value converter or something?
+
     if (label) {
       NSTextField *lab = make_label (label);
       place_child (parent, lab, NO);
@@ -711,8 +745,8 @@ make_number_selector (NSUserDefaultsController *prefs,
     [step sizeToFit];
     place_child (parent, step, YES);
     rect = [step frame];
-    rect.size.height = [txt frame].size.height;
     rect.origin.x -= COLUMN_SPACING;  // this one goes close
+    rect.origin.y += ([txt frame].size.height - rect.size.height) / 2;
     [step setFrame:rect];
     
     [step setMinValue:[low  doubleValue]];
@@ -727,6 +761,18 @@ make_number_selector (NSUserDefaultsController *prefs,
       [step setIncrement:range / 100.0];
     else
       [step setIncrement:1.0];
+
+    NSNumberFormatter *fmt = [[[NSNumberFormatter alloc] init] autorelease];
+    [fmt setFormatterBehavior:NSNumberFormatterBehavior10_4];
+    [fmt setNumberStyle:NSNumberFormatterDecimalStyle];
+    [fmt setMinimum:[NSNumber numberWithDouble:[low  doubleValue]]];
+    [fmt setMaximum:[NSNumber numberWithDouble:[high doubleValue]]];
+    [fmt setMinimumFractionDigits: (float_p ? 1 : 0)];
+    [fmt setMaximumFractionDigits: (float_p ? 2 : 0)];
+
+    [fmt setGeneratesDecimalNumbers:float_p];
+    [[txt cell] setFormatter:fmt];
+
 
     bind_switch_to_preferences (prefs, step, arg, opts);
     bind_switch_to_preferences (prefs, txt,  arg, opts);
@@ -997,6 +1043,69 @@ unwrap (NSString *text)
 }
 
 
+static char *
+anchorize (const char *url)
+{
+  const char *wiki = "http://en.wikipedia.org/wiki/";
+  const char *math = "http://mathworld.wolfram.com/";
+  if (!strncmp (wiki, url, strlen(wiki))) {
+    char *anchor = (char *) malloc (strlen(url) * 3 + 10);
+    strcpy (anchor, "Wikipedia: \"");
+    const char *in = url + strlen(wiki);
+    char *out = anchor + strlen(anchor);
+    while (*in) {
+      if (*in == '_') {
+        *out++ = ' ';
+      } else if (*in == '#') {
+        *out++ = ':';
+        *out++ = ' ';
+      } else if (*in == '%') {
+        char hex[3];
+        hex[0] = in[1];
+        hex[1] = in[2];
+        hex[2] = 0;
+        int n = 0;
+        sscanf (hex, "%x", &n);
+        *out++ = (char) n;
+        in += 2;
+      } else {
+        *out++ = *in;
+      }
+      in++;
+    }
+    *out++ = '"';
+    *out = 0;
+    return anchor;
+
+  } else if (!strncmp (math, url, strlen(math))) {
+    char *anchor = (char *) malloc (strlen(url) * 3 + 10);
+    strcpy (anchor, "MathWorld: \"");
+    const char *start = url + strlen(wiki);
+    const char *in = start;
+    char *out = anchor + strlen(anchor);
+    while (*in) {
+      if (*in == '_') {
+        *out++ = ' ';
+      } else if (in != start && *in >= 'A' && *in <= 'Z') {
+        *out++ = ' ';
+        *out++ = *in;
+      } else if (!strncmp (in, ".htm", 4)) {
+        break;
+      } else {
+        *out++ = *in;
+      }
+      in++;
+    }
+    *out++ = '"';
+    *out = 0;
+    return anchor;
+
+  } else {
+    return strdup (url);
+  }
+}
+
+
 /* Converts any http: URLs in the given text field to clickable links.
  */
 static void
@@ -1040,27 +1149,35 @@ hreffify (NSText *nstext)
     NSString *nsurl = [text substringWithRange:r2];
     const char *url = [nsurl UTF8String];
 
-    // Construct the RTF corresponding to <A HREF="url">url</A>
+    // If this is a Wikipedia URL, make the linked text be prettier.
+    //
+    char *anchor = anchorize(url);
+
+    // Construct the RTF corresponding to <A HREF="url">anchor</A>
     //
     const char *fmt = "{\\field{\\*\\fldinst{HYPERLINK \"%s\"}}%s}";
-    char *rtf = malloc (strlen (fmt) + (strlen (url) * 2) + 10);
-    sprintf (rtf, fmt, url, url);
+    char *rtf = malloc (strlen (fmt) + strlen(url) + strlen(anchor) + 10);
+    sprintf (rtf, fmt, url, anchor);
+    free (anchor);
     NSData *rtfdata = [NSData dataWithBytesNoCopy:rtf length:strlen(rtf)];
 
     // Insert the RTF into the NSText.
     [nstext replaceCharactersInRange:r2 withRTF:rtfdata];
+
+    int L2 = [text length];  // might have changed
+    start.location -= (L - L2);
+    L = L2;
   }
 }
 
-/* Makes the first word of the text be bold.
+/* Makes the text up to the first comma be bold.
  */
 static void
 boldify (NSText *nstext)
 {
   NSString *text = [nstext string];
-  NSRange r = [text rangeOfCharacterFromSet:
-                      [NSCharacterSet whitespaceCharacterSet]];
-  r.length = r.location;
+  NSRange r = [text rangeOfString:@"," options:0];
+  r.length = r.location+1;
   r.location = 0;
 
   NSFont *font = [nstext font];
@@ -1148,7 +1265,7 @@ make_text_controls (NSUserDefaultsController *prefs,
 {
   /*
     Display Text:
-     (x)  Computer Name and Time
+     (x)  Computer name and time
      ( )  Text       [__________________________]
      ( )  Text file  [_________________] [Choose]
      ( )  URL        [__________________________]
@@ -1184,7 +1301,7 @@ make_text_controls (NSUserDefaultsController *prefs,
   [matrix setAllowsEmptySelection:NO];
 
   NSArrayController *cnames  = [[NSArrayController alloc] initWithContent:nil];
-  [cnames addObject:@"Computer Name and Time"];
+  [cnames addObject:@"Computer name and time"];
   [cnames addObject:@"Text"];
   [cnames addObject:@"File"];
   [cnames addObject:@"URL"];
@@ -1302,13 +1419,13 @@ make_image_controls (NSUserDefaultsController *prefs,
                      NSView *parent, NSXMLNode *node)
 {
   /*
-    [x]  Grab Desktop Images
-    [ ]  Choose Random Image:
+    [x]  Grab desktop images
+    [ ]  Choose random image:
          [__________________________]  [Choose]
 
-   <boolean id="grabDesktopImages" _label="Grab Desktop Images"
+   <boolean id="grabDesktopImages" _label="Grab desktop images"
        arg-unset="-no-grab-desktop"/>
-   <boolean id="chooseRandomImages" _label="Grab Desktop Images"
+   <boolean id="chooseRandomImages" _label="Grab desktop images"
        arg-unset="-choose-random-images"/>
    <file id="imageDirectory" _label="" arg-set="-image-directory %"/>
    */
@@ -1319,7 +1436,7 @@ make_image_controls (NSUserDefaultsController *prefs,
   [node2 setAttributesAsDictionary:
           [NSDictionary dictionaryWithObjectsAndKeys:
                         @"grabDesktopImages",   @"id",
-                        @"Grab Desktop Images", @"_label",
+                        @"Grab desktop images", @"_label",
                         @"-no-grab-desktop",    @"arg-unset",
                         nil]];
   make_checkbox (prefs, opts, parent, node2);
@@ -1329,7 +1446,7 @@ make_image_controls (NSUserDefaultsController *prefs,
   [node2 setAttributesAsDictionary:
           [NSDictionary dictionaryWithObjectsAndKeys:
                         @"chooseRandomImages",    @"id",
-                        @"Choose Random Images",  @"_label",
+                        @"Choose random images",  @"_label",
                         @"-choose-random-images", @"arg-set",
                         nil]];
   make_checkbox (prefs, opts, parent, node2);
@@ -1339,7 +1456,7 @@ make_image_controls (NSUserDefaultsController *prefs,
   [node2 setAttributesAsDictionary:
           [NSDictionary dictionaryWithObjectsAndKeys:
                         @"imageDirectory",     @"id",
-                        @"Images Directory:",  @"_label",
+                        @"Images directory:",  @"_label",
                         @"-image-directory %", @"arg",
                         nil]];
   make_file_selector (prefs, opts, parent, node2, YES, NO);
@@ -1475,7 +1592,7 @@ fix_contentview_size (NSView *parent)
 //          f.origin.y + f.size.height, [kid class]);
   }
   
-  if (maxx < 350) maxx = 350;   // leave room for the NSText paragraph...
+  if (maxx < 400) maxx = 400;   // leave room for the NSText paragraph...
   
   /* Now that we know the width of the window, set the width of the NSText to
      that, so that it can decide what its height needs to be.
@@ -1495,10 +1612,33 @@ fix_contentview_size (NSView *parent)
   miny = f.origin.y - LINE_SPACING;
   [text setFrame:f];
   
-  // Stop second-guessing us on sizing now.  Size is now locked.
+  // Lock the width of the field and unlock the height, and let it resize
+  // once more, to compute the proper height of the text for that width.
+  //
   [(NSText *) text setHorizontallyResizable:NO];
+  [(NSText *) text setVerticallyResizable:YES];
+  [(NSText *) text sizeToFit];
+
+  // Now lock the height too: no more resizing this text field.
+  //
   [(NSText *) text setVerticallyResizable:NO];
-  
+
+  // Now reposition the top edge of the text field to be back where it
+  // was before we changed the height.
+  //
+  float oh = f.size.height;
+  f = [text frame];
+  float dh = f.size.height - oh;
+  f.origin.y += dh;
+
+  // #### This is needed in OSX 10.5, but is wrong in OSX 10.6.  WTF??
+  //      If we do this in 10.6, the text field moves down, off the window.
+  //      So instead we repair it at the end, at the "WTF2" comment.
+  [text setFrame:f];
+
+  // Also adjust the parent height by the change in height of the text field.
+  miny -= dh;
+
 //  NSLog(@"text new: %3.0f x %3.0f @ %3.0f %3.0f  %3.0f  %@",
 //        f.size.width, f.size.height, f.origin.x, f.origin.y,
 //        f.origin.y + f.size.height, [text class]);
@@ -1531,6 +1671,25 @@ fix_contentview_size (NSView *parent)
 //          f.origin.y + f.size.height, [kid class]);
   }
   
+/*
+Bad:
+ parent: 420 x 541 @   0   0
+ text:   380 x 100 @  20  22  miny=-501
+
+Good:
+ parent: 420 x 541 @   0   0
+ text:   380 x 100 @  20  50  miny=-501
+*/
+
+  // #### WTF2: See "WTF" above.  If the text field is off the screen,
+  //      move it up.  We need this on 10.6 but not on 10.5.  Auugh.
+  //
+  f = [text frame];
+  if (f.origin.y < 50) {    // magic numbers, yay
+    f.origin.y = 50;
+    [text setFrame:f];
+  }
+
   /* Set the kids to track the top left corner of the window when resized.
      Set the NSText to track the bottom right corner as well.
    */
@@ -1634,7 +1793,26 @@ wrap_with_buttons (NSWindow *window, NSView *panel)
   rect.origin.y += rect.size.height;
   NSBox *pbox = [[NSBox alloc] initWithFrame:rect];
   [pbox setTitlePosition:NSNoTitle];
-  [pbox setBorderType:NSNoBorder];
+  [pbox setBorderType:NSBezelBorder];
+
+  // Enforce a max height on the dialog, so that it's obvious to me
+  // (on a big screen) when the dialog will fall off the bottom of
+  // a small screen (e.g., 1024x768 laptop with a huge bottom dock).
+  {
+    NSRect f = [panel frame];
+    int screen_height = (768    // shortest "modern" Mac display
+                         - 22   // menu bar
+                         - 56   // System Preferences toolbar
+                         - 140  // default magnified bottom dock icon
+                         );
+    if (f.size.height > screen_height) {
+      NSLog(@"%@ height was %.0f; clipping to %d", 
+          [panel class], f.size.height, screen_height);
+      f.size.height = screen_height;
+      [panel setFrame:f];
+    }
+  }
+
   [pbox addSubview:panel];
   [pbox addSubview:bbox];
   [pbox sizeToFit];

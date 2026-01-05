@@ -96,6 +96,10 @@
    can make use of this if it is available. */
 #undef HAVE_GDK_PIXBUF
 
+/* Define this if you have the gdk_pixbuf_apply_embedded_orientation function
+   (gdk-pixbuf 2.12). */
+#undef HAVE_GDK_PIXBUF_APPLY_EMBEDDED_ORIENTATION
+
 /* Define to 1 if you have the `getcwd' function. */
 #undef HAVE_GETCWD
 
@@ -234,6 +238,9 @@
    available if the file /usr/include/X11/extensions/Xrandr.h exists.) */
 #undef HAVE_RANDR
 
+/* Define this if the RANDR library is version 1.2 or newer. */
+#undef HAVE_RANDR_12
+
 /* Define this if you have the XReadDisplay extension (I think this is an
    SGI-only thing; it's in <X11/extensions/readdisplay.h>.) A few of the
    screenhacks will take advantage of this if it's available. */
@@ -277,6 +284,9 @@
 
 /* Define to 1 if you have the `sigaction' function. */
 #undef HAVE_SIGACTION
+
+/* Define to 1 if you have the `sigtimedwait' function. */
+#undef HAVE_SIGTIMEDWAIT
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H

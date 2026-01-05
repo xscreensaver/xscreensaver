@@ -135,7 +135,9 @@ static const char sccsid[] = "@(#)juggle.c	5.10 2003/09/02 xlockmore";
 					"*count:   200   \n" \
 					"*cycles:  1000  \n" \
 					"*ncolors: 32    \n" \
-					"*font:    -*-times-bold-r-normal-*-180-*\n"
+					"*font:    -*-helvetica-bold-r-normal-*-180-*\n" \
+					"*fpsSolid: true\n" \
+
 # define refresh_juggle 0
 # define juggle_handle_event 0
 # undef SMOOTH_COLORS
@@ -2614,7 +2616,8 @@ init_juggle (ModeInfo * mi)
   sp->scale = MIN(MI_HEIGHT(mi)/480.0, MI_WIDTH(mi)/160.0);
 
   if(describe && !sp->mode_font) { /* Check to see if there's room to describe patterns. */
-	sp->mode_font = XQueryFont(MI_DISPLAY(mi), XGContextFromGC(MI_GC(mi)));
+    char *font = get_string_resource (MI_DISPLAY(mi), "font", "Font");
+	sp->mode_font = XLoadQueryFont(MI_DISPLAY(mi), font);
   }
 }
 

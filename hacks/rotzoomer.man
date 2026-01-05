@@ -6,9 +6,11 @@ rotzoomer - animated rotations and scalings of portions of the screen
 [\-display \fIhost:display.screen\fP]
 [\-move | \-no\-move]
 [\-delay \fImillisecs\fP]
+[\-duration \fIsecs\fP]
 [\-n \fIcount\fP]
 [\-shm | \-no\-shm]
 [\-window] [\-root] [\-install] [\-visual \fIvisual\fP]
+[\-fps]
 .SH DESCRIPTION
 The \fIrotzoomer\fP program grabs an image, then picks
 rectangles and draws scaled and rotated animations of that 
@@ -43,6 +45,9 @@ or the id number (decimal or hex) of a specific visual.
 How much of a delay should be introduced between steps of the animation.
 Default 10, or about 1/100th second.
 .TP 8
+.B \-duration \fIseconds\fP
+How long to run before loading a new image.  Default 120 seconds.
+.TP 8
 .B \-move
 Make the rectangles should wander around the screen.
 .TP 8
@@ -54,6 +59,9 @@ How many rectangles to animate simultaneously.  Default 2.
 .TP 8
 .B \-no\-shm
 Disable use of the SHM extension, even if it appears to be available.
+.TP 8
+.B \-fps
+Display the current frame rate and CPU load.
 .SH ENVIRONMENT
 .PP
 .TP 8

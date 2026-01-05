@@ -1,4 +1,4 @@
-/* boing, Copyright (c) 2005 Jamie Zawinski <jwz@jwz.org>
+/* boing, Copyright (c) 2005-2008 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -42,7 +42,7 @@
 #define DEF_SMOOTH      "False"
 #define DEF_SCANLINES   "True"
 #define DEF_SPEED       "1.0"
-#define DEF_SIZE        "0.5"
+#define DEF_BALL_SIZE   "0.5"
 #define DEF_ANGLE       "15"
 #define DEF_MERIDIANS   "16"
 #define DEF_PARALLELS   "8"
@@ -118,7 +118,7 @@ static argtype vars[] = {
   {&scanlines_p,"scanlines","Scanlines",  DEF_SCANLINES, t_Bool},
   {&speed,     "speed",     "Speed",      DEF_SPEED,     t_Float},
   {&angle,     "angle",     "Angle",      DEF_ANGLE,     t_Int},
-  {&ball_size, "ballSize",  "BallSize",   DEF_SIZE,      t_Float},
+  {&ball_size, "ballSize",  "BallSize",   DEF_BALL_SIZE, t_Float},
   {&meridians, "meridians", "meridians",  DEF_MERIDIANS, t_Int},
   {&parallels, "parallels", "parallels",  DEF_PARALLELS, t_Int},
   {&tiles,     "tiles",     "Tiles",      DEF_TILES,     t_Int},
@@ -493,7 +493,9 @@ boing_handle_event (ModeInfo *mi, XEvent *event)
     }
   else if (event->xany.type == ButtonPress &&
            (event->xbutton.button == Button4 ||
-            event->xbutton.button == Button5))
+            event->xbutton.button == Button5 ||
+            event->xbutton.button == Button6 ||
+            event->xbutton.button == Button7))
     {
       gltrackball_mousewheel (bp->trackball, event->xbutton.button, 10,
                               !!event->xbutton.state);

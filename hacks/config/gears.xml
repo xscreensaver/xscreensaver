@@ -5,27 +5,32 @@
   <command arg="-root"/>
 
   <number id="delay" type="slider" arg="-delay %"
-          _label="Animation Speed" _low-label="Slow" _high-label="Fast"
-          low="0" high="20000" default="20000"
+          _label="Frame rate" _low-label="Low" _high-label="High"
+          low="0" high="100000" default="30000"
           convert="invert"/>
 
-  <number id="cycles" type="slider" arg="-cycles %"
-           _label="Rotational Speed" _low-label="Slow" _high-label="Fast"
-          low="1" high="30" default="2"/>
+  <number id="speed" type="slider" arg="-speed %"
+          _label="Speed" _low-label="Slow" _high-label="Fast"
+          low="0.01" high="5.0" default="1.0"/>
 
-  <select id="style">
-   <option id="three"     _label="Three Gear System" arg-set="-mode simple"/>
-   <option id="planetary" _label="Planetary Gear System" arg-set="-mode planetary"/>
-   <option id="random"    _label="Random"/>
-  </select>
+  <number id="count" type="slider" arg="-count %"
+          _label="Gear count" _low-label="0" _high-label="20"
+           low="0" high="20" default="0"/>
 
-  <boolean id="wire"    _label="Wireframe"              arg-set="-wireframe"/>
-  <boolean id="showfps" _label="Show Frames-per-Second" arg-set="-fps"/>
+  <hgroup>
+   <boolean id="wander" _label="Wander"    arg-unset="-no-wander"/>
+   <boolean id="spin"   _label="Spin"      arg-unset="-no-spin"/>
+   <boolean id="wire"   _label="Wireframe" arg-set="-wireframe"/>
+   <boolean id="showfps" _label="Show frame rate" arg-set="-fps"/>
+  </hgroup>
 
   <_description>
 This draws sets of turning, interlocking gears, rotating in three
-dimensions.
+dimensions.  See also the "Pinion" and "MoebiusGears" screen savers.
 
-Written by Brian Paul, Jamie Zawinski. Danny Sung, and Ed Mackey; 1997.
+http://en.wikipedia.org/wiki/Involute_gear
+http://en.wikipedia.org/wiki/Epicyclic_gearing
+
+Written by Jamie Zawinski; 2007.
   </_description>
 </screensaver>

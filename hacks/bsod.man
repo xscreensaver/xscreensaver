@@ -19,6 +19,7 @@ bsod - Blue Screen of Death emulator
 [\-display \fIhost:display.screen\fP] [\-foreground \fIcolor\fP]
 [\-background \fIcolor\fP] [\-window] [\-root] [\-mono] [\-install]
 [\-visual \fIvisual\fP] [\-delay \fIseconds\fP]
+[\-fps]
 .SH DESCRIPTION
 The
 .I bsod
@@ -57,6 +58,9 @@ The delay between displaying one crash and another.
 .TP 8
 .B \-only \fIwhich\fP
 Tell it to run only one mode, e.g., \fI\-only HPUX\fP.
+.TP 8
+.B \-fps
+Display the current frame rate and CPU load.
 .SH ENVIRONMENT
 .PP
 .TP 8
@@ -92,8 +96,9 @@ hacks are displayed and which aren't.
 .BR doVMS ,
 .BR doMSDOS ,
 .BR doOS2 ,
+.BR doHVX ,
 and
-.BR doHVX .
+.BR doATM .
 Each of these is a Boolean resource, they all default to true, except
 for doAtari, doBSD, doSparcLinux, and doHPPALinux, which are turned off
 by default, because they're really not all that interesting looking

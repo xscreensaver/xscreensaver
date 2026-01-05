@@ -45,12 +45,13 @@
 static const char *shadebobs_defaults [] = {
   ".background: black",
   ".foreground: white",
+  "*fpsSolid:	true",
   "*degrees:  0",	/* default: Automatic degree calculation */
   "*color:    random",
   "*count:    4",
   "*cycles:   10",
   "*ncolors:  64",    /* changing this doesn't work particularly well */
-  "*delay:    5000",
+  "*delay:    10000",
   0
 };
 
@@ -343,7 +344,7 @@ static void Initialize( struct state *st )
 	else if( st->iDegreeCount > 5400 ) st->iDegreeCount = 5400;
 	CreateTables( st, st->iDegreeCount );
 #ifdef VERBOSE
-	printf( "%s: Using a %d degree circle.\n", progname );
+	printf( "%s: Using a %d degree circle.\n", progname, st->iDegreeCount );
 #endif /* VERBOSE */
   
 	/*  Get the base color. */
@@ -423,16 +424,6 @@ shadebobs_draw (Display *dpy, Window window, void *closure)
 
   for( st->iShadeBob=0; st->iShadeBob<st->nShadeBobCount; st->iShadeBob++ )
     Execute( st, &st->aShadeBobs[ st->iShadeBob ] );
-
-#ifdef VERBOSE
-  iFrame++;
-  if( nTime - time( NULL ) )
-    {
-      printf( "%s: %d FPS\n", progname, iFrame );
-      nTime = time( NULL );
-      iFrame = 0;
-    }
-#endif  /*  VERBOSE */
 
   return st->delay;
 }

@@ -9,6 +9,7 @@ memscroller - scrolls a dump of its own RAM across the screen
 [\-delay \fIint\fP]
 [\-mono | -color]
 [\-ram | -random | \-filename \fIfile\fP]
+[\-fps]
 .SH DESCRIPTION
 The \fImemscroller\fP program scrolls a dump of its own process memory
 across the screen in three windows at three different rates.
@@ -49,7 +50,10 @@ without ever returning any data.)
 .TP 8
 .B \-delay \fImicroseconds\fP
 How much of a delay should be introduced between steps of the animation.
-Default 100000, or about 1/10th second.
+Default 10000.
+.TP 8
+.B \-fps
+Display the current frame rate and CPU load.
 .SH ENVIRONMENT
 .PP
 .TP 8

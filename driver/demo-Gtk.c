@@ -1,5 +1,5 @@
 /* demo-Gtk.c --- implements the interactive demo-mode and options dialogs.
- * xscreensaver, Copyright (c) 1993-2007 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright (c) 1993-2008 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -267,10 +267,14 @@ void browse_text_program_cb (GtkButton *, gpointer user_data);
 void settings_cb (GtkButton *, gpointer user_data);
 void settings_adv_cb (GtkButton *, gpointer user_data);
 void settings_std_cb (GtkButton *, gpointer user_data);
+void settings_reset_cb (GtkButton *, gpointer user_data);
 void settings_switch_page_cb (GtkNotebook *, GtkNotebookPage *,
                               gint page_num, gpointer user_data);
 void settings_cancel_cb (GtkButton *, gpointer user_data);
 void settings_ok_cb (GtkButton *, gpointer user_data);
+
+static void kill_gnome_screensaver (void);
+static void kill_kde_screensaver (void);
 
 
 /* Some random utility functions
@@ -482,9 +486,23 @@ static void warning_dialog_restart_cb (GtkWidget *widget, gpointer user_data)
   warning_dialog_dismiss_cb (widget, user_data);
 }
 
+static void warning_dialog_killg_cb (GtkWidget *widget, gpointer user_data)
+{
+  kill_gnome_screensaver ();
+  warning_dialog_dismiss_cb (widget, user_data);
+}
+
+static void warning_dialog_killk_cb (GtkWidget *widget, gpointer user_data)
+{
+  kill_kde_screensaver ();
+  warning_dialog_dismiss_cb (widget, user_data);
+}
+
+typedef enum { D_NONE, D_LAUNCH, D_GNOME, D_KDE } dialog_button;
+
 static void
 warning_dialog (GtkWidget *parent, const char *message,
-                Boolean restart_button_p, int center)
+                dialog_button button_type, int center)
 {
   char *msg = strdup (message);
   char *head;
@@ -557,7 +575,7 @@ warning_dialog (GtkWidget *parent, const char *message,
                       label, TRUE, TRUE, 0);
 
 #ifdef HAVE_GTK2
-  if (restart_button_p)
+  if (button_type != D_NONE)
     {
       cancel = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
       gtk_container_add (GTK_CONTAINER (label), cancel);
@@ -571,7 +589,7 @@ warning_dialog (GtkWidget *parent, const char *message,
   ok = gtk_button_new_with_label ("OK");
   gtk_container_add (GTK_CONTAINER (label), ok);
 
-  if (restart_button_p)
+  if (button_type != D_NONE)
     {
       cancel = gtk_button_new_with_label ("Cancel");
       gtk_container_add (GTK_CONTAINER (label), cancel);
@@ -582,22 +600,28 @@ warning_dialog (GtkWidget *parent, const char *message,
   gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
   gtk_window_set_title (GTK_WINDOW (dialog), progclass);
-  STFU GTK_WIDGET_SET_FLAGS (ok, GTK_CAN_DEFAULT);
+  GTK_WIDGET_SET_FLAGS (ok, GTK_CAN_DEFAULT);
   gtk_widget_show (ok);
   gtk_widget_grab_focus (ok);
 
   if (cancel)
     {
-      STFU GTK_WIDGET_SET_FLAGS (cancel, GTK_CAN_DEFAULT); 
+      GTK_WIDGET_SET_FLAGS (cancel, GTK_CAN_DEFAULT); 
       gtk_widget_show (cancel);
     }
   gtk_widget_show (label);
   gtk_widget_show (dialog);
 
-  if (restart_button_p)
+  if (button_type != D_NONE)
     {
-      gtk_signal_connect_object (GTK_OBJECT (ok), "clicked",
-                                 GTK_SIGNAL_FUNC (warning_dialog_restart_cb),
+      GtkSignalFunc fn;
+      switch (button_type) {
+      case D_LAUNCH: fn = GTK_SIGNAL_FUNC (warning_dialog_restart_cb); break;
+      case D_GNOME:  fn = GTK_SIGNAL_FUNC (warning_dialog_killg_cb);   break;
+      case D_KDE:    fn = GTK_SIGNAL_FUNC (warning_dialog_killk_cb);   break;
+      default: abort(); break;
+      }
+      gtk_signal_connect_object (GTK_OBJECT (ok), "clicked", fn, 
                                  (gpointer) dialog);
       gtk_signal_connect_object (GTK_OBJECT (cancel), "clicked",
                                  GTK_SIGNAL_FUNC (warning_dialog_dismiss_cb),
@@ -644,7 +668,7 @@ run_cmd (state *s, Atom command, int arg)
         sprintf (buf, "Error:\n\n%s", err);
       else
         strcpy (buf, "Unknown error!");
-      warning_dialog (s->toplevel_widget, buf, False, 100);
+      warning_dialog (s->toplevel_widget, buf, D_NONE, 100);
     }
   if (err) free (err);
 
@@ -685,7 +709,7 @@ run_hack (state *s, int list_elt, Bool report_errors_p)
                 sprintf (buf, "Error:\n\n%s", err);
               else
                 strcpy (buf, "Unknown error!");
-              warning_dialog (s->toplevel_widget, buf, False, 100);
+              warning_dialog (s->toplevel_widget, buf, D_NONE, 100);
             }
         }
       else
@@ -700,7 +724,7 @@ run_hack (state *s, int list_elt, Bool report_errors_p)
                      "The XScreenSaver daemon doesn't seem to be running\n"
                      "on display \"%s\".  Launch it now?"),
                    d);
-          warning_dialog (s->toplevel_widget, msg, True, 1);
+          warning_dialog (s->toplevel_widget, msg, D_LAUNCH, 1);
         }
     }
 
@@ -756,9 +780,9 @@ about_menu_cb (GtkMenuItem *menuitem, gpointer user_data)
      look as good in the plain-old default Latin1 "C" locale.)
    */
 #ifdef HAVE_GTK2
-  sprintf(copy, ("Copyright \xC2\xA9 1991-2006 %s"), s);
+  sprintf(copy, ("Copyright \xC2\xA9 1991-2008 %s"), s);
 #else  /* !HAVE_GTK2 */
-  sprintf(copy, ("Copyright \251 1991-2006 %s"), s);
+  sprintf(copy, ("Copyright \251 1991-2008 %s"), s);
 #endif /* !HAVE_GTK2 */
 
   sprintf (msg, "%s\n\n%s", copy, desc);
@@ -875,7 +899,7 @@ doc_menu_cb (GtkMenuItem *menuitem, gpointer user_data)
     {
       warning_dialog (s->toplevel_widget,
                       _("Error:\n\n"
-			"No Help URL has been specified.\n"), False, 100);
+			"No Help URL has been specified.\n"), D_NONE, 100);
       return;
     }
 
@@ -982,7 +1006,7 @@ await_xscreensaver (state *s)
                              the length ISO C89 compilers are required to
                              support" in the following expression... */
 # endif
-        strcat (buf,
+        strcat (buf, STFU
 	  _("You are running as root.  This usually means that xscreensaver\n"
             "was unable to contact your X server because access control is\n"
             "turned on.  Try running this command:\n"
@@ -1001,7 +1025,7 @@ await_xscreensaver (state *s)
       else
         strcat (buf, _("Please check your $PATH and permissions."));
 
-      warning_dialog (s->toplevel_widget, buf, False, 1);
+      warning_dialog (s->toplevel_widget, buf, D_NONE, 1);
     }
 
   force_dialog_repaint (s);
@@ -1038,12 +1062,12 @@ demo_write_init_file (state *s, saver_preferences *p)
       if (!f || !*f)
         warning_dialog (s->toplevel_widget,
                         _("Error:\n\nCouldn't determine init file name!\n"),
-                        False, 100);
+                        D_NONE, 100);
       else
         {
           char *b = (char *) malloc (strlen(f) + 1024);
           sprintf (b, _("Error:\n\nCouldn't write %s\n"), f);
-          warning_dialog (s->toplevel_widget, b, False, 100);
+          warning_dialog (s->toplevel_widget, b, D_NONE, 100);
           free (b);
         }
       return -1;
@@ -1106,7 +1130,7 @@ manual_cb (GtkButton *button, gpointer user_data)
     {
       warning_dialog (GTK_WIDGET (button),
                       _("Error:\n\nno `manualCommand' resource set."),
-                      False, 100);
+                      D_NONE, 100);
     }
 
   free (oname);
@@ -1127,7 +1151,7 @@ force_list_select_item (state *s, GtkWidget *list, int list_elt, Bool scroll_p)
   if (!was) gtk_widget_set_sensitive (parent, True);
 #ifdef HAVE_GTK2
   model = gtk_tree_view_get_model (GTK_TREE_VIEW (list));
-  STFU g_assert (model);
+  g_assert (model);
   if (gtk_tree_model_iter_nth_child (model, &iter, NULL, list_elt))
     {
       selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (list));
@@ -1291,7 +1315,7 @@ hack_time_text (state *s, const char *line, Time *store, Bool sec_p)
 		   _("Error:\n\n"
 		     "Unparsable time format: \"%s\"\n"),
 		   line);
-	  warning_dialog (s->toplevel_widget, b, False, 100);
+	  warning_dialog (s->toplevel_widget, b, D_NONE, 100);
 	}
       else
 	*store = value;
@@ -1537,7 +1561,7 @@ flush_dialog_changes_and_save (state *s)
       char b[255];
       sprintf (b, "Error:\n\n" "Directory does not exist: \"%s\"\n",
                p2->image_directory);
-      warning_dialog (s->toplevel_widget, b, False, 100);
+      warning_dialog (s->toplevel_widget, b, D_NONE, 100);
     }
 
 
@@ -1808,7 +1832,7 @@ list_activated_cb (GtkTreeView       *list,
   char *str;
   int list_elt;
 
-  STFU g_return_if_fail (!gdk_pointer_is_grabbed ());
+  g_return_if_fail (!gdk_pointer_is_grabbed ());
 
   str = gtk_tree_path_to_string (path);
   list_elt = strtol (str, NULL, 10);
@@ -1996,7 +2020,7 @@ store_image_directory (GtkWidget *button, gpointer user_data)
     {
       char b[255];
       sprintf (b, _("Error:\n\n" "Directory does not exist: \"%s\"\n"), path);
-      warning_dialog (GTK_WIDGET (top), b, False, 100);
+      warning_dialog (GTK_WIDGET (top), b, D_NONE, 100);
       return;
     }
 
@@ -2026,7 +2050,7 @@ store_text_file (GtkWidget *button, gpointer user_data)
     {
       char b[255];
       sprintf (b, _("Error:\n\n" "File does not exist: \"%s\"\n"), path);
-      warning_dialog (GTK_WIDGET (top), b, False, 100);
+      warning_dialog (GTK_WIDGET (top), b, D_NONE, 100);
       return;
     }
 
@@ -2057,7 +2081,7 @@ store_text_program (GtkWidget *button, gpointer user_data)
     {
       char b[255];
       sprintf (b, _("Error:\n\n" "File does not exist: \"%s\"\n"), path);
-      warning_dialog (GTK_WIDGET (top), b, False, 100);
+      warning_dialog (GTK_WIDGET (top), b, D_NONE, 100);
       return;
     }
 # endif
@@ -2230,7 +2254,7 @@ settings_sync_cmd_text (state *s)
 {
 # ifdef HAVE_XML
   GtkWidget *cmd = GTK_WIDGET (name_to_widget (s, "cmd_text"));
-  char *cmd_line = get_configurator_command_line (s->cdata);
+  char *cmd_line = get_configurator_command_line (s->cdata, False);
   gtk_entry_set_text (GTK_ENTRY (cmd), cmd_line);
   gtk_entry_set_position (GTK_ENTRY (cmd), strlen (cmd_line));
   free (cmd_line);
@@ -2259,6 +2283,20 @@ settings_std_cb (GtkButton *button, gpointer user_data)
   populate_popup_window (s);
 
   gtk_notebook_set_page (notebook, 0);
+}
+
+G_MODULE_EXPORT void
+settings_reset_cb (GtkButton *button, gpointer user_data)
+{
+# ifdef HAVE_XML
+  state *s = global_state_kludge;  /* I hate C so much... */
+  GtkWidget *cmd = GTK_WIDGET (name_to_widget (s, "cmd_text"));
+  char *cmd_line = get_configurator_command_line (s->cdata, True);
+  gtk_entry_set_text (GTK_ENTRY (cmd), cmd_line);
+  gtk_entry_set_position (GTK_ENTRY (cmd), strlen (cmd_line));
+  free (cmd_line);
+  populate_popup_window (s);
+# endif /* HAVE_XML */
 }
 
 G_MODULE_EXPORT void
@@ -3200,7 +3238,7 @@ populate_demo_window (state *s, int list_elt)
   screenhack *hack;
   char *pretty_name;
   GtkFrame *frame1 = GTK_FRAME (name_to_widget (s, "preview_frame"));
-  GtkFrame *frame2 = GTK_FRAME (name_to_widget (s, "doc_frame"));
+  GtkFrame *frame2 = GTK_FRAME (name_to_widget (s, "opt_frame"));
   GtkEntry *cmd    = GTK_ENTRY (name_to_widget (s, "cmd_text"));
   GtkCombo *vis    = GTK_COMBO (name_to_widget (s, "visual_combo"));
   GtkWidget *list  = GTK_WIDGET (name_to_widget (s, "list"));
@@ -3414,7 +3452,7 @@ maybe_reload_init_file (state *s)
                _("Warning:\n\n"
 		 "file \"%s\" has changed, reloading.\n"),
                f);
-      warning_dialog (s->toplevel_widget, b, False, 100);
+      warning_dialog (s->toplevel_widget, b, D_NONE, 100);
       free (b);
 
       load_init_file (dpy, p);
@@ -4024,6 +4062,13 @@ update_subproc_timer (gpointer data)
   return FALSE;  /* do not re-execute timer */
 }
 
+static int
+settings_timer (gpointer data)
+{
+  settings_cb (0, 0);
+  return FALSE;
+}
+
 
 /* Call this when you think you might want a preview process running.
    It will set a timer that will actually launch that program a second
@@ -4247,6 +4292,77 @@ mapper (XrmDatabase *db, XrmBindingList bindings, XrmQuarkList quarks,
 #endif
 
 
+static Window
+gnome_screensaver_window (Screen *screen)
+{
+  Display *dpy = DisplayOfScreen (screen);
+  Window root = RootWindowOfScreen (screen);
+  Window parent, *kids;
+  unsigned int nkids;
+  Window gnome_window = 0;
+  int i;
+
+  if (! XQueryTree (dpy, root, &root, &parent, &kids, &nkids))
+    abort ();
+  for (i = 0; i < nkids; i++)
+    {
+      Atom type;
+      int format;
+      unsigned long nitems, bytesafter;
+      unsigned char *name;
+      if (XGetWindowProperty (dpy, kids[i], XA_WM_COMMAND, 0, 128,
+                              False, XA_STRING, &type, &format, &nitems,
+                              &bytesafter, &name)
+          == Success
+          && type != None
+          && !strcmp ((char *) name, "gnome-screensaver"))
+	{
+	  gnome_window = kids[i];
+          break;
+	}
+    }
+
+  if (kids) XFree ((char *) kids);
+  return gnome_window;
+}
+
+static Bool
+gnome_screensaver_active_p (void)
+{
+  Display *dpy = GDK_DISPLAY();
+  Window w = gnome_screensaver_window (DefaultScreenOfDisplay (dpy));
+  return (w ? True : False);
+}
+
+static void
+kill_gnome_screensaver (void)
+{
+  Display *dpy = GDK_DISPLAY();
+  Window w = gnome_screensaver_window (DefaultScreenOfDisplay (dpy));
+  if (w) XKillClient (dpy, (XID) w);
+}
+
+static Bool
+kde_screensaver_active_p (void)
+{
+  FILE *p = popen ("dcop kdesktop KScreensaverIface isEnabled 2>/dev/null",
+                   "r");
+  char buf[255];
+  fgets (buf, sizeof(buf)-1, p);
+  pclose (p);
+  if (!strcmp (buf, "true\n"))
+    return True;
+  else
+    return False;
+}
+
+static void
+kill_kde_screensaver (void)
+{
+  system ("dcop kdesktop KScreensaverIface enable false");
+}
+
+
 static void
 the_network_is_not_the_computer (state *s)
 {
@@ -4360,12 +4476,36 @@ the_network_is_not_the_computer (state *s)
 
 
   if (*msg)
-    warning_dialog (s->toplevel_widget, msg, True, 1);
+    warning_dialog (s->toplevel_widget, msg, D_LAUNCH, 1);
 
   if (rversion) free (rversion);
   if (ruser) free (ruser);
   if (rhost) free (rhost);
   free (msg);
+  msg = 0;
+
+  /* Note: since these dialogs are not modal, they will stack up.
+     So we do this check *after* popping up the "xscreensaver is not
+     running" dialog so that these are on top.  Good enough.
+   */
+
+  if (gnome_screensaver_active_p ())
+    warning_dialog (s->toplevel_widget,
+                    _("Warning:\n\n"
+                      "The GNOME screensaver daemon appears to be running.\n"
+                      "It must be stopped for XScreenSaver to work properly.\n"
+                      "\n"
+                      "Stop the GNOME screen saver daemon now?\n"),
+                    D_GNOME, 1);
+
+  if (kde_screensaver_active_p ())
+    warning_dialog (s->toplevel_widget,
+                    _("Warning:\n\n"
+                      "The KDE screen saver daemon appears to be running.\n"
+                      "It must be stopped for XScreenSaver to work properly.\n"
+                      "\n"
+                      "Stop the KDE screen saver daemon now?\n"),
+                    D_KDE, 1);
 }
 
 
@@ -4421,6 +4561,7 @@ g_log_handler (const gchar *log_domain, GLogLevelFlags log_level,
                       the .ad file... */
 #endif
 
+STFU
 static char *defaults[] = {
 #include "XScreenSaver_ad.h"
  0
@@ -4434,7 +4575,7 @@ static struct poptOption crapplet_options[] = {
 #endif /* HAVE_CRAPPLET */
 #endif /* 0 */
 
-const char *usage = "[--display dpy] [--prefs]"
+const char *usage = "[--display dpy] [--prefs | --settings]"
 # ifdef HAVE_CRAPPLET
                     " [--crapplet]"
 # endif
@@ -4535,7 +4676,8 @@ main (int argc, char **argv)
   XtAppContext app;
   state S, *s;
   saver_preferences *p;
-  Bool prefs = False;
+  Bool prefs_p = False;
+  Bool settings_p = False;
   int i;
   Display *dpy;
   Widget toplevel_shell;
@@ -4801,7 +4943,9 @@ main (int argc, char **argv)
       if (str[0] == '-' && str[1] == '-')
 	str++;
       if (!strcmp (str, "-prefs"))
-	prefs = True;
+	prefs_p = True;
+      else if (!strcmp (str, "-settings"))
+	settings_p = True;
       else if (crapplet_p)
         /* There are lots of random args that we don't care about when we're
            started as a crapplet, so just ignore unknown args in that case. */
@@ -4907,6 +5051,8 @@ main (int argc, char **argv)
     gtk_widget_set_sensitive (std, False);
     std = GTK_WIDGET (name_to_widget (s, "adv_button"));
     gtk_widget_hide (std);
+    std = GTK_WIDGET (name_to_widget (s, "reset_button"));
+    gtk_widget_hide (std);
     page = 1;
 # endif /* !HAVE_XML */
 
@@ -4971,7 +5117,7 @@ main (int argc, char **argv)
 
 
   /* Handle the -prefs command-line argument. */
-  if (prefs)
+  if (prefs_p)
     {
       GtkNotebook *notebook =
         GTK_NOTEBOOK (name_to_widget (s, "notebook"));
@@ -5059,6 +5205,11 @@ main (int argc, char **argv)
 
 
   gtk_timeout_add (60 * 1000, check_blanked_timer, s);
+
+
+  /* Handle the --settings command-line argument. */
+  if (settings_p)
+    gtk_timeout_add (500, settings_timer, 0);
 
 
   /* Issue any warnings about the running xscreensaver daemon. */

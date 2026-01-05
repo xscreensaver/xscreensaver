@@ -1,4 +1,4 @@
-# utils/Makefile.in --- xscreensaver, Copyright (c) 1997-2005 Jamie Zawinski.
+# utils/Makefile.in --- xscreensaver, Copyright (c) 1997-2010 Jamie Zawinski.
 # the `../configure' script generates `utils/Makefile' from this file.
 
 
@@ -81,6 +81,7 @@
 srcdir		= @srcdir@
 VPATH		= @srcdir@
 prefix		= @prefix@
+datarootdir	= @datarootdir@
 
 CC		= @CC@
 CFLAGS		= @CFLAGS@
@@ -98,7 +99,8 @@ INSTALL_DIRS	= @INSTALL_DIRS@
 
 X_CFLAGS	= @X_CFLAGS@
 
-INCLUDES	= -I$(srcdir) -I.. @INCLUDES@
+INCLUDES_1	= -I$(srcdir) -I..
+INCLUDES	= $(INCLUDES_1) @INCLUDES@
 
 SRCS		= alpha.c colors.c fade.c grabscreen.c grabclient.c hsv.c \
 		  overlay.c resources.c spline.c usleep.c visual.c \
@@ -159,7 +161,7 @@ distdepend::
 	@echo updating dependencies in `pwd`/Makefile.in... ;		    \
 	$(DEPEND) -w 0 -f - 						    \
 	-s '# DO NOT DELETE: updated by make distdepend' $(DEPEND_FLAGS) -- \
-	$(INCLUDES) $(DEFS) $(DEPEND_DEFINES) $(CFLAGS) $(X_CFLAGS) --	    \
+	$(INCLUDES_1) $(DEFS) $(DEPEND_DEFINES) $(CFLAGS) $(X_CFLAGS) --    \
 	$(SRCS) 2>/dev/null |						    \
 	sort -d |							    \
 	(								    \

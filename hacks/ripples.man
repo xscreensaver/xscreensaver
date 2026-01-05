@@ -8,6 +8,7 @@ ripples - interference patterns.
 [\-window]
 [\-root]
 [\-delay \fInumber\fP]
+[\-duration \fIsecs\fP]
 [\-rate \fInumber\fP]
 [\-fluidity \fInumber\fP]
 [\-light \fInumber\fP]
@@ -17,6 +18,7 @@ ripples - interference patterns.
 [\-grayscale]
 [\-colors \fInumber\fP]
 [\-no-shm]
+[\-fps]
 .SH DESCRIPTION
 This draws rippling interference patterns like splashing water. With the
 -water option, it manipulates your desktop image to look like something is
@@ -35,6 +37,9 @@ Draw on the root window.
 .TP 8
 .B \-delay \fInumber\fP
 Per-frame delay, in microseconds.  Default: 50000 (0.05 seconds.).
+.TP 8
+.B \-duration \fIseconds\fP
+How long to run before loading a new image.  Default 120 seconds.
 .TP 8
 .B \-rate \fInumber\fP
 Drizzle.  1 - 100.  Default: 5.
@@ -64,6 +69,9 @@ Colors Two.  Default: 200.
 .TP 8
 .B \-shm | \-no-shm
 Use Shared Memory.  Boolean.
+.TP 8
+.B \-fps
+Display the current frame rate and CPU load.
 .SH ENVIRONMENT
 .PP
 .TP 8

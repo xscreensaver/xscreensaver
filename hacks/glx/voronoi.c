@@ -1,4 +1,4 @@
-/* voronoi, Copyright (c) 2007 Jamie Zawinski <jwz@jwz.org>
+/* voronoi, Copyright (c) 2007, 2008 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -26,12 +26,12 @@
 
 #ifdef USE_GL /* whole file */
 
-#define DEF_POINTS      "10"
+#define DEF_POINTS      "25"
 #define DEF_POINT_SIZE  "9"
-#define DEF_POINT_SPEED "1"
-#define DEF_POINT_DELAY "0.1"
-#define DEF_ZOOM_SPEED  "1"
-#define DEF_ZOOM_DELAY  "10"
+#define DEF_POINT_SPEED "1.0"
+#define DEF_POINT_DELAY "0.05"
+#define DEF_ZOOM_SPEED  "1.0"
+#define DEF_ZOOM_DELAY  "15"
 
 typedef struct node {
   GLfloat x, y;
@@ -142,31 +142,20 @@ cone (void)
   int i;
   int faces = 64;
   GLfloat step = M_PI * 2 / faces;
-  GLfloat s2 = step/2;
-  GLfloat th;
-  GLfloat x, y, x0, y0;
+  GLfloat th = 0;
+  GLfloat x = 1;
+  GLfloat y = 0;
 
-  glBegin(GL_TRIANGLES);
-
-  th = 0;
-  x = 1;
-  y = 0;
-  x0 = cos (s2);
-  y0 = sin (s2);
-
+  glBegin(GL_TRIANGLE_FAN);
+  glVertex3f (0, 0, 1);
   for (i = 0; i < faces; i++)
     {
-      glVertex3f(0,  0, 1);
-      glVertex3f(x, y, 0);
-
+      glVertex3f (x, y, 0);
       th += step;
-      x0 = cos (th + s2);
-      y0 = sin (th + s2);
-      x  = cos (th);
-      y  = sin (th);
-
-      glVertex3f(x, y, 0);
+      x = cos (th);
+      y = sin (th);
     }
+  glVertex3f (1, 0, 0);
   glEnd();
   return faces;
 }
@@ -275,6 +264,7 @@ draw_cells (ModeInfo *mi)
           glColor4fv (nn->color2);
           glVertex2f (nn->x, nn->y);
           glEnd();
+          mi->polygon_count++;
         }
     }
   else
@@ -304,6 +294,7 @@ draw_cells (ModeInfo *mi)
               glVertex2f ( 0.2, 0);
               glEnd ();
               glRotatef (360.0/5, 0, 0, 1);
+              mi->polygon_count++;
             }
           glPopMatrix();
         }
@@ -464,17 +455,11 @@ init_voronoi (ModeInfo *mi)
 
   if (point_size < 0) point_size = 10;
 
-  vp->ncolors = 64;
+  vp->ncolors = 128;
   vp->colors = (XColor *) calloc (vp->ncolors, sizeof(XColor));
-#if 0
-  make_random_colormap (0, 0, 0,
-                        vp->colors, &vp->ncolors,
-                        True, False, 0, False);
-#else
   make_smooth_colormap (0, 0, 0,
                         vp->colors, &vp->ncolors,
                         False, False, False);
-#endif
 
   reshape_voronoi (mi, MI_WIDTH(mi), MI_HEIGHT(mi));
 
@@ -496,10 +481,10 @@ draw_voronoi (ModeInfo *mi)
 
   glXMakeCurrent(MI_DISPLAY(mi), MI_WINDOW(mi), *(vp->glx_context));
 
-  glShadeModel(GL_SMOOTH);
+  glShadeModel(GL_FLAT);
   glEnable(GL_POINT_SMOOTH);
-  glEnable(GL_LINE_SMOOTH);
-  glEnable(GL_POLYGON_SMOOTH);
+/*  glEnable(GL_LINE_SMOOTH);*/
+/*  glEnable(GL_POLYGON_SMOOTH);*/
 
   glEnable (GL_DEPTH_TEST);
   glDepthFunc (GL_LEQUAL);

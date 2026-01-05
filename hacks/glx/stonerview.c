@@ -35,6 +35,8 @@
 #include "stonerview.h"
 #include "gltrackball.h"
 
+#define DEF_TRANSPARENT "True"
+
 typedef struct {
   GLXContext *glx_context;
   stonerview_state *st;
@@ -44,7 +46,19 @@ typedef struct {
 
 static stonerview_configuration *bps = NULL;
 
-ENTRYPOINT ModeSpecOpt stonerview_opts = {0, NULL, 0, NULL, NULL};
+static Bool transparent_p;
+
+
+static XrmOptionDescRec opts[] = {
+  { "-transparent",   ".transparent",   XrmoptionNoArg, "True" },
+  { "+transparent",   ".transparent",   XrmoptionNoArg, "False" },
+};
+
+static argtype vars[] = {
+  {&transparent_p, "transparent", "Transparent", DEF_TRANSPARENT, t_Bool},
+};
+
+ENTRYPOINT ModeSpecOpt stonerview_opts = {countof(opts), opts, countof(vars), vars, NULL};
 
 
 ENTRYPOINT void
@@ -83,7 +97,7 @@ init_stonerview (ModeInfo *mi)
   bp->glx_context = init_GL(mi);
 
   bp->trackball = gltrackball_init ();
-  bp->st = init_view(MI_IS_WIREFRAME(mi));
+  bp->st = init_view(MI_IS_WIREFRAME(mi), transparent_p);
   init_move(bp->st);
 
   reshape_stonerview (mi, MI_WIDTH(mi), MI_HEIGHT(mi));
@@ -149,7 +163,9 @@ stonerview_handle_event (ModeInfo *mi, XEvent *event)
     }
   else if (event->xany.type == ButtonPress &&
            (event->xbutton.button == Button4 ||
-            event->xbutton.button == Button5))
+            event->xbutton.button == Button5 ||
+            event->xbutton.button == Button6 ||
+            event->xbutton.button == Button7))
     {
       gltrackball_mousewheel (bp->trackball, event->xbutton.button, 10,
                               !!event->xbutton.state);

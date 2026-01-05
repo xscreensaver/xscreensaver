@@ -1,5 +1,5 @@
 /* lock.c --- handling the password dialog for locking-mode.
- * xscreensaver, Copyright (c) 1993-2007 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright (c) 1993-2008 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -29,10 +29,6 @@
 #include "auth.h"
 
 #ifndef NO_LOCKING              /* (mostly) whole file */
-
-#ifdef HAVE_SYSLOG
-# include <syslog.h>
-#endif /* HAVE_SYSLOG */
 
 #ifdef HAVE_XHPDISABLERESET
 # include <X11/XHPlib.h>
@@ -112,6 +108,7 @@ struct passwd_dialog_data {
   char *date_label;
   char *passwd_string;
   Bool passwd_changed_p; /* Whether the user entry field needs redrawing */
+  Bool caps_p;		 /* Whether we saw a keypress with caps-lock on */
   char *unlock_label;
   char *login_label;
   char *uname_label;
@@ -182,7 +179,7 @@ static void restore_background (saver_info *si);
 
 extern void xss_authenticate(saver_info *si, Bool verbose_p);
 
-static void
+static int
 new_passwd_window (saver_info *si)
 {
   passwd_dialog_data *pw;
@@ -193,7 +190,7 @@ new_passwd_window (saver_info *si)
 
   pw = (passwd_dialog_data *) calloc (1, sizeof(*pw));
   if (!pw)
-    return;
+    return -1;
 
   /* Display the button only if the "newLoginCommand" pref is non-null.
    */
@@ -203,9 +200,6 @@ new_passwd_window (saver_info *si)
   pw->passwd_cursor = XCreateFontCursor (si->dpy, XC_top_left_arrow);
 
   pw->prompt_screen = ssi;
-  if (si->prefs.verbose_p)
-    fprintf (stderr, "%s: %d: creating password dialog.\n",
-             blurb(), pw->prompt_screen->number);
 
   screen = pw->prompt_screen->screen;
   cmap = DefaultColormapOfScreen (screen);
@@ -412,13 +406,14 @@ new_passwd_window (saver_info *si)
   }
 
   si->pw_data = pw;
+  return 0;
 }
 
 
 /**
  * info_msg and prompt may be NULL.
  */
-static void
+static int
 make_passwd_window (saver_info *si,
 		    const char *info_msg,
 		    const char *prompt,
@@ -434,18 +429,23 @@ make_passwd_window (saver_info *si,
 
   cleanup_passwd_window (si);
 
+  if (! ssi)   /* WTF?  Trying to prompt while no screens connected? */
+    return -1;
+
   if (!si->pw_data)
-    new_passwd_window (si);
+    if (new_passwd_window (si) < 0)
+      return -1;
 
   if (!(pw = si->pw_data))
-    return;
+    return -1;
 
   pw->ratio = 1.0;
 
   pw->prompt_screen = ssi;
   if (si->prefs.verbose_p)
-    fprintf (stderr, "%s: %d: creating password dialog.\n",
-             blurb(), pw->prompt_screen->number);
+    fprintf (stderr, "%s: %d: creating password dialog (\"%s\")\n",
+             blurb(), pw->prompt_screen->number,
+             info_msg ? info_msg : "");
 
   screen = pw->prompt_screen->screen;
   cmap = DefaultColormapOfScreen (screen);
@@ -619,10 +619,11 @@ make_passwd_window (saver_info *si,
      actually be visible; this takes into account virtual viewports as
      well as Xinerama. */
   {
-    int x, y, w, h;
-    get_screen_viewport (pw->prompt_screen, &x, &y, &w, &h,
-                         pw->previous_mouse_x, pw->previous_mouse_y,
-                         si->prefs.verbose_p);
+    saver_screen_info *ssi = &si->screens [mouse_screen (si)];
+    int x = ssi->x;
+    int y = ssi->y;
+    int w = ssi->width;
+    int h = ssi->height;
     if (si->prefs.debug_p) w /= 2;
     pw->x = x + ((w + pw->width) / 2) - pw->width;
     pw->y = y + ((h + pw->height) / 2) - pw->height;
@@ -683,6 +684,8 @@ make_passwd_window (saver_info *si,
   if (cmap)
     XInstallColormap (si->dpy, cmap);
   draw_passwd_window (si);
+
+  return 0;
 }
 
 
@@ -1076,9 +1079,10 @@ update_passwd_window (saver_info *si, const char *printed_passwd, float ratio)
 	      pw->user_entry_pixmap = 0;
 	    }
 
-	  pw->user_entry_pixmap = XCreatePixmap(si->dpy, si->passwd_dialog,
-	      rects[0].width, rects[0].height, pw->prompt_screen->current_depth);
-
+	  pw->user_entry_pixmap = 
+            XCreatePixmap (si->dpy, si->passwd_dialog,
+                           rects[0].width, rects[0].height, 
+                           DefaultDepthOfScreen (pw->prompt_screen->screen));
 
 	  XFillRectangle (si->dpy, pw->user_entry_pixmap, gc2,
 			  0, 0, rects[0].width, rects[0].height);
@@ -1288,6 +1292,10 @@ destroy_passwd_window (saver_info *si)
 
   if (si->passwd_dialog)
     {
+      if (si->prefs.verbose_p)
+        fprintf (stderr, "%s: %d: destroying password dialog.\n",
+                 blurb(), pw->prompt_screen->number);
+
       XDestroyWindow (si->dpy, si->passwd_dialog);
       si->passwd_dialog = 0;
     }
@@ -1418,8 +1426,12 @@ xfree_lock_grab_smasher (saver_info *si, Bool lock_p)
 {
   saver_preferences *p = &si->prefs;
   int status;
-
+  int event, error;
   XErrorHandler old_handler;
+
+  if (!XF86MiscQueryExtension(si->dpy, &event, &error))
+    return;
+
   XSync (si->dpy, False);
   error_handler_hit_p = False;
   old_handler = XSetErrorHandler (ignore_all_errors_ehandler);
@@ -1463,6 +1475,7 @@ xfree_lock_mode_switch (saver_info *si, Bool lock_p)
   static Bool any_mode_locked_p = False;
   saver_preferences *p = &si->prefs;
   int screen;
+  int real_nscreens = ScreenCount (si->dpy);
   int event, error;
   Bool status;
   XErrorHandler old_handler;
@@ -1472,7 +1485,7 @@ xfree_lock_mode_switch (saver_info *si, Bool lock_p)
   if (!XF86VidModeQueryExtension (si->dpy, &event, &error))
     return;
 
-  for (screen = 0; screen < (si->xinerama_p ? 1 : si->nscreens); screen++)
+  for (screen = 0; screen < real_nscreens; screen++)
     {
       XSync (si->dpy, False);
       old_handler = XSetErrorHandler (ignore_all_errors_ehandler);
@@ -1509,12 +1522,13 @@ undo_vp_motion (saver_info *si)
 #ifdef HAVE_XF86VMODE
   saver_preferences *p = &si->prefs;
   int screen;
+  int real_nscreens = ScreenCount (si->dpy);
   int event, error;
 
   if (!XF86VidModeQueryExtension (si->dpy, &event, &error))
     return;
 
-  for (screen = 0; screen < si->nscreens; screen++)
+  for (screen = 0; screen < real_nscreens; screen++)
     {
       saver_screen_info *ssi = &si->screens[screen];
       int x, y;
@@ -1762,7 +1776,6 @@ passwd_event_loop (saver_info *si)
   saver_preferences *p = &si->prefs;
   char *msg = 0;
   XEvent event;
-  unsigned int caps_p = 0;
 
   passwd_animate_timer ((XtPointer) si, 0);
 
@@ -1774,7 +1787,7 @@ passwd_event_loop (saver_info *si)
       else if (event.xany.type == KeyPress)
         {
           handle_passwd_key (si, &event.xkey);
-          caps_p = (event.xkey.state & LockMask);
+          si->pw_data->caps_p = (event.xkey.state & LockMask);
         }
       else if (event.xany.type == ButtonPress || 
                event.xany.type == ButtonRelease)
@@ -1796,73 +1809,15 @@ passwd_event_loop (saver_info *si)
     default: msg = 0; break;
     }
 
-  if (si->unlock_state == ul_fail)
-    si->unlock_failures++;
-
   if (p->verbose_p)
-    switch (si->unlock_state)
-      {
-      case ul_fail:
-	fprintf (stderr, "%s: auth/input incorrect!%s\n", blurb(),
-                 (caps_p ? "  (CapsLock)" : ""));
-        break;
-      case ul_cancel:
-	fprintf (stderr, "%s: input cancelled.\n", blurb()); break;
-      case ul_time:
-	fprintf (stderr, "%s: input timed out.\n", blurb()); break;
-      case ul_finished:
-	fprintf (stderr, "%s: input finished.\n", blurb()); break;
-      default: break;
-      }
-
-#ifdef HAVE_SYSLOG
-  if (si->unlock_state == ul_fail)
-    {
-      /* If they typed a password (as opposed to just hitting return) and
-	 the password was invalid, log it.
-      */
-      struct passwd *pw = getpwuid (getuid ());
-      char *d = DisplayString (si->dpy);
-      char *u = (pw && pw->pw_name ? pw->pw_name : "???");
-      int opt = 0;
-      int fac = 0;
-
-# ifdef LOG_PID
-      opt = LOG_PID;
-# endif
-
-# if defined(LOG_AUTHPRIV)
-      fac = LOG_AUTHPRIV;
-# elif defined(LOG_AUTH)
-      fac = LOG_AUTH;
-# else
-      fac = LOG_DAEMON;
-# endif
-
-      if (!d) d = "";
-      openlog (progname, opt, fac);
-      syslog (LOG_NOTICE, "FAILED LOGIN %d ON DISPLAY \"%s\", FOR \"%s\"",
-	      si->unlock_failures, d, u);
-      closelog ();
-    }
-#endif /* HAVE_SYSLOG */
-
-  if (si->unlock_state == ul_fail)
-    XBell (si->dpy, False);
-
-  if (si->unlock_state == ul_success && si->unlock_failures != 0)
-    {
-      if (si->unlock_failures == 1)
-	fprintf (real_stderr,
-		 "%s: WARNING: 1 failed attempt to unlock the screen.\n",
-		 blurb());
-      else
-	fprintf (real_stderr,
-		 "%s: WARNING: %d failed attempts to unlock the screen.\n",
-		 blurb(), si->unlock_failures);
-      fflush (real_stderr);
-
-      si->unlock_failures = 0;
+    switch (si->unlock_state) {
+    case ul_cancel:
+      fprintf (stderr, "%s: input cancelled.\n", blurb()); break;
+    case ul_time:
+      fprintf (stderr, "%s: input timed out.\n", blurb()); break;
+    case ul_finished:
+      fprintf (stderr, "%s: input finished.\n", blurb()); break;
+    default: break;
     }
 
   if (msg)
@@ -1957,6 +1912,12 @@ gui_auth_conv(int num_msg,
   const char *info_msg, *prompt;
   struct auth_response *responses;
 
+  if (si->unlock_state == ul_cancel ||
+      si->unlock_state == ul_time)
+    /* If we've already cancelled or timed out in this PAM conversation,
+       don't prompt again even if PAM asks us to! */
+    return -1;
+
   if (!(responses = calloc(num_msg, sizeof(struct auth_response))))
     goto fail;
 
@@ -1991,9 +1952,11 @@ gui_auth_conv(int num_msg,
 	info_msg_trimmed = remove_trailing_whitespace(info_msg);
 	prompt_trimmed = remove_trailing_whitespace(prompt);
 
-	make_passwd_window(si, info_msg_trimmed, prompt_trimmed,
-			   auth_msgs[i].type == AUTH_MSGTYPE_PROMPT_ECHO
-			   ? True : False);
+	if (make_passwd_window(si, info_msg_trimmed, prompt_trimmed,
+                               auth_msgs[i].type == AUTH_MSGTYPE_PROMPT_ECHO
+                               ? True : False)
+            < 0)
+          goto fail;
 
 	if (info_msg_trimmed)
 	  free(info_msg_trimmed);
@@ -2049,22 +2012,58 @@ fail:
 void
 auth_finished_cb (saver_info *si)
 {
-  if (si->unlock_state == ul_fail)
+  char buf[1024];
+  const char *s;
+
+  /* If we have something to say, put the dialog back up for a few seconds
+     to display it.  Otherwise, don't bother.
+   */
+
+  if (si->unlock_state == ul_fail &&		/* failed with caps lock on */
+      si->pw_data && si->pw_data->caps_p)
+    s = "Authentication failed (Caps Lock?)";
+  else if (si->unlock_state == ul_fail)		/* failed without caps lock */
+    s = "Authentication failed!";
+  else if (si->unlock_state == ul_success &&	/* good, but report failures */
+           si->unlock_failures > 0)
     {
-      make_passwd_window (si, "Authentication failed!", NULL, True);
-      sleep (2); /* Not very nice, I know */
-
-      /* Swallow any keyboard or mouse events that were received while the
-       * dialog was up */
-      {
-	XEvent e;
-	long mask = (KeyPressMask | KeyReleaseMask |
-		     ButtonPressMask | ButtonReleaseMask);
-	while (XCheckMaskEvent (si->dpy, mask, &e))
-	  ;
-      }
+      if (si->unlock_failures == 1)
+        s = "There has been\n1 failed login attempt.";
+      else
+        {
+          sprintf (buf, "There have been\n%d failed login attempts.",
+                   si->unlock_failures);
+          s = buf;
+        }
+      si->unlock_failures = 0;
     }
+  else						/* good, with no failures, */
+    goto END;					/* or timeout, or cancel. */
 
+  make_passwd_window (si, s, NULL, True);
+  XSync (si->dpy, False);
+
+  {
+    int secs = 4;
+    time_t start = time ((time_t *) 0);
+    XEvent event;
+    while (time ((time_t *) 0) < start + secs)
+      if (XPending (si->dpy))
+        {
+          XNextEvent (si->dpy, &event);
+          if (event.xany.window == si->passwd_dialog && 
+              event.xany.type == Expose)
+            draw_passwd_window (si);
+          else if (event.xany.type == ButtonPress || 
+                   event.xany.type == KeyPress)
+            break;
+          XSync (si->dpy, False);
+        }
+      else
+        usleep (250000);  /* 1/4 second */
+  }
+
+ END:
   if (si->pw_data)
     destroy_passwd_window (si);
 }
@@ -2082,9 +2081,6 @@ unlock_p (saver_info *si)
     }
 
   raise_window (si, True, True, True);
-
-  if (p->verbose_p)
-    fprintf (stderr, "%s: prompting for password.\n", blurb());
 
   xss_authenticate(si, p->verbose_p);
 

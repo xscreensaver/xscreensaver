@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Copyright © 2006 Jamie Zawinski <jwz@jwz.org>
+# Copyright © 2006-2009 Jamie Zawinski <jwz@jwz.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -19,11 +19,11 @@
 # Created:  8-Mar-2006.
 
 require 5;
-use diagnostics;
+#use diagnostics;	# Fails on some MacOS 10.5 systems
 use strict;
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my $version = q{ $Revision: 1.6 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
+my $version = q{ $Revision: 1.13 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
 
 my $verbose = 1;
 
@@ -72,17 +72,19 @@ sub update_saver_xml($$) {
   $desc =~ s/\s*$//s;
 
   # in case it's done already...
+  $desc =~ s@<!--.*?-->@@gs;
   $desc =~ s/^.* version \d[^\n]*\n//s;
   $desc =~ s/^From the XScreenSaver.*\n//m;
   $desc =~ s@^http://www\.jwz\.org/xscreensaver.*\n@@m;
-  $desc =~ s/^Copyright [^ \r\n\t]+ (\d{4})(-\d{4})? (.*)\.$/Written $3; $1./m;
+  $desc =~
+       s/\nCopyright [^ \r\n\t]+ (\d{4})(-\d{4})? (.*)\.$/\nWritten $3; $1./s;
   $desc =~ s/^\n+//s;
 
   error ("$filename: description contains bad characters")
     if ($desc =~ m/([^\t\n -~]|[<>])/);
 
   error ("$filename: can't extract authors")
-    unless ($desc =~ m@^(.*)\nWritten by[ \t]+([^\n]+)$@s);
+    unless ($desc =~ m@^(.*)\nWritten by[ \t]+(.+)$@s);
   $desc = $1;
   my $authors = $2;
   $desc =~ s/\s*$//s;
@@ -93,6 +95,7 @@ sub update_saver_xml($$) {
     $year = $2;
   }
 
+  error ("$filename: can't extract year") unless $year;
   my $cyear = 1900 + ((localtime())[5]);
   $year = "$cyear" unless $year;
   if ($year && ! ($year =~ m/$cyear/)) {
@@ -106,24 +109,22 @@ sub update_saver_xml($$) {
   #
   my $curator = "Jamie Zawinski";
   if (! ($authors =~ m/$curator/si)) {
-    if ($authors =~ m@^(.*),? and (.*)$@s) {
+    if ($authors =~ m@^(.*?),? and (.*)$@s) {
       $authors = "$1, $2, and $curator";
     } else {
       $authors .= " and $curator";
     }
   }
 
-  my $cc = "\302\251";  # unicode "&copy;"
-
-  my $desc1 = ("$name, version $vers.\n\n" .
+  my $desc1 = ("$name, version $vers.\n\n" .		# savername.xml
                $desc . "\n" .
                "\n" . 
-               "From the XScreenSaver collection:\n" .
+               "From the XScreenSaver collection: " .
                "http://www.jwz.org/xscreensaver/\n" .
                "Copyright \251 $year by $authors.\n");
 
-  my $desc2 = ("$name $vers,\n" .
-               "$cc $year $authors.\n" .
+  my $desc2 = ("$name $vers,\n" .			# Info.plist
+               "\302\251 $year $authors.\n" .
                "From the XScreenSaver collection:\n" .
                "http://www.jwz.org/xscreensaver/\n" .
                "\n" .
@@ -216,6 +217,11 @@ sub update($) {
   my $copyright = "$1";
   $copyright =~ s/\b\d{4}-(\d{4})\b/$1/;
 
+  # Lose the Wikipedia URLs.
+  $info_str =~ s@http:.*?\b(wikipedia|mathworld)\b[^\s]+[ \t]*\n?@@gm;
+
+  $info_str =~ s/(\n\n)\n+/$1/gs;
+  $info_str =~ s/(^\s+|\s+$)//gs;
   $plist = set_plist_key ($filename, $plist, 
                           "NSHumanReadableCopyright", $copyright);
   $plist = set_plist_key ($filename, $plist,

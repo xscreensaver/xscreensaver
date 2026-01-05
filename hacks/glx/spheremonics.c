@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2002-2006 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 2002-2008 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -63,7 +63,7 @@
 #define DEFAULTS "*delay:	30000	    \n" \
 		 "*showFPS:	False	    \n" \
 		 "*wireframe:	False	    \n" \
-		 "*labelfont:   -*-times-bold-r-normal-*-180-*\n"
+		 "*labelfont:   -*-helvetica-medium-r-normal-*-180-*\n"
 
 # define refresh_spheremonics 0
 # define release_spheremonics 0
@@ -787,7 +787,9 @@ spheremonics_handle_event (ModeInfo *mi, XEvent *event)
     }
   else if (event->xany.type == ButtonPress &&
            (event->xbutton.button == Button4 ||
-            event->xbutton.button == Button5))
+            event->xbutton.button == Button5 ||
+            event->xbutton.button == Button6 ||
+            event->xbutton.button == Button7))
     {
       gltrackball_mousewheel (cc->trackball, event->xbutton.button, 10,
                               !!event->xbutton.state);
@@ -886,7 +888,7 @@ draw_spheremonics (ModeInfo *mi)
       print_gl_string (mi->dpy, cc->font, cc->font_list,
                        mi->xgwa.width, mi->xgwa.height,
                        10, mi->xgwa.height - 10,
-                       buf);
+                       buf, False);
     }
 
   if (!static_parms)

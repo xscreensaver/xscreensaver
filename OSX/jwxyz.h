@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1991-2007 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1991-2010 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -357,8 +357,10 @@ extern Pixmap XCreatePixmapFromBitmapData (Display *, Drawable,
                                            unsigned int depth);
 extern XPixmapFormatValues *XListPixmapFormats (Display *, int *count_ret);
 
-extern void jwxyz_draw_NSImage (Display *, Drawable, void *NSImage_arg,
-                                XRectangle *geom_ret);
+extern void jwxyz_draw_NSImage_or_CGImage (Display *, Drawable, 
+                                           Bool nsimg_p, void *NSImage_arg,
+                                           XRectangle *geom_ret, 
+                                           int exif_rotation);
 
 extern int XSetGraphicsExposures (Display *, GC, Bool);
 extern Bool XTranslateCoordinates (Display *, Window src_w, Window dest_w,
@@ -377,7 +379,6 @@ extern int XTextExtents (XFontStruct *, const char *, int length,
                          XCharStruct *overall_ret);
 extern int XTextWidth (XFontStruct *, const char *, int length);
 extern int XSetFont (Display *, GC, Font);
-extern Font XGContextFromGC (GC);
 
 extern Pixmap XCreatePixmap (Display *, Drawable,
                              unsigned int width, unsigned int height,
@@ -409,10 +410,6 @@ extern int visual_class (Screen *, Visual *);
 
 // also declared in utils/grabclient.h
 extern Bool use_subwindow_mode_p (Screen *, Window);
-
-// for aglUseFont
-extern int jwxyz_font_info (Font, int *size_ret, int *face_ret);
-
 
 struct jwxyz_Visual {
   VisualID visualid;	/* visual id of this visual */

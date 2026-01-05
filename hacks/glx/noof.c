@@ -16,6 +16,7 @@
 #define DEFAULTS	"*delay:	10000       \n" \
 			"*showFPS:      False       \n" \
 			"*fpsSolid:     True        \n" \
+			"*doubleBuffer: False       \n" \
 
 # define refresh_noof 0
 # define release_noof 0
@@ -25,6 +26,10 @@
 #ifdef USE_GL /* whole file */
 
 #define N_SHAPES 7
+
+/* For some reason this hack screws up on Cocoa if we try to double-buffer it.
+   It looks fine single-buffered, so let's just do that. */
+static int dbuf_p = 0;
 
 ENTRYPOINT ModeSpecOpt noof_opts = {0, NULL, 0, NULL, NULL};
 
@@ -117,10 +122,10 @@ static const float bladeratio[] =
   0.22824, 0.21256, 0.19891, 0.18693, 0.17633, 0.16687,
 };
 
-static void
+static int
 drawleaf(noof_configuration *bp, int l)
 {
-
+  int polys = 0;
   int b, blades;
   float x, y;
   float wobble;
@@ -137,7 +142,7 @@ drawleaf(noof_configuration *bp, int l)
     initshapes(bp, l);      /* let it become reborn as something
                            else */
     bp->tko++;
-    return;
+    return polys;
   } {
     float w1 = sin(bp->geep[l] * 15.3 * M_PI / 180.0);
     wobble = 3.0 + 2.00 * sin(bp->geep[l] * 0.4 * M_PI / 180.0) + 3.94261 * w1;
@@ -174,6 +179,7 @@ drawleaf(noof_configuration *bp, int l)
     glVertex2f(x, y);
     glVertex2f(x, -y);  /* C */
     glVertex2f(0.3, 0.0);  /* D */
+    polys += 2;
     glEnd();
 
     /**
@@ -186,11 +192,13 @@ drawleaf(noof_configuration *bp, int l)
     glVertex2f(x, y);
     glVertex2f(0.3, 0.0);  /* D */
     glVertex2f(x, -y);  /* C */
+    polys += 3;
     glEnd();
     glDisable(GL_BLEND);
 
     glPopMatrix();
   }
+  return polys;
 }
 
 static void
@@ -372,6 +380,7 @@ draw_noof (ModeInfo *mi)
   if (!bp->glx_context)
     return;
   glXMakeCurrent(MI_DISPLAY(mi), MI_WINDOW(mi), *(bp->glx_context));
+  mi->polygon_count = 0;
 
   /**
   if((random() & 0xff) == 0x34){
@@ -393,13 +402,14 @@ draw_noof (ModeInfo *mi)
   for (i = 0; i < N_SHAPES; i++) {
     motionUpdate(bp, i);
     colorUpdate(bp, i);
-    drawleaf(bp, i);
+      mi->polygon_count += drawleaf(bp, i);
   }
 
   if (mi->fps_p) do_fps (mi);
   glFinish();
 
-  glXSwapBuffers(MI_DISPLAY(mi), MI_WINDOW(mi));
+  if (dbuf_p)
+    glXSwapBuffers(MI_DISPLAY(mi), MI_WINDOW(mi));
 }
 
 
@@ -442,13 +452,13 @@ init_noof (ModeInfo *mi)
       fprintf(stderr, "%s: out of memory\n", progname);
       exit(1);
     }
-    bp = &bps[MI_SCREEN(mi)];
   }
 
   bp = &bps[MI_SCREEN(mi)];
 
   bp->glx_context = init_GL(mi);
 
+  glDrawBuffer(dbuf_p ? GL_BACK : GL_FRONT);
   glClearColor(0.0, 0.0, 0.0, 1.0);
   glEnable(GL_LINE_SMOOTH);
   glShadeModel(GL_FLAT);

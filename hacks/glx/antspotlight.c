@@ -78,7 +78,7 @@ static antspotlightstruct *antspotlight = (antspotlightstruct *) NULL;
 #define NUM_SCENES      2
 
 /* draw method for ant */
-static Bool draw_ant(antspotlightstruct *mp,
+static Bool draw_ant(ModeInfo *mi, antspotlightstruct *mp,
                      const GLfloat *Material, int mono, int shadow, 
 	      float ant_step, Bool (*sphere)(float), Bool (*cone)(float))
 {
@@ -90,7 +90,9 @@ static Bool draw_ant(antspotlightstruct *mp,
   float sin2 = sin(ant_step + 2 * Pi / 3);
   float sin3 = sin(ant_step + 4 * Pi / 3);
   
-  glEnable(GL_POLYGON_SMOOTH);
+/* Apparently this is a performance killer on many systems...
+   glEnable(GL_POLYGON_SMOOTH);
+ */
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -136,17 +138,21 @@ static Bool draw_ant(antspotlightstruct *mp,
   glVertex3f(0.00, 0.30, 0.00);
   glColor3fv(MaterialGray);
   glVertex3f(0.40, 0.70, 0.40);
+  mi->polygon_count++;
   glColor3fv(mp->mono ? MaterialGray5 : Material);
   glVertex3f(0.00, 0.30, 0.00);
   glColor3fv(MaterialGray);
   glVertex3f(0.40, 0.70, -0.40);
+  mi->polygon_count++;
   glEnd();
 
   if(!shadow) {
     glBegin(GL_POINTS);
     glColor3fv(mp->mono ? MaterialGray6 : MaterialGray5);
     glVertex3f(0.40, 0.70, 0.40);
+    mi->polygon_count++;
     glVertex3f(0.40, 0.70, -0.40);
+    mi->polygon_count++;
     glEnd();
   }
 
@@ -155,8 +161,10 @@ static Bool draw_ant(antspotlightstruct *mp,
   glColor3fv(mp->mono ? MaterialGray5 : Material);
   glVertex3f(0.00, 0.05, 0.18);
   glVertex3f(0.35 + 0.05 * cos1, 0.15, 0.25);
+  mi->polygon_count++;
   glColor3fv(MaterialGray);
   glVertex3f(-0.20 + 0.05 * cos1, 0.25 + 0.1 * sin1, 0.45);
+  mi->polygon_count++;
   glEnd();
 
   /* LEFT-CENTER ARM */
@@ -164,8 +172,10 @@ static Bool draw_ant(antspotlightstruct *mp,
   glColor3fv(mp->mono ? MaterialGray5 : Material);
   glVertex3f(0.00, 0.00, 0.18);
   glVertex3f(0.35 + 0.05 * cos2, 0.00, 0.25);
+  mi->polygon_count++;
   glColor3fv(MaterialGray);
   glVertex3f(-0.20 + 0.05 * cos2, 0.00 + 0.1 * sin2, 0.45);
+  mi->polygon_count++;
   glEnd();
 
   /* LEFT-BACK ARM */
@@ -173,8 +183,10 @@ static Bool draw_ant(antspotlightstruct *mp,
   glColor3fv(mp->mono ? MaterialGray5 : Material);
   glVertex3f(0.00, -0.05, 0.18);
   glVertex3f(0.35 + 0.05 * cos3, -0.15, 0.25);
+  mi->polygon_count++;
   glColor3fv(MaterialGray);
   glVertex3f(-0.20 + 0.05 * cos3, -0.25 + 0.1 * sin3, 0.45);
+  mi->polygon_count++;
   glEnd();
 
   /* RIGHT-FRONT ARM */
@@ -182,8 +194,10 @@ static Bool draw_ant(antspotlightstruct *mp,
   glColor3fv(mp->mono ? MaterialGray5 : Material);
   glVertex3f(0.00, 0.05, -0.18);
   glVertex3f(0.35 - 0.05 * sin1, 0.15, -0.25);
+  mi->polygon_count++;
   glColor3fv(MaterialGray);
   glVertex3f(-0.20 - 0.05 * sin1, 0.25 + 0.1 * cos1, -0.45);
+  mi->polygon_count++;
   glEnd();
 
   /* RIGHT-CENTER ARM */
@@ -191,8 +205,10 @@ static Bool draw_ant(antspotlightstruct *mp,
   glColor3fv(mp->mono ? MaterialGray5 : Material);
   glVertex3f(0.00, 0.00, -0.18);
   glVertex3f(0.35 - 0.05 * sin2, 0.00, -0.25);
+  mi->polygon_count++;
   glColor3fv(MaterialGray);
   glVertex3f(-0.20 - 0.05 * sin2, 0.00 + 0.1 * cos2, -0.45);
+  mi->polygon_count++;
   glEnd();
 
   /* RIGHT-BACK ARM */
@@ -200,8 +216,10 @@ static Bool draw_ant(antspotlightstruct *mp,
   glColor3fv(mp->mono ? MaterialGray5 : Material);
   glVertex3f(0.00, -0.05, -0.18);
   glVertex3f(0.35 - 0.05 * sin3, -0.15, -0.25);
+  mi->polygon_count++;
   glColor3fv(MaterialGray);
   glVertex3f(-0.20 - 0.05 * sin3, -0.25 + 0.1 * cos3, -0.45);
+  mi->polygon_count++;
   glEnd();
 
   if(!shadow) {
@@ -213,6 +231,7 @@ static Bool draw_ant(antspotlightstruct *mp,
     glVertex3f(-0.20 - 0.05 * sin1, 0.25 + 0.1 * cos1, -0.45);
     glVertex3f(-0.20 - 0.05 * sin2, 0.00 + 0.1 * cos2, -0.45);
     glVertex3f(-0.20 - 0.05 * sin3, -0.25 + 0.1 * cos3, -0.45);
+    mi->polygon_count += 6;
     glEnd();
   }
 
@@ -253,7 +272,7 @@ static Bool mySphere2(float radius)
 /* no cone */
 static Bool myCone2(float radius) { return True; }
 
-static void draw_board(antspotlightstruct *mp)
+static void draw_board(ModeInfo *mi, antspotlightstruct *mp)
 {
   int i, j;
   double cutoff = Pi/3.0;
@@ -322,6 +341,7 @@ static void draw_board(antspotlightstruct *mp)
 
       glTexCoord2f(tex[0], tex[1]);
       glVertex3f(point[0], point[1], point[2]);
+      mi->polygon_count++;
     }
 
     glEnd();
@@ -389,7 +409,7 @@ static void reset_ant(antspotlightstruct *mp)
 }
 
 /* draw ant composed of skeleton and glass */
-static void show_ant(antspotlightstruct *mp)
+static void show_ant(ModeInfo *mi, antspotlightstruct *mp)
 {
 
   glPushMatrix();
@@ -400,14 +420,14 @@ static void show_ant(antspotlightstruct *mp)
   glRotatef(90.0, 0.0, 0.0, 1.0);
 
   /* draw skeleton */
-  draw_ant(mp, mp->ant->material, mp->mono, 0, mp->ant->step, mySphere2, myCone2);
+  draw_ant(mi, mp, mp->ant->material, mp->mono, 0, mp->ant->step, mySphere2, myCone2);
 
   /* draw glass */
   if(!mp->wire && !mp->mono) {
     glEnable(GL_BLEND);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, MaterialGrayB);
     glColor4fv(MaterialGrayB);
-    draw_ant(mp, MaterialGrayB, mp->mono, 0, mp->ant->step, mySphere, myCone2);
+    draw_ant(mi, mp, MaterialGrayB, mp->mono, 0, mp->ant->step, mySphere, myCone2);
     glDisable(GL_BLEND);
   }
 
@@ -441,14 +461,14 @@ static void draw_antspotlight_strip(ModeInfo *mi)
   if(mp->wire)
     ;
   else
-    draw_board(mp);
+    draw_board(mi, mp);
 
   glDisable(GL_LIGHT2);
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHT1);
   
   /* now modify ant */
-  show_ant(mp);
+  show_ant(mi, mp);
 
   /* near goal, bend path towards next step */
   if(distance(mp->ant->position, mp->ant->goal) < 0.2) {
@@ -722,6 +742,8 @@ ENTRYPOINT void draw_antspotlight(ModeInfo * mi)
   if(!mp->glx_context)
 	return;
   
+  mi->polygon_count = 0;
+
   /* Just keep running before the texture has come in. */
   /* if (mp->waiting_for_image_p) return; */
 

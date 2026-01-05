@@ -43,7 +43,9 @@ static const char sccsid[] = "@(#)galaxy.c 4.04 97/07/28 xlockmore";
 # define DEFAULTS	"*delay:  20000  \n"   \
 					"*count:  -5     \n"   \
 					"*cycles:  250   \n"   \
-					"*ncolors:  64   \n"
+					"*ncolors:  64   \n" \
+					"*fpsSolid:  true   \n" \
+
 # define UNIFORM_COLORS
 # define reshape_galaxy 0
 # define galaxy_handle_event 0
@@ -368,9 +370,9 @@ draw_galaxy(ModeInfo * mi)
 
         d = d0 * d0 + d1 * d1 + d2 * d2;
         if (d > EPSILON)
-          d = gt->mass / (d * sqrt(d)) * DELTAT * DELTAT * QCONS;
+          d = gtk->mass / (d * sqrt(d)) * DELTAT * DELTAT * QCONS;
         else
-          d = gt->mass * eps;
+          d = gtk->mass / (eps * sqrt(eps));
         v0 += d0 * d;
         v1 += d1 * d;
         v2 += d2 * d;
@@ -400,19 +402,19 @@ draw_galaxy(ModeInfo * mi)
 
       d = d0 * d0 + d1 * d1 + d2 * d2;
       if (d > EPSILON)
-        d = gt->mass * gt->mass / (d * sqrt(d)) * DELTAT * QCONS;
+        d = 1 / (d * sqrt(d)) * DELTAT * QCONS;
       else
-        d = gt->mass * gt->mass / (EPSILON * sqrt_EPSILON) * DELTAT * QCONS;
+        d = 1 / (EPSILON * sqrt_EPSILON) * DELTAT * QCONS;
 
       d0 *= d;
       d1 *= d;
       d2 *= d;
-      gt->vel[0] += d0 / gt->mass;
-      gt->vel[1] += d1 / gt->mass;
-      gt->vel[2] += d2 / gt->mass;
-      gtk->vel[0] -= d0 / gtk->mass;
-      gtk->vel[1] -= d1 / gtk->mass;
-      gtk->vel[2] -= d2 / gtk->mass;
+      gt->vel[0] += d0 * gtk->mass;
+      gt->vel[1] += d1 * gtk->mass;
+      gt->vel[2] += d2 * gtk->mass;
+      gtk->vel[0] -= d0 * gt->mass;
+      gtk->vel[1] -= d1 * gt->mass;
+      gtk->vel[2] -= d2 * gt->mass;
     }
 
     gt->pos[0] += gt->vel[0] * DELTAT;

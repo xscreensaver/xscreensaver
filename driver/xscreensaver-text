@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Copyright © 2005, 2006 Jamie Zawinski <jwz@jwz.org>
+# Copyright © 2005-2010 Jamie Zawinski <jwz@jwz.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -21,15 +21,16 @@
 # Created: 19-Mar-2005.
 
 require 5;
-use diagnostics;
+#use diagnostics;	# Fails on some MacOS 10.5 systems
 use strict;
+
 use Socket;
 use POSIX qw(strftime);
 use Text::Wrap qw(wrap);
 use bytes;
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my $version = q{ $Revision: 1.14 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
+my $version = q{ $Revision: 1.21 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
 
 my $verbose = 0;
 my $http_proxy = undef;
@@ -73,7 +74,20 @@ my %entity_table = (
    "ocirc"  => 'ô', "otilde" => 'õ', "ouml"   => 'ö', "divide" => '÷',
    "oslash" => 'ø', "ugrave" => 'ù', "uacute" => 'ú', "ucirc"  => 'û',
    "uuml"   => 'ü', "yacute" => 'ý', "thorn"  => 'þ', "yuml"   => 'ÿ',
-   "apos"   => '\''
+   "apos"   => '\'',
+
+   # HTML 4 entities that do not have 1:1 Latin1 mappings.
+   "bull"  => "*",   "hellip"=> "...",  "prime" => "'",  "Prime" => "\"",
+   "frasl" => "/",   "trade" => "[tm]", "larr"  => "<-", "rarr"  => "->",
+   "harr"  => "<->", "lArr"  => "<=",   "rArr"  => "=>", "hArr"  => "<=>",
+   "empty" => "Ø",   "minus" => "-",    "lowast"=> "*",  "sim"   => "~",
+   "cong"  => "=~",  "asymp" => "~",    "ne"    => "!=", "equiv" => "==",
+   "le"    => "<=",  "ge"    => ">=",   "lang"  => "<",  "rang"  => ">",
+   "loz"   => "<>",  "OElig" => "OE",   "oelig" => "oe", "Yuml"  => "Y",
+   "circ"  => "^",   "tilde" => "~",    "ensp"  => " ",  "emsp"  => " ",
+   "thinsp"=> " ",   "ndash" => "-",    "mdash" => "-",  "lsquo" => "`",
+   "rsquo" => "'",   "sbquo" => "'",    "ldquo" => "\"", "rdquo" => "\"",
+   "bdquo" => "\"",  "lsaquo"=> "<",    "rsaquo"=> ">",
 );
 
 # Maps certain UTF8 characters (2 or 3 bytes) to the corresponding
@@ -118,15 +132,19 @@ sub de_entify($) {
   my ($text) = @_;
   $text =~ s/(&(\#)?([[:alpha:]\d]+);?)/
     {
-     my $c;
-     if ($2) {
-       $c = chr($3);  # the &#number is always decimal, right?
+     my $c = $3;
+     if (! defined($2)) {
+       $c = $entity_table{$c};		# for &Aacute;
      } else {
-       $c = $entity_table{$3};
+       if ($c =~ m@^x([\dA-F]+)$@si) {	# for &#x41;
+         $c = chr(hex($1));
+       } elsif ($c =~ m@^\d+$@si) {	# for &#65;
+         $c = chr($c);
+       } else {
+         $c = undef;
+       }
      }
-#    print STDERR "$progname: warning: unknown HTML character entity \"$1\"\n"
-#     unless $c;
-     ($c ? $c : "[$3]");
+     ($c || "[$3]");			# for &unknown; => "[unknown]"
     }
    /gexi;
   return $text;
@@ -410,7 +428,8 @@ sub output() {
 sub get_url_1($;$) {
   my ($url, $referer) = @_;
   
-  if (! ($url =~ m@^(http|feed)://@i)) {
+  $url =~ s@^feed:@http:@si;
+  if (! ($url =~ m@^http://@i)) {
     error ("not an HTTP URL: $url");
   }
 
@@ -596,8 +615,18 @@ sub reformat_html($$) {
   my ($body, $rss_p) = @_;
   $_ = $body;
 
+  # In HTML, try to preserve newlines inside of PRE.
+  #
   if (! $rss_p) {
-    # In HTML, unfold lines (this breaks PRE.  Sue me.)
+    s@(<PRE\b[^<>]*>\s*)(.*?)(</PRE)@{
+      my ($a, $b, $c) = ($1, $2, $3);
+      $b =~ s/[\r\n]/<BR>/gs;
+      $a . $b . $c;
+     }@gsexi;
+  }
+
+  if (! $rss_p) {
+    # In HTML, unfold lines.
     # In RSS, assume \n means literal line break.
     s@[\r\n]@ @gsi;
   }
@@ -629,6 +658,8 @@ sub reformat_html($$) {
     $_ = wrap ("", "  ", $_);     # wrap the lines as a paragraph
     s/[ \t]+$//gm;                # lose whitespace at end of line again
   }
+
+  s/^\n+//gs;
 
   y/A-Za-z/N-ZA-Mn-za-m/ if ($nyarlathotep_p);
   print STDOUT $_;
@@ -694,6 +725,8 @@ sub reformat_rss($) {
     $title = rss_field_to_html ($title || '');
     $body1 = rss_field_to_html ($body1 || '');
 
+    $title = '' if ($body1 eq $title);  # Identical in Twitter's atom feed.
+
     reformat_html ("$title<P>$body1", 1);
     print "\n";
   }
@@ -733,16 +766,41 @@ sub reformat_text($) {
 }
 
 
-sub get_url_text($) {
-  my ($url) = @_;
+# Figure out what the proxy server should be, either from environment
+# variables or by parsing the output of the (MacOS) program "scutil",
+# which tells us what the system-wide proxy settings are.
+#
+sub set_proxy() {
 
   # historical suckage: the environment variable name is lower case.
   $http_proxy = $ENV{http_proxy} || $ENV{HTTP_PROXY};
 
-  if ($http_proxy && $http_proxy =~ m@^http://([^/]*)/?$@ ) {
-    # historical suckage: allow "http://host:port" as well as "host:port".
-    $http_proxy = $1;
+  if (defined ($http_proxy)) {
+    if ($http_proxy && $http_proxy =~ m@^http://([^/]*)/?$@ ) {
+      # historical suckage: allow "http://host:port" as well as "host:port".
+      $http_proxy = $1;
+    }
+
+  } else {
+    my $proxy_data = `scutil --proxy 2>/dev/null`;
+    my ($server) = ($proxy_data =~ m/\bHTTPProxy\s*:\s*([^\s]+)/s);
+    my ($port)   = ($proxy_data =~ m/\bHTTPPort\s*:\s*([^\s]+)/s);
+    # Note: this ignores the "ExceptionsList".
+    if ($server) {
+      $http_proxy = $server;
+      $http_proxy .= ":$port" if $port;
+    }
   }
+
+  print STDERR "$progname: proxy server: $http_proxy\n" 
+    if ($verbose > 2 && $http_proxy);
+}
+
+
+sub get_url_text($) {
+  my ($url) = @_;
+
+  set_proxy();
 
   my ($ct, $body) = get_url ($url);
 
@@ -809,16 +867,16 @@ sub main() {
     elsif (m/^--?date$/)    { $text_mode = 'date';
                               $load_p = 0; }
     elsif (m/^--?text$/)    { $text_mode = 'literal';
-                              $text_literal = shift @ARGV;
+                              $text_literal = shift @ARGV || '';
                               $load_p = 0; }
     elsif (m/^--?file$/)    { $text_mode = 'file';
-                              $text_file = shift @ARGV;
+                              $text_file = shift @ARGV || '';
                               $load_p = 0; }
     elsif (m/^--?program$/) { $text_mode = 'program';
-                              $text_program = shift @ARGV;
+                              $text_program = shift @ARGV || '';
                               $load_p = 0; }
     elsif (m/^--?url$/)     { $text_mode = 'url';
-                              $text_url = shift @ARGV;
+                              $text_url = shift @ARGV || '';
                               $load_p = 0; }
     elsif (m/^--?col(umn)?s?$/) { $wrap_columns = 0 + shift @ARGV; }
     elsif (m/^--?cocoa$/)   { $cocoa_id = shift @ARGV; }

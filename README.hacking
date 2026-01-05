@@ -56,9 +56,13 @@ The XScreenSaver API
       yoursavername_free     -- Free everything you've allocated.
       yoursavername_reshape  -- Called when the window is resized.
       yoursavername_event    -- Called when a keyboard or mouse event happens.
-                                The "reshape" and "event" functions are only
-                                called when running in a window (not as a
-                                screen saver). It's ok for them to do nothing.
+
+      The "event" function will only be called when running in a window
+      (not as a screen saver).  The "reshape" event will be called when the
+      window size changes, or (as a screen saver) when the display size
+      changes as a result of a RANDR event (e.g., plugging in a new monitor).
+
+      It's ok for both the "event" and "resize" functions to do nothing.
 
   - All other functions should be static.
 
@@ -94,7 +98,7 @@ The XLockMore API
   hacks like "Flag".  The XLockMore ones are the ones that begin with
   "#ifdef STANDALONE" and #include "xlockmore.h".
 
-  All of the OpenGL screen savers follow the XLockMore API.
+  But, all OpenGL screen savers have to follow the XLockMore API.
 
   The XLockMore API is similar to the XScreenSaver API, in that you define
   (roughly) the same set of functions, but the naming conventions are
@@ -157,7 +161,7 @@ The MacOS X Port
 
   To compile on MacOS, use the XCode project included in the source
   distribution.  You shouldn't need to have X11 installed, and shouldn't
-  need to run "configure" first.  MacOS 10.4.0 and XCode 2.2 or newer are
+  need to run "configure" first.  MacOS 10.4.0 and XCode 3.1 or newer are
   required.
 
 ==========================================================================

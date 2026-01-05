@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1991-2006 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1991-2010 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -17,6 +17,7 @@
  */
 
 #import <stdlib.h>
+#import <stdint.h>
 #import <Cocoa/Cocoa.h>
 #import "jwxyz.h"
 #import "jwxyz-timers.h"
@@ -112,6 +113,7 @@ jwxyz_make_display (void *nsview_arg)
   // w->cgc = [[[view window] graphicsContext] graphicsPort];
   w->cgc = 0;
   w->window.view = view;
+  CFRetain (w->window.view);   // needed for garbage collection?
   w->window.background = BlackPixel(0,0);
 
   d->main_window = w;
@@ -395,6 +397,8 @@ XDrawPoints (Display *dpy, Drawable d, GC gc,
   int i;
   CGRect wr = d->frame;
 
+  push_fg_gc (d, gc, YES);
+
 # ifdef XDRAWPOINTS_IMAGES
 
   unsigned int argb = gc->gcv.foreground;
@@ -440,7 +444,6 @@ XDrawPoints (Display *dpy, Drawable d, GC gc,
   CGRect *rects = (CGRect *) malloc (count * sizeof(CGRect));
   CGRect *r = rects;
   
-  push_fg_gc (d, gc, YES);
   for (i = 0; i < count; i++) {
     r->size.width = r->size.height = 1;
     if (i > 0 && mode == CoordModePrevious) {
@@ -458,6 +461,8 @@ XDrawPoints (Display *dpy, Drawable d, GC gc,
   free (rects);
 
 # endif /* ! XDRAWPOINTS_IMAGES */
+
+  pop_gc (d, gc);
 
   return 0;
 }
@@ -483,6 +488,7 @@ XCopyArea (Display *dpy, Drawable src, Drawable dst, GC gc,
            unsigned int width, unsigned int height, 
            int dst_x, int dst_y)
 {
+  Assert (gc, "no GC");
   Assert ((width  < 65535), "improbably large width");
   Assert ((height < 65535), "improbably large height");
   Assert ((src_x  < 65535 && src_x  > -65535), "improbably large src_x");
@@ -493,8 +499,8 @@ XCopyArea (Display *dpy, Drawable src, Drawable dst, GC gc,
   if (width == 0 || height == 0)
     return 0;
 
-  if (gc && (gc->gcv.function == GXset ||
-             gc->gcv.function == GXclear)) {
+  if (gc->gcv.function == GXset ||
+      gc->gcv.function == GXclear) {
     // "set" and "clear" are dumb drawing modes that ignore the source
     // bits and just draw solid rectangles.
     set_color (dst->cgc, (gc->gcv.function == GXset
@@ -593,7 +599,6 @@ XCopyArea (Display *dpy, Drawable src, Drawable dst, GC gc,
                            src_rect.size.height - src_rect.origin.y);
       // This does not copy image data, so it should be fast.
       CGImageRef cgi2 = CGImageCreateWithImageInRect (cgi, src_rect);
-      CGImageRelease (cgi);
       cgi = cgi2;
     }
 
@@ -611,8 +616,8 @@ XCopyArea (Display *dpy, Drawable src, Drawable dst, GC gc,
 #if 1
     // get the bits (desired sub-rectangle) out of the NSView via Cocoa.
     //
-    NSBitmapImageRep *bm = [NSBitmapImageRep alloc];
-    [bm initWithFocusedViewRect:nsfrom];
+    NSBitmapImageRep *bm = [[NSBitmapImageRep alloc]
+                             initWithFocusedViewRect:nsfrom];
     unsigned char *data = [bm bitmapData];
     int bps = [bm bitsPerSample];
     int bpp = [bm bitsPerPixel];
@@ -1172,7 +1177,9 @@ Status
 XAllocColor (Display *dpy, Colormap cmap, XColor *color)
 {
   // store 32 bit ARGB in the pixel field.
-  color->pixel = ((                       0xFF  << 24) |
+  // (The uint32_t is so that 0xFF000000 doesn't become 0xFFFFFFFFFF000000)
+  color->pixel = (uint32_t)
+                 ((                       0xFF  << 24) |
                   (((color->red   >> 8) & 0xFF) << 16) |
                   (((color->green >> 8) & 0xFF) <<  8) |
                   (((color->blue  >> 8) & 0xFF)      ));
@@ -1306,17 +1313,18 @@ ximage_putpixel_1 (XImage *ximage, int x, int y, unsigned long pixel)
 static unsigned long
 ximage_getpixel_32 (XImage *ximage, int x, int y)
 {
-  return *((unsigned long *) ximage->data +
-           (y * (ximage->bytes_per_line >> 2)) +
-           x);
+  return ((unsigned long)
+          *((uint32_t *) ximage->data +
+            (y * (ximage->bytes_per_line >> 2)) +
+            x));
 }
 
 static int
 ximage_putpixel_32 (XImage *ximage, int x, int y, unsigned long pixel)
 {
-  *((unsigned long *) ximage->data +
+  *((uint32_t *) ximage->data +
     (y * (ximage->bytes_per_line >> 2)) +
-    x) = pixel;
+    x) = (uint32_t) pixel;
   return 0;
 }
 
@@ -1479,6 +1487,14 @@ XPutImage (Display *dpy, Drawable d, GC gc, XImage *ximage,
 {
   CGRect wr = d->frame;
 
+  Assert (gc, "no GC");
+  Assert ((w < 65535), "improbably large width");
+  Assert ((h < 65535), "improbably large height");
+  Assert ((src_x  < 65535 && src_x  > -65535), "improbably large src_x");
+  Assert ((src_y  < 65535 && src_y  > -65535), "improbably large src_y");
+  Assert ((dest_x < 65535 && dest_x > -65535), "improbably large dest_x");
+  Assert ((dest_y < 65535 && dest_y > -65535), "improbably large dest_y");
+
   // Clip width and height to the bounds of the Drawable
   //
   if (dest_x + w > wr.size.width) {
@@ -1509,8 +1525,8 @@ XPutImage (Display *dpy, Drawable d, GC gc, XImage *ximage,
   if (w <= 0 || h <= 0)
     return 0;
 
-  if (gc && (gc->gcv.function == GXset ||
-             gc->gcv.function == GXclear)) {
+  if (gc->gcv.function == GXset ||
+      gc->gcv.function == GXclear) {
     // "set" and "clear" are dumb drawing modes that ignore the source
     // bits and just draw solid rectangles.
     set_color (d->cgc, (gc->gcv.function == GXset
@@ -1605,32 +1621,39 @@ XGetImage (Display *dpy, Drawable d, int x, int y,
            unsigned long plane_mask, int format)
 {
   const unsigned char *data = 0;
-  int depth, ibpp, ibpl;
+  int depth, ibpp, ibpl, alpha_first_p;
   NSBitmapImageRep *bm = 0;
   
+  Assert ((width  < 65535), "improbably large width");
+  Assert ((height < 65535), "improbably large height");
+  Assert ((x < 65535 && x > -65535), "improbably large x");
+  Assert ((y < 65535 && y > -65535), "improbably large y");
+
   if (d->type == PIXMAP) {
     depth = d->pixmap.depth;
+    alpha_first_p = 1; // we created it with kCGImageAlphaNoneSkipFirst.
     ibpp = CGBitmapContextGetBitsPerPixel (d->cgc);
     ibpl = CGBitmapContextGetBytesPerRow (d->cgc);
     data = CGBitmapContextGetData (d->cgc);
     Assert (data, "CGBitmapContextGetData failed");
   } else {
     // get the bits (desired sub-rectangle) out of the NSView
-    bm = [NSBitmapImageRep alloc];
     NSRect nsfrom;
     nsfrom.origin.x = x;
     nsfrom.origin.y = y;
     nsfrom.size.width = width;
     nsfrom.size.height = height;
-    [bm initWithFocusedViewRect:nsfrom];
+    bm = [[NSBitmapImageRep alloc] initWithFocusedViewRect:nsfrom];
     depth = 32;
+    alpha_first_p = ([bm bitmapFormat] & NSAlphaFirstBitmapFormat);
     ibpp = [bm bitsPerPixel];
     ibpl = [bm bytesPerRow];
     data = [bm bitmapData];
     Assert (data, "NSBitmapImageRep initWithFocusedViewRect failed");
-
-    data += (y * ibpl) + (x * (ibpp/8));
   }
+  
+  // data points at (x,y) with ibpl rowstride.  ignore x,y from now on.
+  data += (y * ibpl) + (x * (ibpp/8));
   
   format = (depth == 1 ? XYPixmap : ZPixmap);
   XImage *image = XCreateImage (dpy, 0, depth, format, 0, 0, width, height,
@@ -1642,19 +1665,23 @@ XGetImage (Display *dpy, Drawable d, int x, int y,
   /* both PPC and Intel use word-ordered ARGB frame buffers, which
      means that on Intel it is BGRA when viewed by bytes (And BGR
      when using 24bpp packing).
+
+     BUT! Intel-64 stores alpha at the other end! 32bit=RGBA, 64bit=ARGB.
+     The NSAlphaFirstBitmapFormat bit in bitmapFormat seems to be the
+     indicator of this latest kink.
    */
   int xx, yy;
   if (depth == 1) {
     const unsigned char *iline = data;
-    for (yy = y; yy < y+height; yy++) {
+    for (yy = 0; yy < height; yy++) {
 
       const unsigned char *iline2 = iline;
-      for (xx = x; xx < x+width; xx++) {
+      for (xx = 0; xx < width; xx++) {
 
-        iline2++;                     // ignore b or a
-        iline2++;                     // ignore g or r
-        unsigned char r = *iline2++;  //        r or g
-        if (ibpp == 32) iline2++;     // ignore a or b
+        iline2++;                     // ignore R  or  A  or  A  or  B
+        iline2++;                     // ignore G  or  B  or  R  or  G
+        unsigned char r = *iline2++;  // use    B  or  G  or  G  or  R
+        if (ibpp == 32) iline2++;     // ignore A  or  R  or  B  or  A
 
         XPutPixel (image, xx, yy, (r ? 1 : 0));
       }
@@ -1664,24 +1691,38 @@ XGetImage (Display *dpy, Drawable d, int x, int y,
     Assert (ibpp == 24 || ibpp == 32, "weird obpp");
     const unsigned char *iline = data;
     unsigned char *oline = (unsigned char *) image->data;
-    oline += (y * obpl);
-    for (yy = y; yy < y+height; yy++) {
+    for (yy = 0; yy < height; yy++) {
 
       const unsigned char *iline2 = iline;
       unsigned char *oline2 = oline;
-      for (xx = x; xx < x+width; xx++) {
 
-        unsigned char a = (ibpp == 32 ? (*iline2++) : 0xFF);
-        unsigned char r = *iline2++;
-        unsigned char g = *iline2++;
-        unsigned char b = *iline2++;
-        unsigned long pixel = ((a << 24) |
-                               (r << 16) |
-                               (g <<  8) |
-                               (b <<  0));
-        *((unsigned int *) oline2) = pixel;
-        oline2 += 4;
-     }
+      if (alpha_first_p)			// ARGB
+        for (xx = 0; xx < width; xx++) {
+          unsigned char a = (ibpp == 32 ? (*iline2++) : 0xFF);
+          unsigned char r = *iline2++;
+          unsigned char g = *iline2++;
+          unsigned char b = *iline2++;
+          uint32_t pixel = ((a << 24) |
+                            (r << 16) |
+                            (g <<  8) |
+                            (b <<  0));
+          *((uint32_t *) oline2) = pixel;
+          oline2 += 4;
+        }
+      else					// RGBA
+        for (xx = 0; xx < width; xx++) {
+          unsigned char r = *iline2++;
+          unsigned char g = *iline2++;
+          unsigned char b = *iline2++;
+          unsigned char a = (ibpp == 32 ? (*iline2++) : 0xFF);
+          uint32_t pixel = ((a << 24) |
+                            (r << 16) |
+                            (g <<  8) |
+                            (b <<  0));
+          *((uint32_t *) oline2) = pixel;
+          oline2 += 4;
+        }
+
       oline += obpl;
       iline += ibpl;
     }
@@ -1692,33 +1733,112 @@ XGetImage (Display *dpy, Drawable d, int x, int y,
   return image;
 }
 
-void
-jwxyz_draw_NSImage (Display *dpy, Drawable d, void *nsimg_arg,
-                    XRectangle *geom_ret)
+
+/* Returns a transformation matrix to do rotation as per the provided
+   EXIF "Orientation" value.
+ */
+static CGAffineTransform
+exif_rotate (int rot, CGSize rect)
 {
-  NSImage *nsimg = (NSImage *) nsimg_arg;
+  CGAffineTransform trans = CGAffineTransformIdentity;
+  switch (rot) {
+  case 2:		// flip horizontal
+    trans = CGAffineTransformMakeTranslation (rect.width, 0);
+    trans = CGAffineTransformScale (trans, -1, 1);
+    break;
 
-  // convert the NSImage to a CGImage via the toll-free-bridging 
-  // of NSData and CFData...
-  //
-  NSData *nsdata = [NSBitmapImageRep
-                        TIFFRepresentationOfImageRepsInArray:
-                          [nsimg representations]];
-  CFDataRef cfdata = (CFDataRef) nsdata;
-  CGImageSourceRef cgsrc = CGImageSourceCreateWithData (cfdata, NULL);
-  CGImageRef cgi = CGImageSourceCreateImageAtIndex (cgsrc, 0, NULL);
+  case 3:		// rotate 180
+    trans = CGAffineTransformMakeTranslation (rect.width, rect.height);
+    trans = CGAffineTransformRotate (trans, M_PI);
+    break;
 
-  NSSize imgr = [nsimg size];
+  case 4:		// flip vertical
+    trans = CGAffineTransformMakeTranslation (0, rect.height);
+    trans = CGAffineTransformScale (trans, 1, -1);
+    break;
+
+  case 5:		// transpose (UL-to-LR axis)
+    trans = CGAffineTransformMakeTranslation (rect.height, rect.width);
+    trans = CGAffineTransformScale (trans, -1, 1);
+    trans = CGAffineTransformRotate (trans, 3 * M_PI / 2);
+    break;
+
+  case 6:		// rotate 90
+    trans = CGAffineTransformMakeTranslation (0, rect.width);
+    trans = CGAffineTransformRotate (trans, 3 * M_PI / 2);
+    break;
+
+  case 7:		// transverse (UR-to-LL axis)
+    trans = CGAffineTransformMakeScale (-1, 1);
+    trans = CGAffineTransformRotate (trans, M_PI / 2);
+    break;
+
+  case 8:		// rotate 270
+    trans = CGAffineTransformMakeTranslation (rect.height, 0);
+    trans = CGAffineTransformRotate (trans, M_PI / 2);
+    break;
+
+  default: 
+    break;
+  }
+
+  return trans;
+}
+
+
+void
+jwxyz_draw_NSImage_or_CGImage (Display *dpy, Drawable d, 
+                                Bool nsimg_p, void *img_arg,
+                               XRectangle *geom_ret, int exif_rotation)
+{
+  CGImageRef cgi;
+  CGImageSourceRef cgsrc;
+  NSSize imgr;
+
+  if (nsimg_p) {
+
+    NSImage *nsimg = (NSImage *) img_arg;
+    imgr = [nsimg size];
+
+    // convert the NSImage to a CGImage via the toll-free-bridging 
+    // of NSData and CFData...
+    //
+    NSData *nsdata = [NSBitmapImageRep
+                       TIFFRepresentationOfImageRepsInArray:
+                         [nsimg representations]];
+    CFDataRef cfdata = (CFDataRef) nsdata;
+    cgsrc = CGImageSourceCreateWithData (cfdata, NULL);
+    cgi = CGImageSourceCreateImageAtIndex (cgsrc, 0, NULL);
+
+  } else {
+    cgi = (CGImageRef) img_arg;
+    imgr.width  = CGImageGetWidth (cgi);
+    imgr.height = CGImageGetHeight (cgi);
+  }
+
+  Bool rot_p = (exif_rotation >= 5);
+
+  if (rot_p)
+    imgr = NSMakeSize (imgr.height, imgr.width);
+
   CGRect winr = d->frame;
   float rw = winr.size.width  / imgr.width;
   float rh = winr.size.height / imgr.height;
   float r = (rw < rh ? rw : rh);
 
-  CGRect dst;
+  CGRect dst, dst2;
   dst.size.width  = imgr.width  * r;
   dst.size.height = imgr.height * r;
   dst.origin.x = (winr.size.width  - dst.size.width)  / 2;
   dst.origin.y = (winr.size.height - dst.size.height) / 2;
+
+  dst2.origin.x = dst2.origin.y = 0;
+  if (rot_p) {
+    dst2.size.width = dst.size.height; 
+    dst2.size.height = dst.size.width;
+  } else {
+    dst2.size = dst.size;
+  }
 
   // Clear the part not covered by the image to background or black.
   //
@@ -1729,11 +1849,22 @@ jwxyz_draw_NSImage (Display *dpy, Drawable d, void *nsimg_arg,
     draw_rect (dpy, d, 0, 0, 0, winr.size.width, winr.size.height, NO, YES);
   }
 
-  //Assert (CGImageGetColorSpace (cgi) == dpy->colorspace, "bad colorspace");
-  CGContextDrawImage (d->cgc, dst, cgi);
+  CGAffineTransform trans = 
+    exif_rotate (exif_rotation, rot_p ? dst2.size : dst.size);
 
-  CFRelease (cgsrc);
-  CGImageRelease (cgi);
+  CGContextSaveGState (d->cgc);
+  CGContextConcatCTM (d->cgc, 
+                      CGAffineTransformMakeTranslation (dst.origin.x,
+                                                        dst.origin.y));
+  CGContextConcatCTM (d->cgc, trans);
+  //Assert (CGImageGetColorSpace (cgi) == dpy->colorspace, "bad colorspace");
+  CGContextDrawImage (d->cgc, dst2, cgi);
+  CGContextRestoreGState (d->cgc);
+
+  if (nsimg_p) {
+    CFRelease (cgsrc);
+    CGImageRelease (cgi);
+  }
 
   if (geom_ret) {
     geom_ret->x = dst.origin.x;
@@ -1842,6 +1973,15 @@ copy_pixmap (Pixmap p)
 static void
 query_font (Font fid)
 {
+  if (!fid || !fid->nsfont) {
+    NSLog(@"no NSFont in fid");
+    abort();
+  }
+  if (![fid->nsfont fontName]) {
+    NSLog(@"broken NSFont in fid");
+    abort();
+  }
+
   int first = 32;
   int last = 255;
 
@@ -1890,6 +2030,14 @@ query_font (Font fid)
       NSTextStorage *ts = [[NSTextStorage alloc] initWithString:nsstr];
       [ts setFont:fid->nsfont];
       NSLayoutManager *lm = [[NSLayoutManager alloc] init];
+
+      /* Without this, the layout manager ends up on a queue somewhere and is
+         referenced again after we return to the command loop.  Since we don't
+         use this layout manager again, by that time it may have been garbage
+         collected, and we crash.  Setting this seems to cause `lm' to no 
+         longer be referenced once we exit this block. */
+      [lm setBackgroundLayoutEnabled:NO];
+
       NSTextContainer *tc = [[NSTextContainer alloc] init];
       [lm addTextContainer:tc];
       [tc release];	// lm retains tc
@@ -1993,7 +2141,7 @@ copy_font (Font fid)
 
   // copy the other pointers
   fid2->ps_name = strdup (fid->ps_name);
-  [fid2->nsfont retain];
+//  [fid2->nsfont retain];
   fid2->metrics.fid = fid2;
 
   return fid2;
@@ -2004,23 +2152,45 @@ static NSFont *
 try_font (BOOL fixed, BOOL bold, BOOL ital, BOOL serif, float size,
           char **name_ret)
 {
-  const char *prefix = (fixed ? "Monaco" : (serif ? "Times" : "Helvetica"));
-  const char *suffix = (bold && ital
-                        ? (serif ? "-BoldItalic" : "-BoldOblique")
-                        : (bold ? "-Bold" :
-                           ital ? (serif ? "-Italic" : "-Oblique") : ""));
-  char *name = (char *) malloc (strlen(prefix) + strlen(suffix) + 1);
-  strcpy (name, prefix);
-  strcat (name, suffix);
+  Assert (size > 0, "zero font size");
+  const char *name;
+
+  if (fixed) {
+    // 
+    // "Monaco" only exists in plain.
+    // "LucidaSansTypewriterStd" gets an AGL bad value error.
+    // 
+    if (bold && ital) name = "Courier-BoldOblique";
+    else if (bold)    name = "Courier-Bold";
+    else if (ital)    name = "Courier-Oblique";
+    else              name = "Courier";
+
+  } else if (serif) {
+    // 
+    // "Georgia" looks better than "Times".
+    // 
+    if (bold && ital) name = "Georgia-BoldItalic";
+    else if (bold)    name = "Georgia-Bold";
+    else if (ital)    name = "Georgia-Italic";
+    else              name = "Georgia";
+
+  } else {
+    // 
+    // "Geneva" only exists in plain.
+    // "LucidaSansStd-BoldItalic" gets an AGL bad value error.
+    // "Verdana" renders smoother than "Helvetica" for some reason.
+    // 
+    if (bold && ital) name = "Verdana-BoldItalic";
+    else if (bold)    name = "Verdana-Bold";
+    else if (ital)    name = "Verdana-Italic";
+    else              name = "Verdana";
+  }
 
   NSString *nsname = [NSString stringWithCString:name
                                         encoding:NSUTF8StringEncoding];
   NSFont *f = [NSFont fontWithName:nsname size:size];
-  if (f) {
-    *name_ret = name;
-  } else {
-    free (name);
-  }
+  if (f)
+    *name_ret = strdup(name);
   return f;
 }
 
@@ -2055,8 +2225,8 @@ try_native_font (const char *name, char **name_ret, float *size_ret)
 static NSFont *
 random_font (BOOL bold, BOOL ital, float size, char **name_ret)
 {
-  NSFontTraitMask mask = ((bold ? NSUnboldFontMask   : NSBoldFontMask) |
-                          (ital ? NSUnitalicFontMask : NSItalicFontMask));
+  NSFontTraitMask mask = ((bold ? NSBoldFontMask   : NSUnboldFontMask) |
+                          (ital ? NSItalicFontMask : NSUnitalicFontMask));
   NSArray *fonts = [[NSFontManager sharedFontManager]
                      availableFontNamesWithTraits:mask];
   if (!fonts) return 0;
@@ -2196,46 +2366,13 @@ XLoadFont (Display *dpy, const char *name)
     NSLog(@"no NSFont for \"%s\"", name);
     abort();
   }
+  CFRetain (fid->nsfont);   // needed for garbage collection?
 
   //NSLog(@"parsed \"%s\" to %s %.1f", name, fid->ps_name, fid->size);
 
   query_font (fid);
 
   return fid;
-}
-
-
-/* This translates the NSFont into the numbers that aglUseFont() wants.
- */
-int
-jwxyz_font_info (Font f, int *size_ret, int *face_ret)
-{
-  char *name = strdup (f->ps_name);
-  char *dash = strchr (name, '-');
-  int flags = 0;
-  int size = f->size;
-  if (dash) {
-    // 0 = plain; 1=B; 2=I; 3=BI; 4=U; 5=UB; etc.
-    if (strcasestr (dash, "bold"))    flags |= 1;
-    if (strcasestr (dash, "italic"))  flags |= 2;
-    if (strcasestr (dash, "oblique")) flags |= 2;
-    *dash = 0;
-  }
-  NSString *nname = [NSString stringWithCString:name
-                                       encoding:NSUTF8StringEncoding];
-  ATSFontFamilyRef id =
-    ATSFontFamilyFindFromName ((CFStringRef) nname, kATSOptionFlagsDefault);
-
-
-  // WTF?  aglUseFont gets a BadValue if size is small!!
-  if (size < 9) size = 9;
-
-  //NSLog (@"font %s %.1f => %d %d %d", f->ps_name, f->size, id, flags, size);
-  Assert (id >= 0, "no ATS font family");
-
-  *size_ret = size;
-  *face_ret = flags;
-  return id;
 }
 
 
@@ -2251,7 +2388,15 @@ XUnloadFont (Display *dpy, Font fid)
 {
   free (fid->ps_name);
   free (fid->metrics.per_char);
-  [fid->nsfont release];
+
+  // #### DAMMIT!  I can't tell what's going wrong here, but I keep getting
+  //      crashes in [NSFont ascender] <- query_font, and it seems to go away
+  //      if I never release the nsfont.  So, fuck it, we'll just leak fonts.
+  //      They're probably not very big...
+  //
+  //  [fid->nsfont release];
+  //  CFRelease (fid->nsfont);
+
   free (fid);
   return 0;
 }
@@ -2290,13 +2435,9 @@ XSetFont (Display *dpy, GC gc, Font fid)
   if (gc->gcv.font)
     XUnloadFont (dpy, gc->gcv.font);
   gc->gcv.font = copy_font (fid);
+  [gc->gcv.font->nsfont retain];
+  CFRetain (gc->gcv.font->nsfont);   // needed for garbage collection?
   return 0;
-}
-
-Font  // really GContext
-XGContextFromGC (GC gc)    // WTF is this actually supposed to do?
-{
-  return gc->gcv.font;
 }
 
 int
@@ -2341,8 +2482,12 @@ static void
 set_font (CGContextRef cgc, GC gc)
 {
   Font font = gc->gcv.font;
-  if (! font)
-    font = gc->gcv.font = XLoadFont (0, 0);
+  if (! font) {
+    font = XLoadFont (0, 0);
+    gc->gcv.font = font;
+    [gc->gcv.font->nsfont retain];
+    CFRetain (gc->gcv.font->nsfont);   // needed for garbage collection?
+  }
   CGContextSelectFont (cgc, font->ps_name, font->size, kCGEncodingMacRoman);
   CGContextSetTextMatrix (cgc, CGAffineTransformIdentity);
 }
@@ -2378,8 +2523,8 @@ draw_string (Display *dpy, Drawable d, GC gc, int x, int y,
   set_font (d->cgc, gc);
 
   CGContextSetTextDrawingMode (d->cgc, kCGTextFill);
-  if (! gc->gcv.antialias_p)
-    CGContextSetShouldAntialias (d->cgc, YES);  // always antialias text
+  if (gc->gcv.antialias_p)
+    CGContextSetShouldAntialias (d->cgc, YES);
   CGContextShowTextAtPoint (d->cgc,
                             wr.origin.x + x,
                             wr.origin.y + wr.size.height - y,

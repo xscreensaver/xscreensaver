@@ -17,11 +17,41 @@ distclean:
 
 distdepend:: update_plist_version
 
-debug:
+debug: distdepend
 	cd ..; xcodebuild -target $(XCODE_TARGET) -configuration Debug   build
 
-release:
+release:: distdepend
 	cd ..; xcodebuild -target $(XCODE_TARGET) -configuration Release build
+
+release:: check_versions
+
+release:: sign
+
+sign:
+	@for f in build/Release/*.saver ; do \
+	  codesign -vfs 'Jamie Zawinski' $$f ; \
+	 done
+
+check_versions:
+	@\
+  SRC=../utils/version.h ;						\
+  V=`sed -n 's/[^0-9]*\([0-9]\.[0-9][^. ]*\).*/\1/p' $$SRC` ;		\
+  DIR=build/Release ;							\
+  RESULT=0 ;								\
+  for S in $$DIR/*.saver ; do						\
+   for P in $$S/Contents/Info.plist ; do				\
+     V2=`perl -0000 -n -e						\
+	'm@<key>CFBundleVersion</key>\s*<string>(.*?)</string>@si 	\
+	 && print $$1' < $$P` ;						\
+     if [ "$$V2" != "$$V" ] ; then					\
+       echo "Wrong version: $$S ($$V2)" ;				\
+       RESULT=1 ;							\
+     fi ;								\
+   done ;								\
+  done ;								\
+  if [ "$$RESULT" = 0 ]; then echo "Versions match ($$V2)" ; fi ;	\
+  exit $$RESULT
+
 
 echo_tarfiles:
 	@echo `find . \
@@ -38,7 +68,7 @@ update_plist_version:
   V=`sed -n 's/[^0-9]*\([0-9]\.[0-9][^. ]*\).*/\1/p' $$SRC` ;		      \
   T=/tmp/xs.$$$$ ;							      \
   for S in XScreenSaver.plist SaverTester.plist ; do			      \
-    echo -n "Updating version number in $$S to \"$$V\"... " ;		      \
+    /bin/echo -n "Updating version number in $$S to \"$$V\"... " ;	      \
     KEYS="CFBundleVersion|CFBundleShortVersionString" ;			      \
     perl -0777 -pne							      \
       "s@(<key>($$KEYS)</key>\s*<string>)[^<>]+(</string>)@\$${1}$$V\$${3}@g" \
@@ -53,7 +83,7 @@ update_plist_version:
   rm $$T
 
 # -format UDBZ saves 4% (~1.2 MB) over UDZO.
-dmg::
+dmg:: distdepend check_versions
 	@								      \
   set -e ;								      \
   SRC=../utils/version.h ;						      \
@@ -70,8 +100,27 @@ dmg::
   rm -rf "$$STAGE" ;							      \
   echo + mkdir "$$STAGE" ;						      \
          mkdir "$$STAGE" ;						      \
-  echo + cp -pr "$$SRC/"\*.saver "$$STAGE" ;				      \
-         cp -pr "$$SRC/"*.saver  "$$STAGE" ;				      \
+									      \
+  retired=`perl -0 -ne							      \
+     's/\\\\\\n//g; m/^RETIRED_EXES\s*=\s*(.*)$$/m && print "$$1\n"'	      \
+      ../hacks/Makefile.in ;						      \
+      perl -0 -ne							      \
+     's/\\\\\\n//g; m/^RETIRED_GL_EXES\s*=\s*(.*)$$/m && print "$$1\n"'	      \
+      ../hacks/glx/Makefile.in` ;					      \
+									      \
+  for f in $$SRC/*.saver ; do						      \
+   ok=yes ;								      \
+   ff=`echo $$f | perl -e '$$_=<>; s@^.*/(.*)\..*$$@\L$$1@; print'`;	      \
+   for r in $$retired ; do						      \
+    if [ "$$ff" = "$$r" ]; then ok=no ; fi ;				      \
+   done ;								      \
+   if [ "$$ok" = yes ]; then						      \
+    echo + cp -pr "$$f" "$$STAGE/" ;					      \
+           cp -pr "$$f" "$$STAGE/" ;					      \
+   else									      \
+    echo skipping "$$f" ;						      \
+   fi ;									      \
+  done ;								      \
   set -x ;								      \
   cp -p bindist.rtf "$$STAGE/ READ ME.rtf" ;				      \
   cp -p bindist-DS_Store "$$STAGE/.DS_Store" ;				      \
