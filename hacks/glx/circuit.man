@@ -44,7 +44,7 @@ Whether the scene should spin.
 Rotation speed, 0 - 100.  Default: 1.
 .TP 8
 .B \-light | \-no-light
-Whether to us lighting, or flat coloring.
+Whether to use lighting, or flat coloring.
 .TP 8
 .B \-fps
 Display the current frame rate, CPU load, and polygon count.
