@@ -43,7 +43,14 @@ release:: distdepend
 release:: check_versions
 
 Sparkle.framework:
-	unzip ../archive/Sparkle.framework-2013-12-04.zip
+	rm -rf bin sparkle-bin
+	tar -vxjf ../archive/Sparkle-1.21.2.tar.bz2 \
+	  --exclude CHANGELOG \
+	  --exclude LICENSE \
+	  --exclude SampleAppcast.xml \
+	  --exclude Sparkle.framework.dSYM \
+	  --exclude Sparkle\ Test\ App\*
+	mv bin sparkle-bin
 
 # Download and resize images from jwz.org.
 # This saves us having to include 4MB of images in the tar file
@@ -54,7 +61,7 @@ Sparkle.framework:
 
 BASE = xscreensaver/screenshots/
 URL = https://www.jwz.org/$(BASE)
-WGET = wget -q -U xscreensaver-build-osx
+WGET = wget -q -U xscreensaver-build-osx --content-on-error=0
 CVT  = -thumbnail '200x150^' -gravity center -extent 200x150 \
      \( +clone  -alpha extract \
         -draw 'fill black polygon 0,0 0,6 6,0 fill white circle 6,6 6,0' \
@@ -280,11 +287,12 @@ build/Release/installer.pkg: installer.rtf installer.xml installer.sh installer.
 
 
 # -format UDBZ saves 4% (~1.2 MB) over UDZO.
-dmg:: distdepend
-dmg:: check_versions check_coretext
+dmg:: distdepend check_versions check_coretext
 #dmg:: check_gc
 dmg:: build/Release/installer.pkg
-dmg::
+dmg:: _dmg notarize
+
+_dmg::
 	@								      \
   set -e ;								      \
   SRC=../utils/version.h ;						      \
@@ -369,7 +377,68 @@ dmg::
     "$$TMPDMG" -o "$$DMG" ;						      \
   xattr -w com.apple.quarantine "0000;00000000;;" "$$DMG" ;		      \
   rm -f "$$TMPDMG" ;							      \
-  ls -ldhgF "$$DMG"
+  ls -ldhgF "$$DMG" ;							      \
+  $(MAKE) notarize ;							      \
+
+
+# To set up notarization:
+#  - Log in on https://appleid.apple.com/
+#  - Generate App-Specific Password, "altool-notarizer"
+#  - Keychain Access / New
+#  - Name: "altool-notarizer", Account: "jwz@jwz.org",
+#    Pass: the one you just generated.
+#
+# "make notarize", which will upload the DMG (slow).
+# A response will be emailed back in about an hour.
+# When that arrives, "make staple".
+#
+# https://developer.apple.com/documentation/security/notarizing_your_app_before_distribution/customizing_the_notarization_workflow?language=objc
+#
+# Note that if Sparkle.framework/.../Autoupdate.app is not independently
+# signed, it won't pass. I had to add a build phase for that.
+#
+NOTARGS=-u "jwz@jwz.org" -p "@keychain:altool-notarizer"
+
+notarize::
+	@								      \
+  set -e ;								      \
+  SRC=../utils/version.h ;						      \
+  V=`sed -n 's/[^0-9]*\([0-9]\.[0-9][^. ]*\).*/\1/p' $$SRC` ;		      \
+  BASE="xscreensaver-$$V" ;						      \
+  OUTDIR="../archive" ;							      \
+  DMG="$$OUTDIR/$$BASE.dmg" ;						      \
+  set -x ;								      \
+  xcrun altool --notarize-app --primary-bundle-id "org.jwz.xscreensaver"      \
+    --file "$$DMG" $(NOTARGS) ;						      \
+  echo "" ;								      \
+  sleep 3 ;								      \
+  $(MAKE) notarize_wait staple updates.xml
+
+notarize_wait::
+	@while ( xcrun altool --notarization-history 0 $(NOTARGS) |	      \
+		 grep -q 'in progress' ); do				      \
+	  echo `date +%I:%M:` "waiting for notarization..." ;		      \
+	  sleep 15 ;							      \
+	done ;								      \
+	echo '' ;							      \
+	xcrun altool --notarization-history 0 $(NOTARGS) ;		      \
+
+staple::
+	@								      \
+  set -e ;								      \
+  SRC=../utils/version.h ;						      \
+  V=`sed -n 's/[^0-9]*\([0-9]\.[0-9][^. ]*\).*/\1/p' $$SRC` ;		      \
+  BASE="xscreensaver-$$V" ;						      \
+  OUTDIR="../archive" ;							      \
+  DMG="$$OUTDIR/$$BASE.dmg" ;						      \
+  set -x ;								      \
+  xcrun stapler staple "$$DMG" ;					      \
+  xcrun stapler validate "$$DMG"
+
+notarization_history::
+	xcrun altool --notarization-history 0 $(NOTARGS)
+	@echo 'now do: xcrun altool $(NOTARGS) --notarization-info <UUID>' ;  \
+	echo 'and wget the LogFileURL'
 
 
 # When debugging, sometimes I have to reset the preferences for all
