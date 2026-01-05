@@ -8,6 +8,17 @@
   <description>Updates to xscreensaver.</description>
   <language>en</language>
   <item>
+   <title>Version 5.27</title>
+   <link>http://www.jwz.org/xscreensaver/xscreensaver-5.27.dmg</link>
+   <description><![CDATA[&bull; New hacks, `tessellimage' and `projectiveplane'. <BR>&bull; Added support for pthreads, because Dave Odell is a madman. <BR>&bull; Updated `webcollage' for recent changes. <BR>&bull; Minor iOS tweaks to the `analogtv' hacks. <BR>&bull; X11: Don't assume Suspend = 0 implies "No DPMS". <BR>&bull; Minor updates to `boxed' and `klein'. <BR>&bull; Fixed possible crash in `apple2', `noseguy', `xmatrix', `shadebobs'. <BR>&bull; Fixed possible crash in OSX preferences. <BR>&bull; OSX Performance improvements. <BR>&bull; Plugged some leaks.]]></description>
+   <pubDate>Tue, 27 May 2014 03:05:35 -0700</pubDate>
+   <enclosure url="http://www.jwz.org/xscreensaver/xscreensaver-5.27.dmg"
+    sparkle:version="5.27"
+    sparkle:dsaSignature="MC0CFQDIHH0Q0NqJ8K0XDDe8lUPpTdpLeQIUW1tdF1xsu0WviJ+EpxOXYiudetM="
+    length="50979508"
+    type="application/octet-stream" />
+  </item>
+  <item>
    <title>Version 5.26</title>
    <link>http://www.jwz.org/xscreensaver/xscreensaver-5.26.dmg</link>
    <description><![CDATA[&bull; More auto-updater tweaks.]]></description>
