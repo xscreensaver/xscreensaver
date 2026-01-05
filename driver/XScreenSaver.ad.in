@@ -4,8 +4,8 @@
 !            a screen saver and locker for the X window system
 !                            by Jamie Zawinski
 !
-!                              version 6.08
-!                              10-Oct-2023
+!                              version 6.10
+!                              27-Apr-2025
 !
 ! See "man xscreensaver" for more info.  The latest version is always
 ! available at https://www.jwz.org/xscreensaver/
@@ -575,7 +575,13 @@ XScreenSaver.bourneShell:		/bin/sh
 @GL_KLUDGE@ GL: 				cubocteversion --root			    \n\
 				droste --root				    \n\
 @GL_KLUDGE@ GL: 				papercube --root			    \n\
-@GL_KLUDGE@ GL: 				skulloop --root				    \n
+@GL_KLUDGE@ GL: 				skulloop --root				    \n\
+@GL_KLUDGE@ GL: 				highvoltage --root			    \n\
+@GL_KLUDGE@ GL: 				kallisti --root				    \n\
+@GL_KLUDGE@ GL: 				klondike --root				    \n\
+@GL_KLUDGE@ GL: 				dumpsterfire --root			    \n\
+@GL_KLUDGE@ GL: 				hopffibration --root			    \n\
+@GL_KLUDGE@ GL: 				platonicfolding --root			    \n
 
 
 
@@ -616,6 +622,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.decayscreen.name:    Decay Screen
 *hacks.deepstars.name:      Deep Stars
 *hacks.dnalogo.name:        DNA Logo
+*hacks.dumpsterfire.name:   Dumpster Fire
 *hacks.dymaxionmap.name:    Dymaxion Map
 *hacks.energystream.name:   Energy Stream
 *hacks.etruscanvenus.name:  Etruscan Venus
@@ -648,6 +655,8 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.gravitywell.name:    Gravity Well
 *hacks.hexstrut.name:       Hex Strut
 *hacks.hextrail.name:       Hex Trail
+*hacks.highvoltage.name:    High Voltage
+*hacks.hopffibration.name:  Hopf Fibration
 *hacks.ifs.name:            IFS
 *hacks.imsmap.name:         IMS Map
 *hacks.jigglypuff.name:     Jiggly Puff
@@ -670,6 +679,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.pacman.name:         Pac-Man
 *hacks.papercube.name:      Paper Cube
 *hacks.photopile.name:      Photo Pile
+*hacks.platonicfolding.name:Platonic Folding
 *hacks.popsquares.name:     Pop Squares
 *hacks.projectiveplane.name:Projective Plane
 *hacks.quasicrystal.name:   Quasi-Crystal

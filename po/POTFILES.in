@@ -1,4 +1,4 @@
-# Auto-generated: Tue Oct 10 17:37:06 PDT 2023
+# Auto-generated: Mon Apr 28 12:45:42 PDT 2025
 driver/demo-Gtk-conf.c
 driver/demo-Gtk.c
 driver/demo.ui
@@ -74,6 +74,7 @@ hacks/config/distort.xml
 hacks/config/dnalogo.xml
 hacks/config/drift.xml
 hacks/config/droste.xml
+hacks/config/dumpsterfire.xml
 hacks/config/dymaxionmap.xml
 hacks/config/endgame.xml
 hacks/config/energystream.xml
@@ -131,8 +132,10 @@ hacks/config/helix.xml
 hacks/config/hexadrop.xml
 hacks/config/hexstrut.xml
 hacks/config/hextrail.xml
+hacks/config/highvoltage.xml
 hacks/config/hilbert.xml
 hacks/config/hopalong.xml
+hacks/config/hopffibration.xml
 hacks/config/hydrostat.xml
 hacks/config/hyperball.xml
 hacks/config/hypercube.xml
@@ -150,7 +153,9 @@ hacks/config/juggler3d.xml
 hacks/config/julia.xml
 hacks/config/kaleidescope.xml
 hacks/config/kaleidocycle.xml
+hacks/config/kallisti.xml
 hacks/config/klein.xml
+hacks/config/klondike.xml
 hacks/config/kumppa.xml
 hacks/config/lament.xml
 hacks/config/laser.xml
@@ -196,6 +201,7 @@ hacks/config/photopile.xml
 hacks/config/piecewise.xml
 hacks/config/pinion.xml
 hacks/config/pipes.xml
+hacks/config/platonicfolding.xml
 hacks/config/polyhedra.xml
 hacks/config/polyominoes.xml
 hacks/config/polytopes.xml

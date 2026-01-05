@@ -57,6 +57,7 @@ LOCAL_SRC_FILES := \
 
 # Some savers occupy more than one source file:
 LOCAL_SRC_FILES += \
+    hacks/ansi-tty.c \
     hacks/glx/b_draw.c \
     hacks/glx/b_lockglue.c \
     hacks/glx/b_sphere.c \
@@ -71,13 +72,18 @@ LOCAL_SRC_FILES += \
     hacks/glx/cow_tail.c \
     hacks/glx/cow_udder.c \
     hacks/glx/dolphin.c \
+    hacks/glx/dumpster_model.c \
     hacks/glx/dymaxionmap-coords.c \
     hacks/glx/gllist.c \
     hacks/glx/glschool_alg.c \
     hacks/glx/glschool_gl.c \
     hacks/glx/handsy_model.c \
     hacks/glx/headroom_model.c \
+    hacks/glx/highvoltage_model.c \
+    hacks/glx/hopfanimations.c \
     hacks/glx/involute.c \
+    hacks/glx/kallisti_model.c \
+    hacks/glx/klondike-game.c \
     hacks/glx/lament_model.c \
     hacks/glx/pipeobjs.c \
     hacks/glx/quickhull.c \
@@ -182,6 +188,7 @@ LOCAL_SRC_FILES += \
     utils/usleep.c \
     utils/utf8wc.c \
     utils/xft.c \
+    utils/xftwrap.c \
     utils/xshm.c \
     utils/yarandom.c \
 

@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 2006-2022 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2006-2023 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -475,7 +475,7 @@
   return;
 # endif
 
-  BOOL queued =
+  // BOOL queued =
   [coordinator animateAlongsideTransition:^
                (id <UIViewControllerTransitionCoordinatorContext> context) {
     // This executes repeatedly during the rotation.
@@ -1517,6 +1517,7 @@ FAIL:
 
 # ifndef HAVE_IPHONE
   int window_count = ([saverNames count] <= 1 ? 1 : 2);
+
   NSMutableArray *a = [[NSMutableArray arrayWithCapacity: window_count+1]
                         retain];
   windows = a;
