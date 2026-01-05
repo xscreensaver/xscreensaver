@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1991-2011 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1991-2012 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -299,14 +299,28 @@ xscreensaver %s, copyright (c) 1991-2008 by Jamie Zawinski <jwz@jwz.org>\n\
 }
 
 
+Bool in_signal_handler_p = 0;	/* I hate C so much... */
+
 char *
 timestring (void)
 {
-  time_t now = time ((time_t *) 0);
-  char *str = (char *) ctime (&now);
-  char *nl = (char *) strchr (str, '\n');
-  if (nl) *nl = 0; /* take off that dang newline */
-  return str;
+  if (in_signal_handler_p)
+    {
+      /* Turns out that ctime() and even localtime_r() call malloc() on Linux!
+         So we can't call them from inside SIGCHLD.  WTF.
+       */
+      static char buf[30];
+      strcpy (buf, "... ... ..   signal ....");
+      return buf;
+    }
+  else
+    {
+      time_t now = time ((time_t *) 0);
+      char *str = (char *) ctime (&now);
+      char *nl = (char *) strchr (str, '\n');
+      if (nl) *nl = 0; /* take off that dang newline */
+      return str;
+    }
 }
 
 static Bool blurb_timestamp_p = True;   /* kludge */
@@ -1190,6 +1204,10 @@ main_loop (saver_info *si)
              is holding both the mouse and keyboard grabbed, then
              we would never be able to un-blank it!  We would never
              see any events, and the display would be wedged.
+
+             In particular, without that keyboard grab, we will be
+             unable to ever read keypresses on the unlock dialog.
+             You can't unlock if you can't type your password.
 
              So, just go around the loop again and wait for the
              next bout of idleness.  (If the user remains idle, we

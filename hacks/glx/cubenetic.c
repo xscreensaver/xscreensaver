@@ -307,8 +307,6 @@ init_texture (ModeInfo *mi)
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexGeni (GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-  glTexGeni (GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
   glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
   check_gl_error("texture initialization");
 
@@ -562,7 +560,10 @@ draw_cube (ModeInfo *mi)
                  (y - 0.5) * 6,
                  (z - 0.5) * 15);
 
+    /* Do it twice because we don't track the device's orientation. */
+    glRotatef( current_device_rotation(), 0, 0, 1);
     gltrackball_rotate (cc->trackball);
+    glRotatef(-current_device_rotation(), 0, 0, 1);
 
     get_rotation (cc->rot, &x, &y, &z, !cc->button_down_p);
     glRotatef (x * 360, 1.0, 0.0, 0.0);

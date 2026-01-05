@@ -1,14 +1,18 @@
-# XScreenSaver for MacOS X, Copyright (c) 2006-2011 by Jamie Zawinski.
+# XScreenSaver for MacOS X, Copyright (c) 2006-2012 by Jamie Zawinski.
 
-XCODE_TARGET = "All Savers"
-XCODEBUILD=/Developer/usr/bin/xcodebuild
+XCODEBUILD = /Developer/usr/bin/xcodebuild
+TARGETS    = -target "All Savers"
+ARCH       = -arch i386 -arch x86_64
+CERT       = 'Jamie Zawinski'
+CERT       = 'iPhone Developer: Jamie Zawinski (Y5M82TL69N)'
+THUMBDIR   = $(HOME)/www/xscreensaver/screenshots/
 
 default: release
 all: debug release
 
 clean:
 	-rm -rf build
-#	cd ..; $(XCODEBUILD) -target $(XCODE_TARGET) clean
+#	cd ..; $(XCODEBUILD) -target $(TARGETS) clean
 
 distclean:
 	-rm -f config.status config.cache config.log \
@@ -19,18 +23,18 @@ distclean:
 distdepend:: update_plist_version
 
 debug: distdepend
-	cd ..; $(XCODEBUILD) -target $(XCODE_TARGET) -configuration Debug   build
+	cd ..; $(XCODEBUILD) $(ARCH) $(TARGETS) -configuration Debug   build
 
 release:: distdepend
-	cd ..; $(XCODEBUILD) -target $(XCODE_TARGET) -configuration Release build
+	cd ..; $(XCODEBUILD) $(ARCH) $(TARGETS) -configuration Release build
 
 release:: check_versions
-
+release:: update_thumbs
 release:: sign
 
 sign:
 	@for f in build/Release/*.{saver,app} ; do \
-	  codesign -vfs 'Jamie Zawinski' $$f ; \
+	  codesign -vfs $(CERT) $$f ; \
 	 done
 
 check_versions:
@@ -53,6 +57,14 @@ check_versions:
   if [ "$$RESULT" = 0 ]; then echo "Versions match ($$V2)" ; fi ;	\
   exit $$RESULT
 
+update_thumbs::
+	./update-thumbnail.pl $(THUMBDIR) build/Release/*.saver
+
+
+# Arrrrgh
+ios_function_tables.h::
+	@./build-fntable.pl build/Debug-iphoneos/XScreenSaver.app $@
+
 
 echo_tarfiles:
 	@echo `find . \
@@ -68,7 +80,7 @@ update_plist_version:
   SRC=../utils/version.h ;						      \
   V=`sed -n 's/[^0-9]*\([0-9]\.[0-9][^. ]*\).*/\1/p' $$SRC` ;		      \
   T=/tmp/xs.$$$$ ;							      \
-  for S in XScreenSaver.plist SaverRunner.plist ; do			      \
+  for S in XScreenSaver.plist SaverRunner.plist iSaverRunner.plist ; do	      \
     /bin/echo -n "Updating version number in $$S to \"$$V\"... " ;	      \
     KEYS="CFBundleVersion|CFBundleShortVersionString" ;			      \
     perl -0777 -pne							      \
@@ -82,6 +94,7 @@ update_plist_version:
     fi ;								      \
   done ;								      \
   rm $$T
+
 
 # -format UDBZ saves 4% (~1.2 MB) over UDZO.
 dmg:: distdepend check_versions
@@ -109,7 +122,7 @@ dmg:: distdepend check_versions
       perl -0 -ne							      \
      's/\\\\\\n//g; m/^RETIRED_GL_EXES\s*=\s*(.*)$$/m && print "$$1\n"'	      \
       ../hacks/glx/Makefile.in ;					      \
-     echo savertester` ;						      \
+     echo xscreensaver` ;						      \
 									      \
   for f in $$SRC/*.{saver,app} $$EXTRAS ; do				      \
    ok=yes ;								      \

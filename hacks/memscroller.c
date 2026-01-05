@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2002, 2004, 2006 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 2002-2012 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -20,6 +20,10 @@
 
 #undef countof
 #define countof(x) (sizeof(x)/sizeof(*(x)))
+
+#ifndef USE_IPHONE
+# define READ_FILES
+#endif
 
 typedef struct {
   int which;
@@ -163,7 +167,9 @@ memscroller_init (Display *dpy, Window window)
   s = 0;
 
 
+# ifdef READ_FILES
   st->filename = get_string_resource (dpy, "filename", "Filename");
+# endif
 
   if (!st->filename ||
       !*st->filename ||
@@ -171,12 +177,16 @@ memscroller_init (Display *dpy, Window window)
       !strcasecmp (st->filename, "(mem)") ||
       !strcasecmp (st->filename, "(memory)"))
     st->seed_mode = SEED_RAM;
+# ifdef READ_FILES
   else if (st->filename &&
            (!strcasecmp (st->filename, "(rand)") ||
             !strcasecmp (st->filename, "(random)")))
     st->seed_mode = SEED_RANDOM;
   else
     st->seed_mode = SEED_FILE;
+# else
+  st->seed_mode = SEED_RANDOM;
+# endif
 
   st->nscrollers = 3;
   st->scrollers = (scroller *) calloc (st->nscrollers, sizeof(scroller));
@@ -270,6 +280,7 @@ reshape_memscroller (state *st)
 
 
 
+# ifdef READ_FILES
 static void
 open_file (state *st)
 {
@@ -288,6 +299,7 @@ open_file (state *st)
       exit (1);
     }
 }
+#endif
 
 
 static unsigned int
@@ -416,6 +428,7 @@ more_bits (state *st, scroller *sc)
       pv = PACK();
       break;
 
+# ifdef READ_FILES
     case SEED_FILE:
       {
         int i;
@@ -460,6 +473,7 @@ more_bits (state *st, scroller *sc)
         pv = PACK();
       }
       break;
+# endif /* READ_FILES */
 
     default:
       abort();
@@ -604,7 +618,7 @@ static const char *memscroller_defaults [] = {
   ".foreground:		   #00FF00",
   "*borderSize:		   2",
 
-#ifdef HAVE_COCOA
+#if defined(HAVE_COCOA) && !defined(USE_IPHONE)
   ".font1:		   OCR A Std 192, Lucida Console 192",
   ".font2:		   OCR A Std 144, Lucida Console 144",
   ".font3:		   OCR A Std 128, Lucida Console 128",

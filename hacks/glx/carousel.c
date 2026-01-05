@@ -1,4 +1,4 @@
-/* carousel, Copyright (c) 2005-2011 Jamie Zawinski <jwz@jwz.org>
+/* carousel, Copyright (c) 2005-2012 Jamie Zawinski <jwz@jwz.org>
  * Loads a sequence of images and rotates them around.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -520,8 +520,19 @@ loading_msg (ModeInfo *mi, int n)
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
-  gluOrtho2D(0, MI_WIDTH(mi), 0, MI_HEIGHT(mi));
 
+  {
+    double rot = current_device_rotation();
+    glRotatef(rot, 0, 0, 1);
+    if ((rot >  45 && rot <  135) ||
+        (rot < -45 && rot > -135))
+      {
+        GLfloat s = MI_WIDTH(mi) / (GLfloat) MI_HEIGHT(mi);
+        glScalef (s, 1/s, 1);
+      }
+  }
+
+  glOrtho(0, MI_WIDTH(mi), 0, MI_HEIGHT(mi), -1, 1);
   glTranslatef ((MI_WIDTH(mi)  - ss->loading_sw) / 2,
                 (MI_HEIGHT(mi) - ss->loading_sh) / 2,
                 0);
@@ -831,6 +842,8 @@ draw_carousel (ModeInfo *mi)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glPushMatrix();
+
+  glRotatef(current_device_rotation(), 0, 0, 1);
 
 
   /* Run the startup "un-shrink" animation.

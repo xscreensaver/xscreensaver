@@ -1,4 +1,4 @@
-/* gltrackball, Copyright (c) 2002-2008 Jamie Zawinski <jwz@jwz.org>
+/* gltrackball, Copyright (c) 2002-2012 Jamie Zawinski <jwz@jwz.org>
  * GL-flavored wrapper for trackball.c
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -18,14 +18,18 @@
 # include "config.h"
 #endif
 
-#ifdef HAVE_COCOA
-# include <OpenGL/gl.h>
-#else
+#ifndef HAVE_COCOA
 # include <GL/gl.h>
 #endif
 
+#ifdef HAVE_JWZGLES
+# include "jwzgles.h"
+#endif /* HAVE_JWZGLES */
+
 #include "trackball.h"
 #include "gltrackball.h"
+
+extern double current_device_rotation (void);  /* Bah, it's in fps.h */
 
 struct trackball_state {
   int x, y;
@@ -52,6 +56,7 @@ gltrackball_reset (trackball_state *ts)
   memset (ts, 0, sizeof(*ts));
   trackball (ts->q, 0, 0, 0, 0);
 }
+
 
 /* Begin tracking the mouse: Call this when the mouse button goes down.
    x and y are the mouse position relative to the window.

@@ -239,7 +239,7 @@ MEN_OSX		= xscreensaver-getimage-desktop.man pdf2jpeg.man
 MEN		= $(MEN_1) @MEN_OSX@
 
 EXTRAS		= README Makefile.in \
-		  XScreenSaver.ad.in XScreenSaver-Xm.ad xscreensaver.pam \
+		  XScreenSaver.ad.in XScreenSaver-Xm.ad xscreensaver.pam.in \
 		  xscreensaver-demo.glade2 xscreensaver-demo.glade2p \
 		  screensaver-properties.desktop.in \
 		  .gdbinit
@@ -414,8 +414,8 @@ uninstall-man:
 	       rm -f $(install_prefix)$(manNdir)/$$instname* ;		\
 	done
 
-install-pam:
-	@src="$(srcdir)/xscreensaver.pam" ;				\
+install-pam: xscreensaver.pam
+	@src="xscreensaver.pam" ;				\
 	dest=`sed -n 's/.*PAM_SERVICE_NAME[ 	]*"\([^"]*\)".*$$/\1/p'	\
 	   < ../config.h` ;						\
 	dir="$(install_prefix)$(PAM_DIR)" ;				\
@@ -673,11 +673,13 @@ update_ad_version::
   files="XScreenSaver.ad.in ../hacks/config/README ../OSX/bindist.rtf" ;    \
   U=$(UTILS_SRC)/version.h ;						    \
   V=`sed -n 's/[^0-9]*\([0-9]\.[0-9][^. ]*\).*/\1/p' < $$U` ;		    \
+  Y=`date '+%Y'` ;							    \
   D=`date '+%d-%b-%Y'` ;						    \
   for S in $$files ; do							    \
     T=/tmp/xs.$$$$ ;							    \
     sed -e "s/\(.*version \)[0-9][0-9]*\.[0-9]*[ab]*[0-9]*\(.*\)/\1$$V\2/"  \
         -e "s/\([0-9][0-9]-[A-Z][a-z][a-z]-[0-9][0-9][0-9]*\)/$$D/"	    \
+        -e "s/\( [0-9][0-9][0-9][0-9]-\)[0-9][0-9][0-9][0-9] /\1$$Y /"	    \
       < $$S > $$T ;							    \
     if cmp -s $$S $$T ; then						    \
       true ;								    \
@@ -875,21 +877,7 @@ xdpyinfo: xdpyinfo.o
 # DO NOT DELETE: updated by make distdepend
 
 demo-Gtk-conf.o: ../config.h
-demo-Gtk-conf.o: $(srcdir)/demo-Gtk-conf.h
-demo-Gtk-conf.o: $(UTILS_SRC)/xscreensaver-intl.h
-demo-Gtk.o: XScreenSaver_ad.h
 demo-Gtk.o: ../config.h
-demo-Gtk.o: $(srcdir)/demo-Gtk-conf.h
-demo-Gtk.o: $(srcdir)/demo-Gtk-support.h
-demo-Gtk.o: $(srcdir)/demo-Gtk-widgets.h
-demo-Gtk.o: $(srcdir)/prefs.h
-demo-Gtk.o: $(srcdir)/remote.h
-demo-Gtk.o: $(srcdir)/types.h
-demo-Gtk.o: $(UTILS_SRC)/resources.h
-demo-Gtk.o: $(UTILS_SRC)/usleep.h
-demo-Gtk.o: $(UTILS_SRC)/version.h
-demo-Gtk.o: $(UTILS_SRC)/visual.h
-demo-Gtk.o: $(UTILS_SRC)/xscreensaver-intl.h
 demo-Gtk-support.o: ../config.h
 demo-Gtk-support.o: $(srcdir)/demo-Gtk-support.h
 demo-Gtk-widgets.o: ../config.h
