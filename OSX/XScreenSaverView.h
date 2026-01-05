@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2006-2020 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2006-2021 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -29,7 +29,6 @@
 #else
 # import <Cocoa/Cocoa.h>
 # import <ScreenSaver/ScreenSaver.h>
-//# define USE_TOUCHBAR
 #endif
 
 
@@ -37,6 +36,11 @@
 #import "PrefsReader.h"
 
 #ifdef HAVE_IPHONE
+
+# if TARGET_OS_TV && !defined(HAVE_TVOS)
+   // We aren't receiving this from Xcode when compiling libjwxyz.a for tvOS.
+#  define HAVE_TVOS 1
+# endif
 
 @class XScreenSaverView;
 
@@ -67,10 +71,10 @@
 # define BACKBUFFER_OPENGL
 
 @interface XScreenSaverView : ScreenSaverView
-# ifdef HAVE_IPHONE
+# if defined(HAVE_TVOS)
+			      <UIApplicationDelegate>
+# elif defined(HAVE_IPHONE)
 			      <UIAlertViewDelegate>
-# elif defined(USE_TOUCHBAR)
-			      <NSTouchBarDelegate>
 # endif
 {
   struct xscreensaver_function_table *xsft;
@@ -112,11 +116,6 @@
   NSOpenGLPixelFormat *pixfmt;
 
 # endif // !HAVE_IPHONE
-
-# ifdef USE_TOUCHBAR
-  XScreenSaverView *touchbar_view;
-  BOOL touchbar_p;
-# endif
 
   NSOpenGLContext *ogl_ctx;      // OpenGL rendering context
 

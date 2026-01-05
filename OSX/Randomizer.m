@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 2020-2021 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2020-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -15,6 +15,7 @@
 
 #import "Randomizer.h"
 #import "yarandom.h"
+#include <sys/sysctl.h>
 
 # undef ya_rand_init
 # undef abort
@@ -27,65 +28,123 @@
 #define CYCLE_DEFAULT (5 * 60)
 
 
-// Returns a string that (hopefully) uniquely identifies the NSScreen,
-// and will survive reboots.  Also the pretty name of that screen.
+// Returns a string that (hopefully) uniquely identifies the display hardware
+// associated with this NSScreen in such a way that it will persist across
+// reboots.  Also the pretty name of that screen.
 //
 static NSArray *
 screen_id (NSScreen *screen)
 {
+  NSData   *edid = NULL;
+  NSString *name = NULL;
+
   NSDictionary *d = [screen deviceDescription];
 
-  // This is the CGDirectDisplayID. "A display ID can persist across
-  // processes and typically remains constant until the machine is
-  // restarted."  It does not always persist across reboots.
+  // This is the CGDirectDisplayID. "A display ID can persist across processes
+  // and typically remains constant until the machine is restarted."  It does
+  // not always persist across reboots.
   //
   unsigned long id = [[d objectForKey:@"NSScreenNumber"] unsignedLongValue];
 
-  // The EDID of a display contains manufacturer, product ID, and most
-  // importantly, serial number.  So that should persist.
+  // Aug 2022: CGDisplayIOServicePort has been deprecated since 10.9, and as
+  // of 12.5, it always returns NULL, at least on M1 hardware.  Perhaps this
+  // should be #if __x86_64__ or !__arm64__?
   //
-  io_service_t display_port = CGDisplayIOServicePort(id);
-  if (display_port == MACH_PORT_NULL) {
-    // No physical device to get a name from... are we in Screen Sharing?
-    NSLog(@"no device for display %lu", id);
-    return @[ [NSString stringWithFormat:@"%08lX", id],
-              @"unknown" ];
+# pragma clang diagnostic push   // "CGDisplayIOServicePort deprecated in 10.9"
+# pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  io_service_t dport = CGDisplayIOServicePort (id);
+# pragma clang diagnostic pop
+
+  if (dport != MACH_PORT_NULL) {
+    NSDictionary *d2 = (NSDictionary *)  // CFDictionaryRef
+      IODisplayCreateInfoDictionary (dport, kIODisplayOnlyPreferredName);
+
+    // This returns the EDID as a 256-bytes binary blob that contains, among
+    // other things, the manufacturer, product ID, and unique serial number.
+    //
+    edid = [d2 objectForKey:[NSString stringWithUTF8String:kIODisplayEDIDKey]];
+
+    // Now get the human-readable name of the screen.
+    // The dict has an entry like: "DisplayProductName": { "en_US": "iMac" };
+    //
+    NSDictionary *names =
+      [d2 objectForKey: [NSString stringWithUTF8String:kDisplayProductName]];
+    if (names && [names count] > 0)
+      name = [[names objectForKey:[[names allKeys] objectAtIndex:0]] retain];
+
+    [d2 release];
   }
 
-  NSDictionary *d2 = (NSDictionary *)  // CFDictionaryRef
-    IODisplayCreateInfoDictionary (display_port, kIODisplayOnlyPreferredName);
-  NSData *edid = [d2 objectForKey:
-                       [NSString stringWithUTF8String:kIODisplayEDIDKey]];
-  NSString *b64;
-  if (!edid) {
-    // For ancient monitors and safe-mode graphics drivers.
-    b64 = [NSString stringWithFormat:@"%08lX", id];
-  } else {
-    // But the EDID is 256 binary bytes. That's annoyingly big.
-    // So let's hash and base64 it for use as the resource key.
-    // That's 43 characters.
+  if (! edid) {
     //
+    // If we weren't able to retrieve the full 256-byte EDID above, hopefully
+    // these three numbers also uniquely identify the hardware.
+    //
+    // However, they won't always.  I have an "EDID Ghost" adapter (a dongle
+    // to prevent resolution negotiation) whose serial number is 0.  Maybe if
+    // I had two of them, even the 256-byte version would be non-unique.
+    //
+    // We could also dig through IOServiceMatching("IOMobileFramebuffer") in
+    // order to find more info about the displays in the "DisplayAttributes"
+    // dictionary (see "ioreg -lw0") but that probably won't give us anything
+    // more unique than the above.  In particular, that dict contains an
+    // entry for "EDID UUID" which is a hex string of 16 bytes that does
+    // *not* distinguish between two different monitors of the same model.
+    //
+    uint32_t bin[3];
+    bin[0] = CGDisplayVendorNumber (id);
+    bin[1] = CGDisplayModelNumber  (id);
+    bin[2] = CGDisplaySerialNumber (id);
+    if (bin[0] || bin[1] || bin[2])
+      edid = [NSData dataWithBytes:bin length:sizeof(bin)];
+  }
+
+  if (!name || !name.length) {
+    //
+    // We might have gotten the name from CGDisplayIOServicePort ->
+    // kIODisplayOnlyPreferredName.  If not, use the localized display name.
+    // which was introduced in macOS 10.15.  Maybe those are identical?
+    //
+    if (@available (macOS 10.15, *))
+      name = [screen localizedName];
+    if (!name || !name.length)
+      name = @"unknown";
+  }
+
+  if (! edid) {
+    //
+    // If we weren't able to find the EDID at all, use the display name, size
+    // and position, and hope that is invariant across boots.  Good luck!
+    //
+    edid = [[NSString stringWithFormat:@"%dx%d @ %d+%d, %@",
+                      (int) screen.frame.size.width,
+                      (int) screen.frame.size.height,
+                      (int) screen.frame.origin.x, 
+                      (int) screen.frame.origin.y,
+                      name]
+             dataUsingEncoding: NSUTF8StringEncoding];
+  }
+
+  //
+  // The EDID might be only 12 bytes, or it might be 256 bytes, which is
+  // annoyingly big.  Or somewhere in between.  So if it's more than 32 bytes,
+  // hash it first.  After base64, the resource key will be no more than 43
+  // characters.
+  //
+  if (edid.length > CC_SHA256_DIGEST_LENGTH) {
     const char *bytes = [edid bytes];
     unsigned char out[CC_SHA256_DIGEST_LENGTH + 1];
     CC_SHA256 (bytes, edid.length, out);
-    b64 = [[NSData dataWithBytes:bytes length:CC_SHA256_DIGEST_LENGTH]
-           base64EncodedStringWithOptions:0];
-    // Replace irritating b64 characters with safer ones.
-    b64 = [[[b64 stringByReplacingOccurrencesOfString:@"+" withString:@"-"]
-                 stringByReplacingOccurrencesOfString:@"/" withString:@"_"]
-                 stringByReplacingOccurrencesOfString:@"=" withString:@""];
+    edid = [NSData dataWithBytes: out
+                          length: CC_SHA256_DIGEST_LENGTH];
   }
 
-  // Now get the human-readable name of the screen.
-  // The dict has an entry like: "DisplayProductName": { "en_US": "iMac" };
-  //
-  NSString *name = @"unknown";
-  NSDictionary *names =
-    [d2 objectForKey: [NSString stringWithUTF8String:kDisplayProductName]];
-  if (names && [names count] > 0)
-    name = [[names objectForKey:[[names allKeys] objectAtIndex:0]] retain];
+  NSString *b64 = [edid base64EncodedStringWithOptions:0];
 
-  [d2 release];
+  // Replace irritating b64 characters with safer ones.
+  b64 = [[[b64 stringByReplacingOccurrencesOfString:@"+" withString:@"-"]
+               stringByReplacingOccurrencesOfString:@"/" withString:@"_"]
+               stringByReplacingOccurrencesOfString:@"=" withString:@""];
 
   return @[ b64, name ];  // Analyzer says name leaks?
 }
@@ -113,21 +172,11 @@ get_boolean (NSString *key, NSUserDefaultsController *prefs)
 
 
 static NSString *
-resource_key_for_name (NSString *s, BOOL screen_p)
+resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
 {
   if (screen_p) {
-    const char *name = [s UTF8String];
-    int n;
-    char dummy;
-    if (2 != sscanf (name, "Screen %d %c", &n, &dummy))
-      return 0;
-
-    NSArray *dscreens = [NSScreen screens];
-    NSScreen *sc = [dscreens objectAtIndex: n-1];
-    NSArray  *aa = screen_id (sc);
-    NSString *id = [aa objectAtIndex:0];
+    NSString *id = [screen_ids objectForKey: s];
     return [NSString stringWithFormat:@"screen_%@_disabled", id];
-
   } else {
     // Keep risky characters out of the preferences database.
     NSMutableCharacterSet *set =
@@ -179,8 +228,8 @@ resource_key_for_name (NSString *s, BOOL screen_p)
   if (p && frame.size.width >= 640)
     p = NO;
 
-  if (p && getenv("SELECTED_SAVER")) // Running under SaverTester
-    p = NO;
+//  if (p && getenv("SELECTED_SAVER")) // Running under SaverTester
+//    p = NO;
 
   self = [super initWithFrame:frame isPreview:p];
   if (! self) return 0;
@@ -308,7 +357,7 @@ resource_key_for_name (NSString *s, BOOL screen_p)
 
       [seen setObject:p forKey: [name lowercaseString]];
 
-      NSString *res = resource_key_for_name (name, FALSE);
+      NSString *res = resource_key_for_name (name, FALSE, NULL);
       BOOL disabled = get_boolean (res, prefs);
       if (disabled) {
         // NSLog(@"disabled: %@", name);
@@ -416,6 +465,11 @@ resource_key_for_name (NSString *s, BOOL screen_p)
   saver2.wantsLayer = YES;
   [saver2 retain];
   [saver2 setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+
+  // XScreenSaverView catches signals in initWithFrame (to log a backtrace)
+  // so we have to catch our signals after that.
+  [self initSignalHandlers];
+
   return saver2;
 }
 
@@ -445,28 +499,118 @@ resource_key_for_name (NSString *s, BOOL screen_p)
 // error text shows up on the screen, and after that we're hung and you
 // can't unlock the screen.  So... that's worse.
 //
-#if 0
+// But let's try re-invoking the current process on signal, and just 
+// restarting legacyScreenSaver or whatever from scratch.  Maybe that
+// will work?  Nope.  The re-exec works under SaverTester, but when
+// legacyScreenSaver is re-exec'd with the same args, the savers do
+// not re-launch.
+//
+#if 1
+
+static int saved_argc = 0;
+static char **saved_argv, *saved_execpath;
+
+
 static void
-signal_exception (int sig)
+sighandler (int sig)
 {
   signal (sig, SIG_DFL);
+
+  const char *s = "randomizer caught signal\n";
+  write (fileno (stderr), s, strlen(s));  // no fprintf in signal handler
+
+# if 0
   [[NSException exceptionWithName: NSInternalInconsistencyException
                            reason: [NSString stringWithFormat: @"Signal %s",
                                              sys_signame[sig]]
                          userInfo: nil]
     raise];
+# else
+  if (saved_argc) {
+    NSLog (@"randomizer: signal: re-executing %s", saved_execpath);
+    execvp (saved_execpath, saved_argv);
+    // Somehow after the exec, SIGTERM stops working. So that's great.
+#  undef exit
+    exit (1);
+  }
+# endif
 }
+
+static void
+catch_signal (int sig, void (*handler) (int))
+{
+  struct sigaction a;
+  a.sa_handler = handler;
+  sigemptyset (&a.sa_mask);
+  a.sa_flags = SA_NODEFER;
+
+# if 0				// This isn't working
+  a.sa_handler = SIG_IGN;
+
+  dispatch_source_t src = 
+    dispatch_source_create (DISPATCH_SOURCE_TYPE_SIGNAL, sig, 0,
+                            dispatch_get_global_queue (0, 0));
+  dispatch_source_set_event_handler (src, ^{ (*handler) (sig); });
+  dispatch_resume (src);
+# endif
+
+  if (sigaction (sig, &a, 0) < 0)
+    NSLog (@"randomizer: couldn't catch signal %d", sig);
+}
+
 
 - (void) initSignalHandlers
 {
-  signal (SIGABRT, signal_exception);
-  signal (SIGBUS,  signal_exception);
-  signal (SIGSEGV, signal_exception);
-  signal (SIGFPE,  signal_exception);
-  signal (SIGILL,  signal_exception);
-  signal (SIGIOT,  signal_exception);
-  signal (SIGSYS,  signal_exception);
+  if (! saved_argc) {
+    // Get the current process's argv from the kernel.
+
+    int mib[3] = { CTL_KERN, KERN_PROCARGS2, getpid() };
+    char *buf, *s;
+    int i;
+    size_t L;
+
+    if (sysctl (mib, 3, NULL, &L, NULL, 0) < 0) goto ERR;  // get buffer size
+    buf = malloc (L);
+    if (sysctl (mib, 3, buf, &L, NULL, 0)  < 0) goto ERR;  // get buffer data
+
+    saved_argc = ((int *) buf)[0];
+    if (saved_argc <= 0 || saved_argc > 100) goto ERR;
+    saved_argv = (char **) calloc (saved_argc + 2, sizeof (*saved_argv));
+
+    s = buf + sizeof(int);
+    saved_execpath = strdup (s);
+    while (*s) s++;
+    while (!*s) s++;		// execpath is followed by one or more nulls
+
+    for (i = 0; i < saved_argc; i++) {	// then we have null-separated argv
+      saved_argv[i] = strdup (s);
+      while (*s) s++; s++;
+    }
+    saved_argv[i] = 0;
+  }
+
+//catch_signal (SIGINT,  sighandler);  // shell ^C
+//catch_signal (SIGQUIT, sighandler);  // shell ^|
+  catch_signal (SIGILL,  sighandler);
+  catch_signal (SIGTRAP, sighandler);
+  catch_signal (SIGABRT, sighandler);
+  catch_signal (SIGEMT,  sighandler);
+  catch_signal (SIGFPE,  sighandler);
+  catch_signal (SIGBUS,  sighandler);
+  catch_signal (SIGSEGV, sighandler);
+  catch_signal (SIGSYS,  sighandler);
+//catch_signal (SIGTERM, sighandler);  // kill default
+//catch_signal (SIGKILL, sighandler);  // -9 untrappable
+  catch_signal (SIGXCPU, sighandler);
+  catch_signal (SIGXFSZ, sighandler);
+  NSLog (@"randomizer: installed signal handlers for %s", saved_execpath);
+  return;
+
+ ERR:
+  saved_argc = 0;
+  NSLog (@"randomizer: error getting argv");
 }
+
 #else
 - (void) initSignalHandlers {}
 #endif
@@ -686,7 +830,6 @@ signal_exception (int sig)
   NSLog(@"cycle timer");
   if (cycle_timer) [cycle_timer invalidate];
   cycle_timer = 0;
-  [self initSignalHandlers];
   [crash_label removeFromSuperview];
   [crash_label setStringValue:@""];
   [self fadeSaverOut];
@@ -783,6 +926,15 @@ signal_exception (int sig)
 
 - (void)animateOneFrame
 {
+#if 0
+  if (! (random() % 2000)) {
+    NSLog(@"randomizer: BOOM ####");
+    // int x = 123; char segv = * ((char *)x);
+    #undef abort
+    abort();
+  }
+#endif
+
   if (saver1) {
     @try { [saver1 animateOneFrame]; }
     @catch (NSException *e) {
@@ -892,7 +1044,9 @@ signal_exception (int sig)
 {
   NSTableView *screen_table, *saver_table;
   NSTextField *timerLabel;
-  NSArray *screens, *savers;
+  NSArray *savers;
+  NSArray *screen_names;     // Readable, sortable strings printed in the list
+  NSDictionary *screen_ids;  // screen_names -> resource id
   NSUserDefaultsController *prefs;
 }
 
@@ -909,8 +1063,8 @@ signal_exception (int sig)
   NSRect frame;
   frame.origin.x = 0;
   frame.origin.y = 0;
-  frame.size.width  = 400;
-  frame.size.height = 480;
+  frame.size.width  = 460;
+  frame.size.height = 520;
   [self setFrame:frame display:NO];
   self.minSize = frame.size;
   frame.size.height = 99999;
@@ -1069,23 +1223,57 @@ signal_exception (int sig)
 
   // Screen table view
 
+  NSArray *dscreens = [NSScreen screens];
+
+  NSMutableDictionary *screen_ords =
+    [NSMutableDictionary dictionaryWithCapacity: [dscreens count]];
+
   {
-    NSArray *dscreens = [NSScreen screens];
-    NSMutableArray *s2 = [NSMutableArray arrayWithCapacity: [dscreens count]];
+    // Save the original number of the screens.
     for (int i = 0; i < [dscreens count]; i++) {
       NSScreen *sc = [dscreens objectAtIndex: i];
-      NSArray  *aa = screen_id (sc);
-      NSString *desc = [aa objectAtIndex:1];
-      [s2 addObject: [NSString stringWithFormat:
-                                 @"Screen %d - %d x %d @ %d, %d (%@)",
-                               (i + 1),
-                               (int) sc.frame.size.width,
-                               (int) sc.frame.size.height,
-                               (int) sc.frame.origin.x, 
-                               (int) sc.frame.origin.y,
-                               desc]];
+      NSDictionary *d = [sc deviceDescription];
+      NSNumber *sid = [d objectForKey:@"NSScreenNumber"];
+      [screen_ords setObject: [NSNumber numberWithInteger:i] forKey: sid];
     }
-    screens = [s2 retain];
+
+    // Sort the screens left to right, then top to bottom.
+    dscreens = [dscreens sortedArrayUsingComparator:
+                           ^ NSComparisonResult (id a, id b) {
+        NSScreen *sa = a;
+        NSScreen *sb = b;
+        return (sa.frame.origin.x > sb.frame.origin.x ? NSOrderedDescending :
+                sa.frame.origin.x < sb.frame.origin.x ? NSOrderedAscending  :
+                sa.frame.origin.y > sb.frame.origin.y ? NSOrderedDescending :
+                sa.frame.origin.y < sb.frame.origin.y ? NSOrderedAscending  :
+                NSOrderedSame);
+      }];
+
+    NSMutableArray *sn = [NSMutableArray arrayWithCapacity: [dscreens count]];
+    NSMutableDictionary *si = [NSMutableDictionary
+                                dictionaryWithCapacity:[dscreens count]];
+    for (int i = 0; i < [dscreens count]; i++) {
+      NSScreen *sc = [dscreens objectAtIndex: i];
+      NSDictionary *d = [sc deviceDescription];
+      NSNumber *sid = [d objectForKey:@"NSScreenNumber"];
+      int ord = [(NSNumber *) [screen_ords objectForKey: sid] integerValue];
+
+      NSArray  *aa = screen_id (sc);
+      NSString *id   = [aa objectAtIndex:0];
+      NSString *desc = [aa objectAtIndex:1];
+      NSString *name = [NSString stringWithFormat:
+                                   @"Screen %d - %d x %d @ %d, %d (%@)",
+                                 (ord + 1),
+                                 (int) sc.frame.size.width,
+                                 (int) sc.frame.size.height,
+                                 (int) sc.frame.origin.x, 
+                                 (int) sc.frame.origin.y,
+                                 desc];
+      [sn addObject: name];
+      [si setObject:id forKey:name];
+    }
+    screen_names = [sn retain];
+    screen_ids   = [si retain];
   }
 
   NSScrollView *sv = [[NSScrollView alloc] init];
@@ -1125,13 +1313,13 @@ signal_exception (int sig)
   frame.size.width = panel.frame.size.width - margin * 2;
   frame.size.height = stab.frame.size.height;
   frame.size.height += line_height * 2;  // tab headers, sigh
-  int max = line_height * 5;
+  int max = line_height * 10;  // 7 = 3 lines??
   if (frame.size.height > max) frame.size.height = max;
   frame.origin.x = margin;
   frame.origin.y = hlab.frame.origin.y - frame.size.height - margin;
   sv.frame = frame;
 
-  if ([screens count] <= 1) {  // Hide the screens list if there's only one.
+  if ([screen_names count] <= 1) {  // Hide the screens list if only one.
     [sv removeFromSuperview];
     frame.origin.y += frame.size.height + margin;
     frame.size.height = 0;
@@ -1270,7 +1458,7 @@ signal_exception (int sig)
 - (NSInteger)numberOfRowsInTableView:(NSTableView *) tv
 {
   if (tv == screen_table) {
-    return [screens count];
+    return [screen_names count];
   } else if (tv == saver_table) {
     return [savers count];
   } else {
@@ -1308,9 +1496,9 @@ signal_exception (int sig)
 {
   BOOL screen_p = (tv == screen_table);
   NSString *s = (screen_p
-                 ? [screens objectAtIndex: y]
+                 ? [screen_names objectAtIndex: y]
                  : [savers objectAtIndex: y]);
-  return resource_key_for_name (s, screen_p);
+  return resource_key_for_name (s, screen_p, screen_ids);
 }
 
 
@@ -1324,7 +1512,7 @@ signal_exception (int sig)
 
   NSString *s;
   if (tv == screen_table) {
-    s = [screens objectAtIndex: y];
+    s = [screen_names objectAtIndex: y];
   } else {  // if (tv == saver_table) {
     s = [savers objectAtIndex: y];
   }
@@ -1366,7 +1554,7 @@ signal_exception (int sig)
     sortDescriptorsDidChange: (NSArray *) od
 {
   BOOL screen_p = (tv == screen_table);
-  NSArray *aa = (screen_p ? screens : savers);
+  NSArray *aa = (screen_p ? screen_names : savers);
 
   // Only one column should be sorting at a time.  Surely this is the wrong
   // right way to accomplish this, as I don't know which of the two columns
@@ -1391,7 +1579,7 @@ signal_exception (int sig)
 
       NSMutableDictionary *cc = [[NSMutableDictionary alloc] init];
       for (NSString *s in aa) {
-        NSString *res = resource_key_for_name (s, screen_p);
+        NSString *res = resource_key_for_name (s, screen_p, screen_ids);
         BOOL checked = !get_boolean (res, prefs);
         [cc setObject:[NSNumber numberWithBool: checked] forKey:s];
       }
@@ -1410,8 +1598,8 @@ signal_exception (int sig)
 
   [aa retain];
   if (tv == screen_table) {
-    [screens release];
-    screens = aa;
+    [screen_names release];
+    screen_names = aa;
   } else if (tv == saver_table) {
     [savers release];
     savers = aa;
@@ -1424,7 +1612,7 @@ signal_exception (int sig)
 - (void) selectAllAction:(NSObject *)arg selected:(BOOL)selected
 {
   for (NSString *s in savers) {
-    NSString *res = resource_key_for_name (s, NO);
+    NSString *res = resource_key_for_name (s, NO, screen_ids);
     if (selected)  // checkmark means no "disabled" entry in prefs
       [[prefs defaults] removeObjectForKey: res];
     else
@@ -1456,7 +1644,8 @@ signal_exception (int sig)
 
 - (void) dealloc
 {
-  [screens release];
+  [screen_names release];
+  [screen_ids release];
   [savers release];
   [super dealloc];
 }

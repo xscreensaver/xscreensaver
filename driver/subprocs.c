@@ -1,5 +1,5 @@
 /* subprocs.c --- choosing, spawning, and killing screenhacks.
- * xscreensaver, Copyright © 1991-2021 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright © 1991-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -461,6 +461,16 @@ xt_sigterm_handler (XtPointer data, XtSignalId *id)
         fprintf (stderr, "%s: %s: unblanking\n", blurb(), 
                  signal_name (sigterm_received));
 
+       /* We are in the process of shutting down and are about to exit,
+          so don't accidentally re-launch hacks. */
+      si->terminating_p = True;
+
+      if (si->watchdog_id)
+        {
+          XtRemoveTimeOut (si->watchdog_id);
+          si->watchdog_id = 0;
+        }
+
       /* Kill before unblanking, to stop drawing as soon as possible. */
       for (i = 0; i < si->nscreens; i++)
         {
@@ -831,7 +841,11 @@ spawn_screenhack (saver_screen_info *ssi)
                  "not launching a hack\n", blurb(), ssi->number);
       ssi->current_hack = -1;
 
-      /* Hooray, this doesn't actually clear the window if it was OpenGL. */
+      /* Hooray, this doesn't actually clear the window if it was OpenGL.
+         And some X servers apparently ignore XClearWindow if the monitor is
+         powered off, meaning when the monitor powers back on, the stale bits
+         that we just tried to erase are still in the frame buffer.
+       */
       XClearWindow (si->dpy, ssi->screensaver_window);
 
       /* Even though we aren't launching a hack, do launch the cycle timer,
@@ -947,6 +961,18 @@ spawn_screenhack (saver_screen_info *ssi)
 	    goto AGAIN;
 	}
 
+      if (getuid() == (uid_t) 0 || geteuid() == (uid_t) 0)
+        /* Prior to XScreenSaver 6, if running as root, we would change the
+           effective uid to the user "nobody" or "daemon" or "noaccess",
+           but even that was just encouraging bad behavior.  Don't log in
+           as root. */
+        {
+          fprintf (stderr, "%s: %d: running as root: not launching hacks.\n",
+                   blurb(), ssi->number);
+          screenhack_obituary (ssi, "", "XScreenSaver: Don't log in as root.");
+          goto DONE;
+        }
+
       forked = fork_and_exec (ssi, hack->command);
       switch ((int) forked)
 	{
@@ -977,6 +1003,13 @@ spawn_screenhack (saver_screen_info *ssi)
     XDeleteProperty (si->dpy, ssi->screensaver_window, XA_WM_COMMAND);
 
   store_saver_status (si);  /* store current hack numbers */
+
+  /* If there is no hack running, clear the window, in case there are
+     stale bits left over because the server chose to ignore our earlier
+     call to XClearWindow while the monitor was powered down.
+   */
+  if (!ssi->pid && !ssi->error_dialog)
+    XClearWindow (si->dpy, ssi->screensaver_window);
 
   /* Now that the hack has launched, queue a timer to cycle it. */
   if (!si->demoing_p && p->cycle)
@@ -1054,7 +1087,13 @@ kill_screenhack (saver_screen_info *ssi)
     kill_job (si, ssi->pid, SIGTERM);
   ssi->pid = 0;
 
-  /* Hooray, this doesn't actually clear the window if it was OpenGL. */
+  /* Do not clear ssi->current_hack here, see watchdog_timer(). */
+
+  /* Hooray, this doesn't actually clear the window if it was OpenGL.
+     And some X servers apparently ignore XClearWindow if the monitor is
+     powered off, meaning when the monitor powers back on, the stale bits
+     that we just tried to erase are still in the frame buffer.
+   */
   XClearWindow (si->dpy, ssi->screensaver_window);
 }
 

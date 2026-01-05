@@ -4,8 +4,8 @@
 !            a screen saver and locker for the X window system
 !                            by Jamie Zawinski
 !
-!                              version 6.01
-!                              09-Jun-2021
+!                              version 6.04
+!                              29-May-2022
 !
 ! See "man xscreensaver" for more info.  The latest version is always
 ! available at https://www.jwz.org/xscreensaver/
@@ -58,7 +58,7 @@
 *ignoreUninstalledPrograms: False
 *authWarningSlack:	20
 
-*textMode:		file
+*textMode:		url
 *textLiteral:		XScreenSaver
 *textFile:		@DEFAULT_TEXT_FILE@
 *textProgram:		fortune
@@ -362,7 +362,7 @@ XScreenSaver.bourneShell:		/bin/sh
 				munch -root				    \n\
 				penrose -root				    \n\
 @GL_KLUDGE@ GL: 				pipes -root				    \n\
-				rd-bomb -root				    \n\
+				rdbomb -root				    \n\
 @GL_KLUDGE@ GL: 				rubik -root				    \n\
 -				sierpinski -root			    \n\
 				slip -root				    \n\
@@ -565,7 +565,13 @@ XScreenSaver.bourneShell:		/bin/sh
 @GL_KLUDGE@ GL: 				etruscanvenus -root			    \n\
 @GL_KLUDGE@ GL: 				gibson -root				    \n\
 @GL_KLUDGE@ GL: 				headroom -root				    \n\
-@GL_KLUDGE@ GL: 				sphereeversion -root			    \n
+@GL_KLUDGE@ GL: 				sphereeversion -root			    \n\
+				binaryhorizon -root			    \n\
+				marbling -root				    \n\
+@GL_KLUDGE@ GL: 				chompytower -root			    \n\
+@GL_KLUDGE@ GL: 				mapscroller -root			    \n\
+@GL_KLUDGE@ GL: 				nakagin -root				    \n\
+@GL_KLUDGE@ GL: 				squirtorus -root			    \n
 
 
 
@@ -580,6 +586,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.antmaze.name:        Ant Maze
 *hacks.antspotlight.name:   Ant Spotlight
 *hacks.apple2.name:         Apple ][
+*hacks.binaryhorizon.name:  Binary Horizon
 *hacks.binaryring.name:     Binary Ring
 *hacks.blinkbox.name:       Blink Box
 *hacks.blitspin.name:       Blit Spin
@@ -589,6 +596,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.bsod.name:           BSOD
 *hacks.bubble3d.name:       Bubble 3D
 *hacks.ccurve.name:         C Curve
+*hacks.chompytower.name:    Chompy Tower
 *hacks.cityflow.name:       City Flow
 *hacks.cloudlife.name:      Cloud Life
 *hacks.companioncube.name:  Companion Cube
@@ -641,6 +649,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.lcdscrub.name:       LCD Scrub
 *hacks.lmorph.name:         LMorph
 *hacks.m6502.name:          m6502
+*hacks.mapscroller.name:    Map Scroller
 *hacks.maze3d.name:         Maze 3D
 *hacks.memscroller.name:    Mem Scroller
 *hacks.metaballs.name:      Meta Balls
@@ -659,8 +668,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.quasicrystal.name:   Quasi-Crystal
 *hacks.raverhoop.name:      Raver Hoop
 *hacks.razzledazzle.name:   Razzle Dazzle
-*hacks.rd-bomb.name:        RD-Bomb
-*hacks.rd-bomb.name:        RD-Bomb
+*hacks.rdbomb.name:         RD-Bomb
 *hacks.romanboy.name:       Roman Boy
 *hacks.rotzoomer.name:      Rot Zoomer
 *hacks.rubikblocks.name:    Rubik Blocks

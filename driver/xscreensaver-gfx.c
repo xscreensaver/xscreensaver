@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 1991-2021 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 1991-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -35,6 +35,10 @@
 #include <netdb.h>	/* for gethostbyname() */
 #include <sys/types.h>
 #include <pwd.h>
+
+#ifndef HAVE_XINPUT
+# error The XInput2 extension is required
+#endif
 
 #include <X11/extensions/XInput2.h>
 
@@ -86,11 +90,15 @@ maybe_reload_init_file (saver_info *si)
   saver_preferences *p = &si->prefs;
   if (init_file_changed_p (p))
     {
+      Bool ov = p->verbose_p;
       if (p->verbose_p)
 	fprintf (stderr, "%s: file \"%s\" has changed, reloading\n",
 		 blurb(), init_file_name());
 
       load_init_file (si->dpy, p);
+
+      if (ov)
+        p->verbose_p = True;
 
       /* If the DPMS settings in the init file have changed, change the
          settings on the server to match.  This also would have happened at
@@ -344,7 +352,9 @@ main_loop (saver_info *si, Bool init_p)
 
   initialize_randr (si);
   update_screen_layout (si);
-  describe_monitor_layout (si->monitor_layout);
+
+  if (p->verbose_p)
+    describe_monitor_layout (si->monitor_layout);
 
   initialize_screensaver_window (si);
   init_sigchld (si);
@@ -389,26 +399,26 @@ main_loop (saver_info *si, Bool init_p)
           /* The Resize and Rotate extension sends an event when the
              size, rotation, or refresh rate of any screen has changed.
            */
-          if (p->verbose_p)
-            {
-              int screen = XRRRootToScreen (si->dpy, event.xrr_event.window);
-              fprintf (stderr, "%s: %d: screen change event received\n",
-                       blurb(), screen);
-            }
+          Bool changed_p;
 
           /* Inform Xlib that it's ok to update its data structures. */
           XRRUpdateConfiguration (&event.x_event);
 
           /* Resize the existing xscreensaver windows and cached ssi data. */
-          if (update_screen_layout (si))
+          changed_p = update_screen_layout (si);
+
+          if (p->verbose_p)
             {
-              if (p->verbose_p)
-                {
-                  fprintf (stderr, "%s: new layout:\n", blurb());
-                  describe_monitor_layout (si->monitor_layout);
-                }
-              resize_screensaver_window (si);
+              int screen = XRRRootToScreen (si->dpy, event.xrr_event.window);
+              fprintf (stderr, "%s: %d: screen change event: %s\n",
+                       blurb(), screen,
+                       (changed_p ? "new layout:" : "layout unchanged"));
+              if (changed_p)
+                describe_monitor_layout (si->monitor_layout);
             }
+
+          if (changed_p)
+            resize_screensaver_window (si);
         }
 # endif /* HAVE_RANDR */
 

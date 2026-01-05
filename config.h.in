@@ -1,7 +1,7 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 
-/* xscreensaver, Copyright © 1991-2021 Jamie Zawinski.
+/* xscreensaver, Copyright © 1991-2022 Jamie Zawinski.
  * Generate this file by running 'configure' rather than editing it by hand.
  */
 
@@ -9,7 +9,8 @@
 /* Define this to allow root to unlock, when not using PAM. */
 #undef ALLOW_ROOT_PASSWD
 
-/* always defined to indicate that i18n is enabled */
+/* Define to 1 if translation of program messages to the user's native
+   language is requested. */
 #undef ENABLE_NLS
 
 /* This is the name of the gettext package to use. */
@@ -21,29 +22,19 @@
 /* Define this for Solaris getpwanam. */
 #undef HAVE_ADJUNCT_PASSWD
 
-/* Define to 1 if you have the `bind_textdomain_codeset' function. */
-#undef HAVE_BIND_TEXTDOMAIN_CODESET
-
-/* Define to 1 if you have the Mac OS X function CFLocaleCopyCurrent in the
-   CoreFoundation framework. */
-#undef HAVE_CFLOCALECOPYCURRENT
+/* Define to 1 if you have the Mac OS X function
+   CFLocaleCopyPreferredLanguages in the CoreFoundation framework. */
+#undef HAVE_CFLOCALECOPYPREFERREDLANGUAGES
 
 /* Define to 1 if you have the Mac OS X function CFPreferencesCopyAppValue in
    the CoreFoundation framework. */
 #undef HAVE_CFPREFERENCESCOPYAPPVALUE
 
-/* Define this if you have Gnome and want to build support for the
-   xscreensaver control panel in the Gtk 1.x Gnome Control Center. */
-#undef HAVE_CRAPPLET
-
-/* Define this if HAVE_CRAPPLET is defined, and the function
-   capplet_widget_changes_are_immediate is available. */
-#undef HAVE_CRAPPLET_IMMEDIATE
-
 /* Define to 1 if you have the <crypt.h> header file. */
 #undef HAVE_CRYPT_H
 
-/* Define to 1 if you have the `dcgettext' function. */
+/* Define if the GNU dcgettext() function is already present or preinstalled.
+   */
 #undef HAVE_DCGETTEXT
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
@@ -68,12 +59,15 @@
 /* Define this if you have forkpty. */
 #undef HAVE_FORKPTY
 
-/* Define this if you have GDK_Pixbuf. */
+/* Define this if you have GDK-Pixbuf. */
 #undef HAVE_GDK_PIXBUF
 
 /* Define this if you have the gdk_pixbuf_apply_embedded_orientation function
    (gdk-pixbuf 2.12). */
 #undef HAVE_GDK_PIXBUF_APPLY_EMBEDDED_ORIENTATION
+
+/* Define this if you have GDK-Pixbuf-Xlib. */
+#undef HAVE_GDK_PIXBUF_XLIB
 
 /* Define to 1 if you have the `getaddrinfo' function. */
 #undef HAVE_GETADDRINFO
@@ -117,11 +111,8 @@
 /* Define this if OpenGL supports the OpenGL Shading Language. */
 #undef HAVE_GLSL
 
-/* Define this if you have Gtk */
-#undef HAVE_GTK
-
 /* Define this if you have Gtk 2.x. */
-#undef HAVE_GTK2
+#undef HAVE_GTK
 
 /* Define this for HPUX so-called "Secure Passwords". */
 #undef HAVE_HPUX_PASSWD
@@ -131,6 +122,9 @@
 
 /* Define this if ping uses struct icmphdr.un.echo.id. */
 #undef HAVE_ICMPHDR
+
+/* Define if you have the iconv() function and it works. */
+#undef HAVE_ICONV
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
@@ -148,9 +142,6 @@
 /* Define this if you have Kerberos 5. */
 #undef HAVE_KERBEROS5
 
-/* Define if your <locale.h> file defines LC_MESSAGES. */
-#undef HAVE_LC_MESSAGES
-
 /* Define this if your system has libcap. */
 #undef HAVE_LIBCAP
 
@@ -162,12 +153,6 @@
 
 /* Define this if you have libsystemd. */
 #undef HAVE_LIBSYSTEMD
-
-/* Define to 1 if you have the <locale.h> header file. */
-#undef HAVE_LOCALE_H
-
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
 
 /* Using the MIT-SCREEN-SAVER extension means that the X server will crash at
    random times, and fading and hysteresis won't work. Don't use this. You'll
@@ -182,10 +167,6 @@
 
 /* Define to 1 if you have the `nice' function. */
 #undef HAVE_NICE
-
-/* Define this if you the XML library headers lack the gnome-xml/libxml
-   symlink. */
-#undef HAVE_OLD_XML_HEADERS
 
 /* Define this if you have Pluggable Authentication Modules. */
 #undef HAVE_PAM
@@ -267,6 +248,9 @@
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -393,7 +377,9 @@
 /* Return type of signal handlers */
 #undef RETSIGTYPE
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #undef STDC_HEADERS
 
 /* Stare into the void. */
@@ -401,11 +387,6 @@
 
 /* Define to 1 if the X Window System is missing or not being used. */
 #undef X_DISPLAY_MISSING
-
-/* Enable large inode numbers on Mac OS X 10.5.  */
-#ifndef _DARWIN_USE_64_BIT_INODE
-# define _DARWIN_USE_64_BIT_INODE 1
-#endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #undef _FILE_OFFSET_BITS
@@ -425,7 +406,7 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef mode_t
 
-/* Define to `int' if <sys/types.h> does not define. */
+/* Define as a signed integer type capable of holding a process identifier. */
 #undef pid_t
 
 /* Define to `unsigned int' if <sys/types.h> does not define. */

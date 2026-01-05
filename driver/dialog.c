@@ -1,5 +1,5 @@
 /* dialog.c --- the password dialog and splash screen.
- * xscreensaver, Copyright © 1993-2021 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright © 1993-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -47,6 +47,10 @@
 #include <ctype.h>
 #include <pwd.h>
 
+#ifndef HAVE_XINPUT
+# error The XInput2 extension is required
+#endif
+
 #include <X11/Xproto.h>		/* for CARD32 */
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -79,6 +83,10 @@
 #include "font-retry.h"
 #include "prefs.h"
 #include "usleep.h"
+#include "utf8wc.h"
+
+#undef countof
+#define countof(x) (sizeof((x))/sizeof((*x)))
 
 extern Bool debug_p;
 
@@ -125,7 +133,7 @@ typedef struct {
 typedef struct {
   char *text;
   XftFont *font;
-  XftColor fg;
+  XftColor fg, fg2;
   Pixel bg;
   enum { LABEL, BUTTON, TEXT, TEXT_RO } type;
   line_align align;
@@ -146,7 +154,7 @@ struct window_state {
   Window window;
   Colormap cmap;
 
-  Bool splash_p;
+  int splash_p;
   auth_state auth_state;
   int xi_opcode;
   int xkb_opcode;
@@ -177,6 +185,7 @@ struct window_state {
   XtIntervalId timer;
 
   XtIntervalId cursor_timer;		/* Blink the I-beam */
+  XtIntervalId bs_timer;		/* Auto-repeat Backspace */
   int i_beam;
 
   double start_time, end_time;
@@ -193,6 +202,7 @@ struct window_state {
   char *date_format;
   char *kbd_layout_label;
   char *newlogin_cmd;
+  const char *asterisk_utf8;
 
   /* Resources for fonts and colors */
   XftDraw *xftdraw;
@@ -209,6 +219,7 @@ struct window_state {
   XftColor xft_foreground;
   XftColor xft_text_foreground;
   XftColor xft_button_foreground;
+  XftColor xft_button_disabled;
   XftColor xft_error_foreground;
   Pixel passwd_background;
   Pixel thermo_foreground;
@@ -484,10 +495,13 @@ draw_dialog_line (window_state *ws, Drawable d, dialog_line *line,
 
   if (line->type == BUTTON &&
       line->button &&
-      (line->button->down_p || line->button->disabled_p))
+      line->button->down_p)
     xoff2 = yoff2 = MIN (ws->shadow_width, line->font->ascent/2);
 
-  XftDrawStringUtf8_multi (ws->xftdraw, &line->fg, line->font,
+  XftDrawStringUtf8_multi (ws->xftdraw, 
+                           (line->button && line->button->disabled_p
+                            ? &line->fg2 : &line->fg),
+                           line->font,
                            left + xoff2,
                            y + ypad + yoff2 + line->font->ascent,
                            (FcChar8 *) text, strlen (text),
@@ -667,11 +681,64 @@ get_xft_color (window_state *ws, XftColor *ret,
                      s, ret);
 }
 
+static void
+dim_xft_color (window_state *ws, const XftColor *in, Pixel bg, XftColor *out)
+{
+  double dim = 0.6;
+# if 0  /* Turns out Xft alpha doesn't work. How very. */
+  XRenderColor rc = in->color;
+  rc.alpha *= dim;
+# else
+  XRenderColor rc;
+  XColor xc;
+  xc.pixel = bg;
+  XQueryColor (ws->dpy, DefaultColormapOfScreen (ws->screen), &xc);
+  rc.red   = dim * in->color.red   + (1-dim) * xc.red;
+  rc.green = dim * in->color.green + (1-dim) * xc.green;
+  rc.blue  = dim * in->color.blue  + (1-dim) * xc.blue;
+  rc.alpha = in->color.alpha;
+# endif
+  if (! XftColorAllocValue (ws->dpy,
+                            DefaultVisualOfScreen(ws->screen),
+                            DefaultColormapOfScreen (ws->screen),
+                            &rc, out))
+    abort();
+}
+
+
 static int
 get_int (window_state *ws, const char *name, const char *rclass)
 {
   resource_keys (ws, &name, &rclass);
   return get_integer_resource (ws->dpy, (char *) name, (char *) rclass);
+}
+
+
+static const char *
+choose_asterisk (window_state *ws)
+{
+  static char picked[8];
+  const unsigned long candidates[] = { 0x25CF,  /* Black Circle */
+                                       0x2022,  /* Bullet */
+                                       0x2731,  /* Heavy Asterisk */
+                                       '*' };   /* Ἀστερίσκος */
+  const unsigned long *uc = candidates;
+  int i, L;
+  for (i = 0; i < countof (candidates) - 1; i++)
+    {
+# ifdef HAVE_XFT
+      if (XftCharExists (ws->dpy, ws->label_font, (FcChar32) *uc))
+        break;
+      if (debug_p)
+        fprintf (stderr, "%s: char U+%0lX does not exist\n", blurb(), *uc);
+# endif
+      uc++;
+    }
+
+  L = utf8_encode (*uc, picked, sizeof (picked) - 1);
+  picked[L] = 0;
+
+  return picked;
 }
 
 
@@ -681,26 +748,40 @@ get_int (window_state *ws, const char *name, const char *rclass)
    monitor state, then figure out which one of those the mouse is in.
  */
 static void
-splash_pick_window_position (Display *dpy, Position *xP, Position *yP)
+splash_pick_window_position (Display *dpy, Position *xP, Position *yP,
+                             Screen **screenP)
 {
-  Window pointer_root, pointer_child;
-  int root_x = 0, root_y = 0, win_x, win_y;
-  unsigned int mask;
+  Screen *mouse_screen = DefaultScreenOfDisplay (dpy);
+  int root_x = 0, root_y = 0;
+  int nscreens = ScreenCount (dpy);
+  int i, screen;
   monitor **monitors;
   monitor *m = 0;
-  int i;
 
-  XQueryPointer (dpy, RootWindow (dpy, 0),
-                 &pointer_root, &pointer_child,
-                 &root_x, &root_y, &win_x, &win_y, &mask);
+  /* Find the mouse screen, and position on it. */
+  for (screen = 0; screen < nscreens; screen++)
+    {
+      Window pointer_root, pointer_child;
+      int win_x, win_y;
+      unsigned int mask;
+      int status = XQueryPointer (dpy, RootWindow (dpy, screen),
+                                  &pointer_root, &pointer_child,
+                                  &root_x, &root_y, &win_x, &win_y, &mask);
+      if (status != None)
+        {
+          mouse_screen = ScreenOfDisplay (dpy, screen);
+          break;
+        }
+    }
 
-  monitors = scan_monitors (dpy);
+  monitors = scan_monitors (dpy);  /* This scans all Screens */
   if (!monitors || !*monitors) abort();
 
   for (i = 0; monitors[i]; i++)
     {
       monitor *m0 = monitors[i];
       if (m0->sanity == S_SANE &&
+          mouse_screen == m0->screen &&
           root_x >= m0->x &&
           root_y >= m0->y &&
           root_x < m0->x + m0->width &&
@@ -726,6 +807,7 @@ splash_pick_window_position (Display *dpy, Position *xP, Position *yP)
 
   *xP = m->x + m->width/2;
   *yP = m->y + m->height/2;
+  *screenP = mouse_screen;
   
   free_monitors (monitors);
 }
@@ -909,10 +991,9 @@ create_window (window_state *ws, int w, int h)
 /* Loads resources and creates and returns the global window state.
  */
 static window_state *
-window_init (Widget root_widget, Bool splash_p)
+window_init (Widget root_widget, int splash_p)
 {
   Display *dpy = XtDisplay (root_widget);
-  Screen *screen  = XtScreen (root_widget);
   window_state *ws;
   Bool resource_error_p = False;
 
@@ -921,10 +1002,13 @@ window_init (Widget root_widget, Bool splash_p)
 
   ws->splash_p = splash_p;
   ws->dpy = dpy;
-  ws->screen = screen;
   ws->app = XtWidgetToApplicationContext (root_widget);
-  ws->cmap = XCreateColormap (dpy, RootWindowOfScreen (screen), /* Old skool */
-                              DefaultVisualOfScreen (screen),
+
+  splash_pick_window_position (ws->dpy, &ws->cx, &ws->cy, &ws->screen);
+
+  ws->cmap = XCreateColormap (dpy,
+                              RootWindowOfScreen (ws->screen), /* Old skool */
+                              DefaultVisualOfScreen (ws->screen),
                               AllocNone);
 
   {
@@ -981,6 +1065,8 @@ window_init (Widget root_widget, Bool splash_p)
   ws->label_font    = get_font (ws, "labelFont");
   ws->date_font     = get_font (ws, "dateFont");
   ws->hostname_font = get_font (ws, "unameFont");
+
+  ws->asterisk_utf8 = choose_asterisk (ws);
   
   ws->foreground = get_color (ws, "foreground", "Foreground");
   ws->background = get_color (ws, "background", "Background");
@@ -992,6 +1078,8 @@ window_init (Widget root_widget, Bool splash_p)
                  "error.foreground", "Error.Foreground");
   get_xft_color (ws, &ws->xft_button_foreground,
                  "button.foreground", "Button.Foreground");
+  dim_xft_color (ws, &ws->xft_button_foreground, ws->background,
+                 &ws->xft_button_disabled);
 
   ws->shadow_top    = get_color (ws, "topShadowColor", "Foreground");
   ws->shadow_bottom = get_color (ws, "bottomShadowColor", "Background");
@@ -1008,8 +1096,8 @@ window_init (Widget root_widget, Bool splash_p)
   if (resource_error_p)
     {
       /* Make sure the error messages show up. */
-      ws->foreground = BlackPixelOfScreen (screen);
-      ws->background = WhitePixelOfScreen (screen);
+      ws->foreground = BlackPixelOfScreen (ws->screen);
+      ws->background = WhitePixelOfScreen (ws->screen);
     }
 
   ws->preferred_logo_width  = get_int (ws, "logo.width",  "Logo.Width");
@@ -1046,7 +1134,7 @@ window_init (Widget root_widget, Bool splash_p)
     Window root = RootWindowOfScreen(ws->screen);
     Visual *visual = DefaultVisualOfScreen (ws->screen);
     int logo_size = (ws->heading_font->ascent > 24 ? 2 : 1);
-    ws->logo_pixmap = xscreensaver_logo (screen, visual, root, ws->cmap,
+    ws->logo_pixmap = xscreensaver_logo (ws->screen, visual, root, ws->cmap,
                                          ws->background, 
                                          &ws->logo_pixels, &ws->logo_npixels,
                                          &ws->logo_clipmask, logo_size);
@@ -1054,8 +1142,6 @@ window_init (Widget root_widget, Bool splash_p)
     XGetGeometry (dpy, ws->logo_pixmap, &root, &x, &y,
                   &ws->logo_width, &ws->logo_height, &bw, &d);
   }
-
-  splash_pick_window_position (ws->dpy, &ws->cx, &ws->cy);
 
   ws->x = ws->y = 0;
   create_window (ws, 1, 1);
@@ -1218,7 +1304,7 @@ static void
 window_draw (window_state *ws)
 {
   Display *dpy = ws->dpy;
-  Screen *screen = DefaultScreenOfDisplay (dpy);
+  Screen *screen = ws->screen;
   Window root = RootWindowOfScreen (screen);
   Visual *visual = DefaultVisualOfScreen(screen);
   int depth = DefaultDepthOfScreen (screen);
@@ -1280,6 +1366,7 @@ window_draw (window_state *ws)
   lines[i].text  = ws->heading_label;			/* XScreenSaver */
   lines[i].font  = ws->heading_font;
   lines[i].fg    = ws->xft_foreground;
+  lines[i].fg2   = lines[i].fg;
   lines[i].bg    = ws->background;
   lines[i].type  = LABEL;
   lines[i].align = CENTER;
@@ -1290,6 +1377,7 @@ window_draw (window_state *ws)
       lines[i].text  = _("Update available!\nThis version is very old.\n");
       lines[i].font  = ws->error_font;
       lines[i].fg    = ws->xft_error_foreground;
+      lines[i].fg2   = lines[i].fg;
       lines[i].bg    = ws->background;
       lines[i].type  = LABEL;
       lines[i].align = CENTER;
@@ -1301,6 +1389,7 @@ window_draw (window_state *ws)
       lines[i].text  = _("PRE-RELEASE VERSION");
       lines[i].font  = ws->error_font;
       lines[i].fg    = ws->xft_error_foreground;
+      lines[i].fg2   = lines[i].fg;
       lines[i].bg    = ws->background;
       lines[i].type  = LABEL;
       lines[i].align = CENTER;
@@ -1312,6 +1401,7 @@ window_draw (window_state *ws)
       lines[i].text  = ws->hostname_label;
       lines[i].font  = ws->hostname_font;
       lines[i].fg    = ws->xft_foreground;
+      lines[i].fg2   = lines[i].fg;
       lines[i].bg    = ws->background;
       lines[i].type  = LABEL;
       lines[i].align = CENTER;
@@ -1322,6 +1412,7 @@ window_draw (window_state *ws)
   lines[i].text  = "";                 \
   lines[i].font  = ws->body_font;      \
   lines[i].fg    = ws->xft_foreground; \
+  lines[i].fg2   = lines[i].fg;        \
   lines[i].bg    = ws->background;     \
   lines[i].type  = LABEL;              \
   lines[i].align = CENTER;             \
@@ -1335,6 +1426,7 @@ window_draw (window_state *ws)
         _("DEBUG MODE:\nAll keystrokes are being logged to stderr.\n");
       lines[i].font  = ws->error_font;
       lines[i].fg    = ws->xft_error_foreground;
+      lines[i].fg2   = lines[i].fg;
       lines[i].bg    = ws->background;
       lines[i].type  = LABEL;
       lines[i].align = CENTER;
@@ -1346,6 +1438,7 @@ window_draw (window_state *ws)
       lines[i].text  = ws->body_label;	    /* Copyright or error message */
       lines[i].font  = ws->body_font;
       lines[i].fg    = ws->xft_foreground;
+      lines[i].fg2   = lines[i].fg;
       lines[i].bg    = ws->background;
       lines[i].type  = LABEL;
       lines[i].align = CENTER;
@@ -1366,6 +1459,7 @@ window_draw (window_state *ws)
         lines[i].fg    = (ws->msgs[j].type == AUTH_MSGTYPE_ERROR
                           ? ws->xft_error_foreground
                           : ws->xft_foreground);
+        lines[i].fg2   = lines[i].fg;
         lines[i].bg    = ws->background;
         lines[i].type  = LABEL;
         lines[i].align = CENTER;
@@ -1381,6 +1475,7 @@ window_draw (window_state *ws)
             lines[i].text    = _("Username:");
             lines[i].font    = ws->label_font;
             lines[i].fg      = ws->xft_foreground;
+            lines[i].fg2     = lines[i].fg;
             lines[i].bg      = ws->background;
             lines[i].type    = LABEL;
             lines[i].align   = LEFT;
@@ -1390,6 +1485,7 @@ window_draw (window_state *ws)
             lines[i].text    = ws->user;		/* $USER */
             lines[i].font    = ws->label_font;
             lines[i].fg      = ws->xft_text_foreground;
+            lines[i].fg2     = lines[i].fg;
             lines[i].bg      = ws->passwd_background;
             lines[i].type    = TEXT_RO;
             lines[i].align   = RIGHT;
@@ -1399,6 +1495,7 @@ window_draw (window_state *ws)
         lines[i].text    = trim (ws->msgs[j].msg);	/* PAM prompt text */
         lines[i].font    = ws->label_font;
         lines[i].fg      = ws->xft_foreground;
+        lines[i].fg2     = lines[i].fg;
         lines[i].bg      = ws->background;
         lines[i].type    = LABEL;
         lines[i].align   = LEFT;
@@ -1414,6 +1511,7 @@ window_draw (window_state *ws)
                               : "");
         lines[i].font    = ws->label_font;
         lines[i].fg      = ws->xft_text_foreground;
+        lines[i].fg2     = lines[i].fg;
         lines[i].bg      = ws->passwd_background;
         lines[i].type    = TEXT;
         lines[i].align   = RIGHT;
@@ -1426,6 +1524,7 @@ window_draw (window_state *ws)
             lines[i].text   = date_text;
             lines[i].font   = ws->date_font;
             lines[i].fg     = ws->xft_foreground;
+            lines[i].fg2    = lines[i].fg;
             lines[i].bg     = ws->background;
             lines[i].type   = LABEL;
             lines[i].align  = RIGHT;
@@ -1438,6 +1537,7 @@ window_draw (window_state *ws)
             lines[i].text   = ws->kbd_layout_label;
             lines[i].font   = ws->date_font;
             lines[i].fg     = ws->xft_foreground;
+            lines[i].fg2    = lines[i].fg;
             lines[i].bg     = ws->background;
             lines[i].type   = LABEL;
             lines[i].align  = RIGHT;
@@ -1486,6 +1586,7 @@ window_draw (window_state *ws)
       lines[i].text  = _("Settings");
       lines[i].font  = ws->button_font;
       lines[i].fg    = ws->xft_button_foreground;
+      lines[i].fg2   = ws->xft_button_disabled;
       lines[i].bg    = ws->button_background;
       lines[i].type  = BUTTON;
       lines[i].align = LEFT;
@@ -1493,9 +1594,14 @@ window_draw (window_state *ws)
       lines[i].button = &ws->demo_button_state;
       i++;
 
+      if (ws->splash_p > 1)
+        /* Settings button is disabled with --splash --splash */
+        ws->demo_button_state.disabled_p = True;
+
       lines[i].text  = _("Help");
       lines[i].font  = ws->button_font;
       lines[i].fg    = ws->xft_button_foreground;
+      lines[i].fg2   = ws->xft_button_disabled;
       lines[i].bg    = ws->button_background;
       lines[i].type  = BUTTON;
       lines[i].align = RIGHT;
@@ -1509,6 +1615,7 @@ window_draw (window_state *ws)
           lines[i].text  = _("New Login");
           lines[i].font  = ws->button_font;
           lines[i].fg    = ws->xft_button_foreground;
+          lines[i].fg2   = ws->xft_button_disabled;
           lines[i].bg    = ws->button_background;
           lines[i].type  = BUTTON;
           lines[i].align = LEFT;
@@ -1520,6 +1627,7 @@ window_draw (window_state *ws)
       lines[i].text  = _("OK");
       lines[i].font  = ws->button_font;
       lines[i].fg    = ws->xft_button_foreground;
+      lines[i].fg2   = ws->xft_button_disabled;
       lines[i].bg    = ws->button_background;
       lines[i].type  = BUTTON;
       lines[i].align = RIGHT;
@@ -1724,6 +1832,11 @@ destroy_window (window_state *ws)
       XtRemoveTimeOut (ws->cursor_timer);
       ws->cursor_timer = 0;
     }
+  if (ws->bs_timer)
+    {
+      XtRemoveTimeOut (ws->bs_timer);
+      ws->bs_timer = 0;
+    }
 
   while (XCheckMaskEvent (ws->dpy, PointerMotionMask, &event))
     if (verbose_p)
@@ -1759,7 +1872,7 @@ destroy_window (window_state *ws)
   XftColorFree (ws->dpy, DefaultVisualOfScreen (ws->screen),
                 DefaultColormapOfScreen (ws->screen),
                 &ws->xft_error_foreground);
-  XftDrawDestroy (ws->xftdraw);
+  if (ws->xftdraw) XftDrawDestroy (ws->xftdraw);
 
 # if 0  /* screw this, we're exiting anyway */
   if (ws->foreground != black && ws->foreground != white)
@@ -1884,6 +1997,7 @@ persistent_auth_status_failure (window_state *ws,
 }
 
 
+static void bs_timer (XtPointer, XtIntervalId *);
 
 static void
 handle_keypress (window_state *ws, XKeyEvent *event)
@@ -1949,6 +2063,15 @@ handle_keypress (window_state *ws, XKeyEvent *event)
                   }
                 ws->plaintext_passwd_char_size[nchars-1] = 0;
               }
+
+            /* The XInput2 extension does not send auto-repeat KeyPress
+               events, and it annoys people that you can't hold down the
+               Backspace key to clear the line.  So clear the whole line
+               if the key is held down for a little while.  */
+            if (ws->bs_timer)
+              XtRemoveTimeOut (ws->bs_timer);
+            ws->bs_timer =
+              XtAppAddTimeOut (ws->app, 1000 * 0.6, bs_timer, (XtPointer) ws);
           }
           break;
 
@@ -1960,7 +2083,7 @@ handle_keypress (window_state *ws, XKeyEvent *event)
           ws->auth_state = AUTH_CANCEL;
           break;
 
-        case '\025': case '\030':			/* Erase line */
+        case '\025': case '\030':			/* Erase line ^U ^X */
           memset (ws->plaintext_passwd, 0, sizeof (ws->plaintext_passwd));
           memset (ws->plaintext_passwd_char_size, 0, 
                   sizeof (ws->plaintext_passwd_char_size));
@@ -2001,9 +2124,7 @@ handle_keypress (window_state *ws, XKeyEvent *event)
     *out = 0;
     for (i = 0; i < MAX_PASSWD_CHARS && ws->plaintext_passwd_char_size[i]; i++)
       {
-        const char *b = /* "\xE2\x80\xA2"; */	/* U+2022 Bullet */
-			   "\xe2\x97\x8f";	/* U+25CF Black Circle */
-        strcat (out, b);
+        strcat (out, ws->asterisk_utf8);
         out += strlen(out);
       }
   }
@@ -2063,6 +2184,14 @@ handle_event (window_state *ws, XEvent *xev)
     refresh_p = True;
     break;
 
+  case KeyRelease:
+    if (ws->bs_timer)
+      {
+        XtRemoveTimeOut (ws->bs_timer);
+        ws->bs_timer = 0;
+      }
+    break;
+
   case ButtonPress:
   case ButtonRelease:
     {
@@ -2092,6 +2221,23 @@ cursor_timer (XtPointer closure, XtIntervalId *id)
   ws->cursor_timer =
     XtAppAddTimeOut (ws->app, timeout, cursor_timer, (XtPointer) ws);
   ws->i_beam = !ws->i_beam;
+}
+
+
+/* Auto-repeat Backspace, since XInput2 doesn't do autorepeat. */
+static void
+bs_timer (XtPointer closure, XtIntervalId *id)
+{
+  window_state *ws = (window_state *) closure;
+  if (ws->bs_timer)
+    XtRemoveTimeOut (ws->bs_timer);
+  ws->bs_timer = 0;
+  /* Erase line */
+  memset (ws->plaintext_passwd, 0, sizeof (ws->plaintext_passwd));
+  memset (ws->plaintext_passwd_char_size, 0, 
+          sizeof (ws->plaintext_passwd_char_size));
+  memset (ws->censored_passwd, 0, sizeof(ws->censored_passwd));
+  window_draw (ws);
 }
 
 
@@ -2239,7 +2385,12 @@ gui_main_loop (window_state *ws, Bool splash_p, Bool notification_p)
         break;
       }
 
-      /* Since MappingNotify doesn't work, we have to do this crap instead. */
+      /* Since MappingNotify doesn't work, we have to do this crap instead.
+         Probably some of these events could be ignored, as it seems that
+         any.xkb_type == XkbStateNotify comes in every time a modifier key is
+         touched.  What event comes in when there is a keyboard layout change,
+         the only thing we actually care about?
+       */
       if (xev.xany.type == ws->xkb_opcode)
         {
           XkbEvent *xkb = (XkbEvent *) &xev;
@@ -2499,10 +2650,10 @@ xscreensaver_auth_finished (void *closure, Bool authenticated_p)
 
 
 void
-xscreensaver_splash (void *closure)
+xscreensaver_splash (void *closure, Bool disable_settings_p)
 {
   Widget root_widget = (Widget) closure;
-  window_state *ws = window_init (root_widget, True);
+  window_state *ws = window_init (root_widget, disable_settings_p ? 2 : 1);
   ws->auth_state = AUTH_READ;
   gui_main_loop (ws, True, False);
   destroy_window (ws);

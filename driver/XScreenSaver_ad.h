@@ -29,7 +29,7 @@
 "*installColormap:	True",
 "*ignoreUninstalledPrograms: False",
 "*authWarningSlack:	20",
-"*textMode:		file",
+"*textMode:		url",
 "*textLiteral:		XScreenSaver",
 "*textFile:		",
 "*textProgram:		fortune",
@@ -217,7 +217,7 @@
 				munch -root				    \\n\
 				penrose -root				    \\n\
   GL: 				pipes -root				    \\n\
-				rd-bomb -root				    \\n\
+				rdbomb -root				    \\n\
   GL: 				rubik -root				    \\n\
 -				sierpinski -root			    \\n\
 				slip -root				    \\n\
@@ -253,7 +253,7 @@
 				compass -root				    \\n\
 				deluxe -root				    \\n\
 -				demon -root				    \\n\
-  GL: 				extrusion -root				    \\n\
+- GL: 				extrusion -root				    \\n\
 -				loop -root				    \\n\
 				penetrate -root				    \\n\
 				petri -root				    \\n\
@@ -420,11 +420,18 @@
   GL: 				etruscanvenus -root			    \\n\
   GL: 				gibson -root				    \\n\
   GL: 				headroom -root				    \\n\
-  GL: 				sphereeversion -root			    \\n",
+  GL: 				sphereeversion -root			    \\n\
+				binaryhorizon -root			    \\n\
+				marbling -root				    \\n\
+  GL: 				chompytower -root			    \\n\
+  GL: 				mapscroller -root			    \\n\
+  GL: 				nakagin -root				    \\n\
+  GL: 				squirtorus -root			    \\n",
 "*hacks.antinspect.name:     Ant Inspect",
 "*hacks.antmaze.name:        Ant Maze",
 "*hacks.antspotlight.name:   Ant Spotlight",
 "*hacks.apple2.name:         Apple ][",
+"*hacks.binaryhorizon.name:  Binary Horizon",
 "*hacks.binaryring.name:     Binary Ring",
 "*hacks.blinkbox.name:       Blink Box",
 "*hacks.blitspin.name:       Blit Spin",
@@ -434,6 +441,7 @@
 "*hacks.bsod.name:           BSOD",
 "*hacks.bubble3d.name:       Bubble 3D",
 "*hacks.ccurve.name:         C Curve",
+"*hacks.chompytower.name:    Chompy Tower",
 "*hacks.cityflow.name:       City Flow",
 "*hacks.cloudlife.name:      Cloud Life",
 "*hacks.companioncube.name:  Companion Cube",
@@ -486,6 +494,7 @@
 "*hacks.lcdscrub.name:       LCD Scrub",
 "*hacks.lmorph.name:         LMorph",
 "*hacks.m6502.name:          m6502",
+"*hacks.mapscroller.name:    Map Scroller",
 "*hacks.maze3d.name:         Maze 3D",
 "*hacks.memscroller.name:    Mem Scroller",
 "*hacks.metaballs.name:      Meta Balls",
@@ -504,8 +513,7 @@
 "*hacks.quasicrystal.name:   Quasi-Crystal",
 "*hacks.raverhoop.name:      Raver Hoop",
 "*hacks.razzledazzle.name:   Razzle Dazzle",
-"*hacks.rd-bomb.name:        RD-Bomb",
-"*hacks.rd-bomb.name:        RD-Bomb",
+"*hacks.rdbomb.name:         RD-Bomb",
 "*hacks.romanboy.name:       Roman Boy",
 "*hacks.rotzoomer.name:      Rot Zoomer",
 "*hacks.rubikblocks.name:    Rubik Blocks",

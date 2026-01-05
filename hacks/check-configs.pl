@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Copyright © 2008-2021 Jamie Zawinski <jwz@jwz.org>
+# Copyright © 2008-2022 Jamie Zawinski <jwz@jwz.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -21,7 +21,7 @@ use diagnostics;
 use strict;
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my ($version) = ('$Revision: 1.36 $' =~ m/\s(\d[.\d]+)\s/s);
+my ($version) = ('$Revision: 1.39 $' =~ m/\s(\d[.\d]+)\s/s);
 
 my $verbose = 0;
 my $debug_p = 0;
@@ -73,7 +73,6 @@ sub parse_src($) {
   $file = 'b_lockglue.c' if ($file eq 'bubble3d.c');
   $file = 'polyhedra-gl.c' if ($file eq 'polyhedra.c');
   $file = 'companion.c' if ($file eq 'companioncube.c');
-  $file = 'rd-bomb.c' if ($file eq 'rdbomb.c');
 
   my $ofile = $file;
   $file = "glx/$ofile"          unless (-f $file);
@@ -735,7 +734,6 @@ sub build_android(@) {
 
   foreach my $saver (@savers) {
     next if ($saver =~ m/(-helper)$/);
-    $saver = 'rdbomb' if ($saver eq 'rd-bomb');
 
     my ($src_opts, $switchmap) = parse_src ($saver);
     my ($saver_title, $gl_p, $xml_opts, $widgets) =
@@ -786,8 +784,7 @@ sub build_android(@) {
       my $rsrc  = $widget->{resource};
       my $label = $widget->{_label};
       my $def   = $widget->{default};
-      my $invert_p = (($widget->{convert} || '') eq 'invert');
-
+      my $cvt   = $widget->{convert} || '';
       my $key   = "${saver}_$rsrc" if $rsrc;
 
       #### The menus don't actually have titles on X11 or Cocoa...
@@ -811,7 +808,9 @@ sub build_android(@) {
         $high_label = $high unless defined($high_label);
 
         ($low, $high) = ($high, $low)
-          if (($widget->{convert} || '') eq 'invert');
+          if ($cvt eq 'invert');
+
+        # I guess there's no way to implement convert="ratio" for Android.
 
         $settings .=
           ("<$package.SliderPreference\n" .
@@ -827,7 +826,7 @@ sub build_android(@) {
 
       } elsif ($type eq 'boolean') {
 
-        my $def = ($invert_p ? 'true' : 'false');
+        my $def = ($cvt eq 'invert' ? 'true' : 'false');
         $settings .=
           ("<CheckBoxPreference\n" .
            "  android:key=\"${key}\"\n" .
@@ -971,6 +970,7 @@ sub build_android(@) {
                        $localize0->("${saver_underscore}_saver_desc",
                                     $daydream_desc) . "\"\n" .
                   "  android:name=\".gen.Wallpaper\$$saver_class\"\n" .
+                  "  android:exported=\"true\"\n" .
                   "  android:permission=\"android.permission" .
                        ".BIND_WALLPAPER\">\n" .
                   "  <intent-filter>\n" .
@@ -1043,6 +1043,7 @@ sub build_android(@) {
   $manifest .= ("<activity android:name=\"" .
                 "$package.Activity\"\n" .
                 "  android:theme=\"\@android:style/Theme.Holo\"\n" .
+                "  android:exported=\"true\"\n" .
                 "  android:label=\"\@string/app_name\">\n" .
                 "  <intent-filter>\n" .
                 "    <action android:name=\"android.intent.action" .
@@ -1064,6 +1065,7 @@ sub build_android(@) {
   $manifest .= ("<activity android:name=\"" .
                 "$package.TVActivity\"\n" .
                 "  android:theme=\"\@android:style/Theme.Holo\"\n" .
+                "  android:exported=\"true\"\n" .
                 "  android:label=\"\@string/app_name\">\n" .
                 "  <intent-filter>\n" .
                 "    <action android:name=\"android.intent.action" .

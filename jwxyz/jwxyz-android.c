@@ -53,6 +53,7 @@
 #include "pow2.h"
 
 
+#undef countof
 #define countof(x) (sizeof(x)/sizeof(*(x)))
 
 extern struct xscreensaver_function_table *xscreensaver_function_table;
@@ -1759,6 +1760,9 @@ jwxyz_render_text (Display *dpy, void *native_font,
 }
 
 
+// Returns the verbose Unicode name of this character, like "agrave" or
+// "daggerdouble".  Used by Unicrud, and by Fontglide with debugMetrics.
+//
 char *
 jwxyz_unicode_character_name (Display *dpy, Font fid, unsigned long uc)
 {

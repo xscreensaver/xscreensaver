@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1991-2020 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 1991-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -1515,8 +1515,9 @@ jwxyz_png_to_ximage (Display *dpy, Visual *visual,
     [img release];
     return 0;
   }
-  int width   = [img size].width;
-  int height  = [img size].height;
+  // images/earth.png is 2048x1024 but img.size is 491x245?
+  int width   = [bm pixelsWide];
+  int height  = [bm pixelsHigh];
   size_t ibpp = [bm bitsPerPixel];
   size_t ibpl = [bm bytesPerRow];
   const unsigned char *data = [bm bitmapData];
@@ -1649,7 +1650,7 @@ copy_pixmap (Display *dpy, Pixmap p)
 
 
 // Returns the verbose Unicode name of this character, like "agrave" or
-// "daggerdouble".  Used by fontglide debugMetrics.
+// "daggerdouble".  Used by Unicrud, and by Fontglide with debugMetrics.
 //
 char *
 jwxyz_unicode_character_name (Display *dpy, Font fid, unsigned long uc)

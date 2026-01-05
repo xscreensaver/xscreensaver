@@ -1,5 +1,5 @@
 /* windows.c --- turning the screen black; dealing with visuals, virtual roots.
- * xscreensaver, Copyright © 1991-2021 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright © 1991-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -724,7 +724,6 @@ update_screen_layout (saver_info *si)
 
   free_monitors (si->monitor_layout);
   si->monitor_layout = monitors;
-  check_monitor_sanity (si->monitor_layout);
 
   while (monitors[count])
     {
@@ -740,13 +739,13 @@ update_screen_layout (saver_info *si)
         calloc (sizeof(*si->screens), si->ssi_count);
     }
 
-  if (si->ssi_count <= good_count)
+  if (si->ssi_count < count)
     {
-      si->ssi_count = good_count + 10;
       si->screens = (saver_screen_info *)
-        realloc (si->screens, sizeof(*si->screens) * si->ssi_count);
-      memset (si->screens + si->nscreens, 0, 
-              sizeof(*si->screens) * (si->ssi_count - si->nscreens));
+        realloc (si->screens, sizeof(*si->screens) * count);
+      memset (si->screens + si->ssi_count, 0,
+              sizeof(*si->screens) * (count - si->ssi_count));
+      si->ssi_count = count;
     }
 
   if (! si->screens) abort();
@@ -787,11 +786,7 @@ update_screen_layout (saver_info *si)
 # ifndef DEBUG_MULTISCREEN
       {
         saver_preferences *p = &si->prefs;
-        if (p->debug_p
-#  ifdef QUAD_MODE
-            && !p->quad_p
-#  endif
-            )
+        if (p->debug_p)
           ssi->width /= 2;
       }
 # endif
@@ -912,7 +907,10 @@ screenhack_obituary (saver_screen_info *ssi,
   gcv.line_width = bw;
   gc = XCreateGC (si->dpy, window, GCForeground | GCLineWidth, &gcv);
 
-  sprintf (buf, "\"%.100s\" %.100s", name, error);
+  if (name && *name)
+    sprintf (buf, "\"%.100s\" %.100s", name, error);
+  else
+    sprintf (buf, "%.100s", error);
 
   XftTextExtentsUtf8 (si->dpy, font, (FcChar8 *) buf, strlen(buf), &overall);
   x = (ssi->width - overall.width) / 2;
@@ -961,6 +959,7 @@ watchdog_timer (XtPointer closure, XtIntervalId *id)
 {
   saver_info *si = (saver_info *) closure;
   saver_preferences *p = &si->prefs;
+  Bool running_p, on_p, terminating_p;
 
   /* If the DPMS settings on the server have changed, change them back to
      what ~/.xscreensaver says they should be. */
@@ -971,8 +970,10 @@ watchdog_timer (XtPointer closure, XtIntervalId *id)
 
   raise_windows (si);
 
-  if (any_screenhacks_running_p (si) &&
-      !monitor_powered_on_p (si->dpy))
+  running_p = any_screenhacks_running_p (si);
+  on_p = monitor_powered_on_p (si->dpy);
+  terminating_p = si->terminating_p;
+  if (running_p && !on_p)
     {
       int i;
       if (si->prefs.verbose_p)
@@ -981,6 +982,31 @@ watchdog_timer (XtPointer closure, XtIntervalId *id)
                  blurb());
       for (i = 0; i < si->nscreens; i++)
         kill_screenhack (&si->screens[i]);
+      /* Do not clear current_hack here. */
+    }
+  else if (terminating_p)
+    {
+       /* If we are in the process of shutting down and are about to exit,
+          don't re-launch anything just because the monitor came back on. */
+    }
+  else if (!running_p && on_p)
+    {
+      /* If the hack number is set but no hack is running, it is because the
+         hack was killed when the monitor powered off, above.  This assumes
+         that kill_screenhack() clears pid but not current_hack.  Start the
+         hack going again.  The cycle_timer will also do this (unless "cycle"
+         is 0) but watchdog_timer runs more frequently.
+       */
+      if (si->nscreens > 0 && si->screens[0].current_hack >= 0)
+        {
+          int i;
+          if (si->prefs.verbose_p)
+            fprintf (stderr,
+                     "%s: monitor has powered back on; re-launching hacks\n",
+                     blurb());
+          for (i = 0; i < si->nscreens; i++)
+            spawn_screenhack (&si->screens[i]);
+        }
     }
 
   /* Re-schedule this timer.  The watchdog timer defaults to a bit less

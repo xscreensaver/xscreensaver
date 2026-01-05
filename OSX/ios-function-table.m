@@ -1,5 +1,5 @@
 /* Generated file, do not edit.
-   Created: Thu Dec 24 07:44:49 2020 by build-fntable.pl 1.10.
+   Created: Thu May 26 13:26:42 2022 by build-fntable.pl 1.14.
  */
 
 #import <Foundation/Foundation.h>
@@ -21,6 +21,7 @@ extern struct xscreensaver_function_table
  atunnel_xscreensaver_function_table,
  barcode_xscreensaver_function_table,
  beats_xscreensaver_function_table,
+ binaryhorizon_xscreensaver_function_table,
  binaryring_xscreensaver_function_table,
  blaster_xscreensaver_function_table,
  blinkbox_xscreensaver_function_table,
@@ -39,6 +40,7 @@ extern struct xscreensaver_function_table
  carousel_xscreensaver_function_table,
  ccurve_xscreensaver_function_table,
  celtic_xscreensaver_function_table,
+ chompytower_xscreensaver_function_table,
  circuit_xscreensaver_function_table,
  cityflow_xscreensaver_function_table,
  cloudlife_xscreensaver_function_table,
@@ -140,6 +142,7 @@ extern struct xscreensaver_function_table
  lavalite_xscreensaver_function_table,
  loop_xscreensaver_function_table,
  m6502_xscreensaver_function_table,
+ marbling_xscreensaver_function_table,
  maze_xscreensaver_function_table,
  maze3d_xscreensaver_function_table,
  memscroller_xscreensaver_function_table,
@@ -154,6 +157,7 @@ extern struct xscreensaver_function_table
  morph3d_xscreensaver_function_table,
  mountain_xscreensaver_function_table,
  munch_xscreensaver_function_table,
+ nakagin_xscreensaver_function_table,
  nerverot_xscreensaver_function_table,
  noof_xscreensaver_function_table,
  noseguy_xscreensaver_function_table,
@@ -207,6 +211,7 @@ extern struct xscreensaver_function_table
  spotlight_xscreensaver_function_table,
  sproingies_xscreensaver_function_table,
  squiral_xscreensaver_function_table,
+ squirtorus_xscreensaver_function_table,
  stairs_xscreensaver_function_table,
  starfish_xscreensaver_function_table,
  starwars_xscreensaver_function_table,
@@ -267,6 +272,7 @@ NSDictionary *make_function_table_dict(void) {
 	@"Atunnel":	[NSValue valueWithPointer:&atunnel_xscreensaver_function_table],
 	@"Barcode":	[NSValue valueWithPointer:&barcode_xscreensaver_function_table],
 	@"Beats":	[NSValue valueWithPointer:&beats_xscreensaver_function_table],
+	@"Binary Horizon":	[NSValue valueWithPointer:&binaryhorizon_xscreensaver_function_table],
 	@"Binary Ring":	[NSValue valueWithPointer:&binaryring_xscreensaver_function_table],
 	@"Blaster":	[NSValue valueWithPointer:&blaster_xscreensaver_function_table],
 	@"Blink Box":	[NSValue valueWithPointer:&blinkbox_xscreensaver_function_table],
@@ -285,6 +291,7 @@ NSDictionary *make_function_table_dict(void) {
 	@"Carousel":	[NSValue valueWithPointer:&carousel_xscreensaver_function_table],
 	@"C Curve":	[NSValue valueWithPointer:&ccurve_xscreensaver_function_table],
 	@"Celtic":	[NSValue valueWithPointer:&celtic_xscreensaver_function_table],
+	@"Chompy Tower":	[NSValue valueWithPointer:&chompytower_xscreensaver_function_table],
 	@"Circuit":	[NSValue valueWithPointer:&circuit_xscreensaver_function_table],
 	@"City Flow":	[NSValue valueWithPointer:&cityflow_xscreensaver_function_table],
 	@"Cloud Life":	[NSValue valueWithPointer:&cloudlife_xscreensaver_function_table],
@@ -386,6 +393,7 @@ NSDictionary *make_function_table_dict(void) {
 	@"Lavalite":	[NSValue valueWithPointer:&lavalite_xscreensaver_function_table],
 	@"Loop":	[NSValue valueWithPointer:&loop_xscreensaver_function_table],
 	@"m6502":	[NSValue valueWithPointer:&m6502_xscreensaver_function_table],
+	@"Marbling":	[NSValue valueWithPointer:&marbling_xscreensaver_function_table],
 	@"Maze":	[NSValue valueWithPointer:&maze_xscreensaver_function_table],
 	@"Maze 3D":	[NSValue valueWithPointer:&maze3d_xscreensaver_function_table],
 	@"Mem Scroller":	[NSValue valueWithPointer:&memscroller_xscreensaver_function_table],
@@ -400,6 +408,7 @@ NSDictionary *make_function_table_dict(void) {
 	@"Morph 3D":	[NSValue valueWithPointer:&morph3d_xscreensaver_function_table],
 	@"Mountain":	[NSValue valueWithPointer:&mountain_xscreensaver_function_table],
 	@"Munch":	[NSValue valueWithPointer:&munch_xscreensaver_function_table],
+	@"Nakagin":	[NSValue valueWithPointer:&nakagin_xscreensaver_function_table],
 	@"Nerve Rot":	[NSValue valueWithPointer:&nerverot_xscreensaver_function_table],
 	@"Noof":	[NSValue valueWithPointer:&noof_xscreensaver_function_table],
 	@"Nose Guy":	[NSValue valueWithPointer:&noseguy_xscreensaver_function_table],
@@ -453,6 +462,7 @@ NSDictionary *make_function_table_dict(void) {
 	@"Spotlight":	[NSValue valueWithPointer:&spotlight_xscreensaver_function_table],
 	@"Sproingies":	[NSValue valueWithPointer:&sproingies_xscreensaver_function_table],
 	@"Squiral":	[NSValue valueWithPointer:&squiral_xscreensaver_function_table],
+	@"Squirtorus":	[NSValue valueWithPointer:&squirtorus_xscreensaver_function_table],
 	@"Stairs":	[NSValue valueWithPointer:&stairs_xscreensaver_function_table],
 	@"Starfish":	[NSValue valueWithPointer:&starfish_xscreensaver_function_table],
 	@"Star Wars":	[NSValue valueWithPointer:&starwars_xscreensaver_function_table],

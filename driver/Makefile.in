@@ -1,9 +1,9 @@
-# driver/Makefile.in --- xscreensaver, Copyright © 1997-2021 Jamie Zawinski.
+# driver/Makefile.in --- xscreensaver, Copyright © 1997-2022 Jamie Zawinski.
 # the `../configure' script generates `driver/Makefile' from this file.
 
 @SET_MAKE@
 .SUFFIXES:
-.SUFFIXES: .c .m .o .desktop .desktop.in
+.SUFFIXES: .c .m .o .desktop .desktop.in .service .service.in
 
 srcdir		= @srcdir@
 VPATH		= @srcdir@
@@ -29,7 +29,9 @@ mansuffixB	= 6
 GTK_DATADIR	= @GTK_DATADIR@
 GTK_APPDIR	= $(GTK_DATADIR)/applications
 GTK_ICONDIR	= $(GTK_DATADIR)/pixmaps
-GTK_UIDIR	= $(GTK_DATADIR)/xscreensaver/ui
+GTK_SHAREDIR	= $(GTK_DATADIR)/xscreensaver
+UPDATE_ICON_CACHE = gtk-update-icon-cache
+GLIB_COMPILE_RESOURCES = @GLIB_COMPILE_RESOURCES@
 
 HACKDIR		= @HACKDIR@
 HACK_CONF_DIR	= @HACK_CONF_DIR@
@@ -51,6 +53,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SETUID	= $(INSTALL_PROGRAM) $(SUID_FLAGS)
 INSTALL_DATA	= @INSTALL_DATA@
 INSTALL_DIRS	= @INSTALL_DIRS@
+HACKDIR		= @HACKDIR@
 
 X_CFLAGS	= @X_CFLAGS@
 X_LIBS		= @X_LIBS@
@@ -81,8 +84,7 @@ PAM_DIR		= $(PAM_ROOT)/pam.d
 PAM_CONF	= $(PAM_ROOT)/pam.conf
 
 ICON_SRC        = $(UTILS_SRC)/images
-LOGO		= $(ICON_SRC)/logo-50.xpm
-GTK_ICONS	= $(ICON_SRC)/screensaver-*.png
+LOGO		= $(ICON_SRC)/logo-512.png
 
 UTILS_SRC	= $(srcdir)/../utils
 UTILS_BIN	= ../utils
@@ -94,7 +96,7 @@ LIBS_PRE	= $(LIBS) $(X_LIBS) $(X_PRE_LIBS)
 LIBS_POST	= $(X_EXTRA_LIBS)
 
 XDPMS_LIBS	= @XDPMS_LIBS@
-XINERAMA_LIBS	= @XINERAMA_LIBS@ $(FIXME)
+XINERAMA_LIBS	= @XINERAMA_LIBS@
 XINPUT_LIBS	= -lXi
 XML_LIBS	= @XML_LIBS@
 
@@ -134,9 +136,6 @@ KERBEROS_OBJS	= passwd-kerberos.o
 PAM_SRCS	= passwd-pam.c
 PAM_OBJS	= passwd-pam.o
 
-PWHELPER_SRCS	= passwd-helper.c
-PWHELPER_OBJS	= passwd-helper.o
-
 PASSWD_SRCS	= @PASSWD_SRCS@
 PASSWD_OBJS	= @PASSWD_OBJS@
 
@@ -160,7 +159,7 @@ AUTH_OBJS_1	= dialog.o passwd.o setuid.o \
 		  $(UTILS_BIN)/logo.o \
 		  $(UTILS_BIN)/minixpm.o
 AUTH_LIBS	= $(LIBS_PRE) $(XFT_LIBS) $(XINPUT_LIBS) $(XINERAMA_LIBS) \
-		  @SAVER_LIBS@ -lXt -lX11 -lXext -lXi \
+		  $(XDPMS_LIBS) @SAVER_LIBS@ -lXt -lX11 -lXext -lXi \
 		  @PASSWD_LIBS@ $(LIBS_POST) $(INTL_LIBS)
 
 SYSTEMD_DEFS	= 
@@ -175,12 +174,11 @@ CMD_LIBS	= $(LIBS_PRE) $(XINPUT_LIBS) -lX11 -lXext $(LIBS_POST)
 
 GTK_DEFS	= -DHACK_CONFIGURATION_PATH='"$(HACK_CONF_DIR)"' \
 		  -DDEFAULT_PATH_PREFIX='"@HACKDIR@"' \
-		  -DDEFAULT_ICONDIR='"$(GTK_UIDIR)"' \
 		  -DLOCALEDIR=\"$(localedir)\" \
 		  -I$(ICON_SRC)
 GTK_SRCS	= demo-Gtk.c demo-Gtk-conf.c
-GTK_OBJS	= demo-Gtk.o demo-Gtk-conf.o \
-		  blurb.o exec.o prefs.o prefsw.o dpms.o remote.o \
+GTK_OBJS	= demo-Gtk.o demo-Gtk-conf.o demo-Gtk-resources.o \
+		  blurb.o exec.o prefs.o prefsw.o dpms.o remote.o screens.o \
 		  clientmsg.o atoms.o \
 		  $(UTILS_BIN)/xmu.o \
 		  $(UTILS_BIN)/resources.o \
@@ -217,6 +215,7 @@ UTIL_EXES	= xscreensaver-gfx @EXES_SYSTEMD@
 SETUID_EXES	= xscreensaver-auth
 DEMO_EXES	= @ALL_DEMO_PROGRAMS@
 EXES_SYSTEMD	= xscreensaver-systemd
+DESKS		= xscreensaver.desktop xscreensaver.service
 
 HDRS		= XScreenSaver_ad.h XScreenSaver_Xm_ad.h \
 		  xscreensaver.h prefs.h remote.h exec.h \
@@ -225,21 +224,21 @@ HDRS		= XScreenSaver_ad.h XScreenSaver_Xm_ad.h \
 MENA		= xscreensaver.man xscreensaver-settings.man \
 		  xscreensaver-command.man
 MENB		= xscreensaver-gfx.man xscreensaver-auth.man \
-		  xscreensaver-command.man xscreensaver-systemd.man
+		  xscreensaver-systemd.man
 
 EXTRAS		= README Makefile.in \
 		  XScreenSaver.ad.in XScreenSaver-Xm.ad xscreensaver.pam.in \
-		  xscreensaver.ui screensaver-properties.desktop.in \
-		  .gdbinit
+		  demo.ui prefs.ui gresource.xml xscreensaver.desktop.in \
+		  xscreensaver-settings.desktop.in xscreensaver.service.in
 
 TARFILES	= $(DAEMON_SRCS) $(GFX_SRCS) $(AUTH_SRCS) $(SYSTEMD_SRCS) \
 		  $(CMD_SRCS) $(GTK_SRCS) $(MOTIF_SRCS) $(PWENT_SRCS) \
-		  $(PWHELPER_SRCS) $(KERBEROS_SRCS) $(PAM_SRCS) \
+		  $(KERBEROS_SRCS) $(PAM_SRCS) \
 		  $(HDRS) $(MENA) $(MENB) $(TEST_SRCS) $(EXTRAS) 
 
-default: $(EXES) $(UTIL_EXES) $(SETUID_EXES)
-all:     $(EXES) $(UTIL_EXES) $(SETUID_EXES) $(DEMO_EXES)
-tests:   $(TEST_EXES)
+default:: $(EXES) $(UTIL_EXES) $(SETUID_EXES) $(DESKS)
+all::     default $(DEMO_EXES)
+tests::   $(TEST_EXES)
 
 
 ##############################################################################
@@ -389,8 +388,8 @@ install-man::
 	 echo ln -sf $$F1 $$D/$$F2 ;					\
 	      ln -sf $$F1 $$D/$$F2
 
-# These used to be in driver/ and installed into $(bindir)
-# Now they are in hacks/ and are installed into ${libexecdir}/xscreensaver/
+# These used to be in driver/ and installed into /usr/bin/
+# Now they are in hacks/ and are installed into /usr/libexec/xscreensaver/
 OLD_EXES = xscreensaver-getimage xscreensaver-getimage-file \
 	   xscreensaver-getimage-video xscreensaver-text \
 	   xscreensaver-systemd
@@ -511,23 +510,45 @@ install-pam: xscreensaver.pam
  $$e ""									     ;\
 	fi
 
-# screensaver-properties.desktop
+
+# xscreensaver.desktop
+# xscreensaver-settings.desktop
 # into /usr/share/applications/
-install-gnome:: screensaver-properties.desktop
+install-gnome:: xscreensaver.desktop xscreensaver-settings.desktop
 	@if [ "$(GTK_DATADIR)" != "" ]; then				      \
 	   if [ ! -d "$(install_prefix)$(GTK_APPDIR)" ]; then		      \
 	     echo $(INSTALL_DIRS) "$(install_prefix)$(GTK_APPDIR)"	     ;\
 		  $(INSTALL_DIRS) "$(install_prefix)$(GTK_APPDIR)"	     ;\
 	   fi								     ;\
-	   name2=xscreensaver-properties.desktop			     ;\
-	   echo $(INSTALL_DATA) screensaver-properties.desktop		      \
-		  $(install_prefix)$(GTK_APPDIR)/$$name2		     ;\
-		$(INSTALL_DATA) screensaver-properties.desktop		      \
-		  $(install_prefix)$(GTK_APPDIR)/$$name2		     ;\
+	   old=xscreensaver-properties.desktop				     ;\
+	   if [ -f "$(install_prefix)$(GTK_APPDIR)/$$old" ]; then	      \
+	     echo rm -f "$(install_prefix)$(GTK_APPDIR)/$$old"		     ;\
+		  rm -f "$(install_prefix)$(GTK_APPDIR)/$$old"		     ;\
+	   fi								     ;\
+	   for name in xscreensaver.desktop xscreensaver-settings.desktop ; do\
+	    echo $(INSTALL_DATA) $$name $(install_prefix)$(GTK_APPDIR)/$$name;\
+		 $(INSTALL_DATA) $$name $(install_prefix)$(GTK_APPDIR)/$$name;\
+	    echo chmod a+x $(install_prefix)$(GTK_APPDIR)/$$name	     ;\
+		 chmod a+x $(install_prefix)$(GTK_APPDIR)/$$name	     ;\
+	   done								     ;\
 	 fi
 
+# xscreensaver.service
+# into /usr/share/xscreensaver/
+# But maybe it should instead be installed as:
+# $(prefix)/share/dbus-1/system-services/org.jwz.xscreensaver.service
+# Or would that make it be enabled by default?
+#
+install-gnome:: xscreensaver.service
+	@if [ ! -d "$(install_prefix)$(GTK_SHAREDIR)" ]; then		      \
+	   echo $(INSTALL_DIRS) "$(install_prefix)$(GTK_SHAREDIR)"	     ;\
+		$(INSTALL_DIRS) "$(install_prefix)$(GTK_SHAREDIR)"	     ;\
+	 fi								     ;\
+	 name=xscreensaver.service					     ;\
+	 echo $(INSTALL_DATA) $$name $(install_prefix)$(GTK_SHAREDIR)/$$name ;\
+	      $(INSTALL_DATA) $$name $(install_prefix)$(GTK_SHAREDIR)/$$name
 
-# xscreensaver.xpm
+# xscreensaver.png
 # into /usr/share/pixmaps/
 install-gnome:: $(LOGO)
 	@if [ "$(GTK_DATADIR)" != "" ]; then                                  \
@@ -535,70 +556,47 @@ install-gnome:: $(LOGO)
              echo $(INSTALL_DIRS) "$(install_prefix)$(GTK_ICONDIR)"          ;\
                   $(INSTALL_DIRS) "$(install_prefix)$(GTK_ICONDIR)"          ;\
            fi                                                                ;\
-	   target=xscreensaver.xpm                                           ;\
+	   target=xscreensaver.png                                           ;\
 	   echo $(INSTALL_DATA) $(LOGO)					      \
 	          $(install_prefix)$(GTK_ICONDIR)/$$target		     ;\
 	        $(INSTALL_DATA) $(LOGO)					      \
 	          $(install_prefix)$(GTK_ICONDIR)/$$target		     ;\
         fi
 
-# ../utils/images/screensaver-*.png
-# into /usr/share/xscreensaver/ui/
-install-gnome::
-	@if [ "$(GTK_DATADIR)" != "" ]; then                                  \
-           if [ ! -d "$(install_prefix)$(GTK_UIDIR)" ]; then                  \
-             echo $(INSTALL_DIRS) "$(install_prefix)$(GTK_UIDIR)"	     ;\
-                  $(INSTALL_DIRS) "$(install_prefix)$(GTK_UIDIR)"	     ;\
-           fi                                                                ;\
-	   for target in $(GTK_ICONS) ; do				      \
-	     dest=`echo $$target | sed 's@^.*/@@'`			     ;\
-	     echo $(INSTALL_DATA) $$target				      \
-	          $(install_prefix)$(GTK_UIDIR)/$$dest			     ;\
-	          $(INSTALL_DATA) $$target				      \
-	          $(install_prefix)$(GTK_UIDIR)/$$dest			     ;\
-	   done								     ;\
-        fi
+install-gnome:: uninstall-old-gnome-icons
+install-gnome:: update-icon-caches
 
-# xscreensaver.ui
-# into /usr/share/xscreensaver/ui/
-install-gnome:: xscreensaver.ui
-	@if [ "$(GTK_DATADIR)" != "" ]; then				      \
-	  if [ ! -d "$(install_prefix)$(GTK_UIDIR)" ]; then		      \
-	    echo $(INSTALL_DIRS) "$(install_prefix)$(GTK_UIDIR)"	     ;\
-	         $(INSTALL_DIRS) "$(install_prefix)$(GTK_UIDIR)"	     ;\
-	  fi								     ;\
-	  target=xscreensaver.ui					     ;\
-	  echo $(INSTALL_DATA) $(srcdir)/$$target			      \
-	    $(install_prefix)$(GTK_UIDIR)/$$target			     ;\
-	  if   $(INSTALL_DATA) $(srcdir)/$$target			      \
-	    $(install_prefix)$(GTK_UIDIR)/$$target			     ;\
-	    then true                                                        ;\
-          else                                                                \
-	    e=echo ;                                                          \
- $$e ""                                                                      ;\
- $$e "  ####################################################################";\
- $$e "  Warning: unable to install $$target into"			     ;\
- $$e "           $(install_prefix)$(GTK_UIDIR)/."			     ;\
- $$e "           Without this file, xscreensaver-settings will not"          ;\
- $$e "           be able to run properly."                                   ;\
- $$e "  ####################################################################";\
- $$e ""                                                                      ;\
-             exit 1 ;                                                         \
-	   fi ;                                                               \
-	 fi
+update-icon-caches::
+	@for f in /usr/share/icons/index.theme				      \
+		  /usr/share/icons/*/index.theme			      \
+		  /usr/share/pixmaps/index.theme			      \
+		  /usr/share/pixmaps/*/index.theme			      \
+	 ; do								      \
+	   if [ -f $$f ]; then						      \
+	     f=`dirname $$f`						     ;\
+	     echo $(UPDATE_ICON_CACHE) --force --quiet $$f		     ;\
+	          $(UPDATE_ICON_CACHE) --force --quiet $$f		     ;\
+	   fi								     ;\
+	 done
 
-
-# screensaver-properties.desktop
+# xscreensaver.desktop
+# xscreensaver-settings.desktop
 # into /usr/share/applications/
 uninstall-gnome::
 	@if [ "$(GTK_DATADIR)" != "" ]; then				      \
-          f=xscreensaver-properties.desktop                                  ;\
-          echo rm -f $(install_prefix)$(GTK_APPDIR)/$$f                      ;\
-               rm -f $(install_prefix)$(GTK_APPDIR)/$$f                      ;\
-        fi
+	  old=xscreensaver-properties.desktop				     ;\
+	  if [ -f "$old" ]; then					      \
+	    echo rm -f $(install_prefix)$(GTK_APPDIR)/$$old		     ;\
+		 rm -f $(install_prefix)$(GTK_APPDIR)/$$old		     ;\
+	  fi								     ;\
+	  for f in xscreensaver.desktop xscreensaver-settings.desktop; do     \
+	    echo rm -f $(install_prefix)$(GTK_APPDIR)/$$f		     ;\
+	         rm -f $(install_prefix)$(GTK_APPDIR)/$$f		     ;\
+	  done								     ;\
+	fi
 
-# xscreensaver.xpm
-# into /usr/share/pixmaps/
+# xscreensaver.xpm (pre-2022)
+# from /usr/share/pixmaps/
 uninstall-gnome::
 	@if [ "$(GTK_ICONDIR)" != "" ]; then				      \
 	  target=xscreensaver.xpm                                            ;\
@@ -606,31 +604,31 @@ uninstall-gnome::
 	       rm -f $(install_prefix)$(GTK_ICONDIR)/$$target                ;\
 	 fi
 
-# ../utils/images/screensaver-*.png
-# into /usr/share/xscreensaver/ui/
+# /usr/share/xscreensaver/ui/*.png and *.ui no longer used as of 2022, 6.05.
 uninstall-gnome::
-	@if [ "$(GTK_DATADIR)" != "" ]; then				      \
-	   for target in $(GTK_ICONS) ; do				      \
-	     dest=`echo $$target | sed 's@^.*/@@'`			     ;\
-	     echo rm -f $(install_prefix)$(GTK_UIDIR)/$$dest                 ;\
-	          rm -f $(install_prefix)$(GTK_UIDIR)/$$dest                 ;\
-	   done								     ;\
-        fi
-
-# xscreensaver.ui
-# into /usr/share/xscreensaver/ui/
-uninstall-gnome::
-	@if [ "$(GTK_DATADIR)" != "" ]; then				      \
-	  for target in xscreensaver.ui xscreensaver-demo.ui ; do	      \
-	    echo rm -f $(install_prefix)$(GTK_UIDIR)/$$target                ;\
-	         rm -f $(install_prefix)$(GTK_UIDIR)/$$target                ;\
-	   done								     ;\
-	  rmdir "$(GTK_UIDIR)"						     ;\
-	  rmdir "$(GTK_DATADIR)/xscreensaver"				     ;\
-	  exit 0							     ;\
+	@if [ "$(GTK_ICONDIR)" != "" ]; then				      \
+	  echo rm -rf $(install_prefix)$(GTK_SHAREDIR)/ui		     ;\
+	       rm -rf $(install_prefix)$(GTK_SHAREDIR)/ui		     ;\
 	 fi
 
-# /usr/share/xscreensaver/glade/ no longer used
+# What is all this crap with the wrong logo?
+# /usr/share/icons/nuoveXT2/16x16/apps/xscreensaver.png through
+# /usr/share/icons/gnome-colors-common/32x32/apps/xscreensaver.png
+uninstall-gnome:: uninstall-old-gnome-icons
+uninstall-old-gnome-icons::
+	@for f in							      \
+	   "$(install_prefix)$(GTK_DATADIR)/icons"/*/*/apps/xscreensaver.png  \
+	   "$(install_prefix)$(GTK_DATADIR)/icons"/*/*/apps/xscreensaver.svg  \
+	   "$(install_prefix)$(GTK_ICONDIR)/xscreensaver.xpm"		      \
+	   "$(install_prefix)$(GTK_ICONDIR)/xscreensaver.svg"		     ;\
+	 do								      \
+	   if [ -f "$$f" ]; then					      \
+	     echo rm -f "$$f"						     ;\
+		  rm -f "$$f"						     ;\
+	   fi								     ;\
+	 done
+
+# /usr/share/xscreensaver/glade/ no longer used as of 2022.
 uninstall-gnome::
 	-rm -rf $(GTK_DATADIR)/xscreensaver/glade
 
@@ -667,7 +665,6 @@ distclean: clean
 	TAGS *~ "#"* *.rej *.orig \
 	Makefile \
 	XScreenSaver.ad \
-	screensaver-properties.desktop \
 	xscreensaver.pam
 
 # Adds all current dependencies to Makefile
@@ -687,7 +684,7 @@ distdepend: check_men update_ad_version XScreenSaver_ad.h XScreenSaver_Xm_ad.h
 	-s '# DO NOT DELETE: updated by make distdepend' $(DEPEND_FLAGS) -- \
 	$(INCLUDES_1) $(DEFS) $(DEPEND_DEFINES) $(CFLAGS) $(X_CFLAGS) --    \
 	$(SAVER_SRCS_1) $(SYSTEMD_SRCS) $(MOTIF_SRCS) $(GTK_SRCS)	    \
-	$(PWENT_SRCS) $(PWHELPER_SRCS) $(KERBEROS_SRCS) $(PAM_SRCS)	    \
+	$(PWENT_SRCS) $(KERBEROS_SRCS) $(PAM_SRCS)			    \
 	$(LOCK_SRCS_1) $(DEMO_SRCS_1) $(CMD_SRCS)			    \
 	$(TEST_SRCS) 2>/dev/null |					    \
 	sort -d |							    \
@@ -862,6 +859,14 @@ demo-Gtk.o: demo-Gtk.c
 demo-Gtk-conf.o: demo-Gtk-conf.c
 	$(CC) -c $(CC_ALL) $(GTK_DEFS) $<
 
+GCRARGS = --sourcedir=$(srcdir) --sourcedir=$(ICON_SRC) --generate-source
+demo-Gtk-resources.c: gresource.xml demo.ui prefs.ui
+	$(GLIB_COMPILE_RESOURCES) gresource.xml --target=$@ $(GCRARGS)
+
+GTK_WARNINGS = -Wno-long-long -Wno-c99-extensions -Wno-pedantic
+demo-Gtk-resources.o: demo-Gtk-resources.c
+	$(CC) -c $(CC_ALL) $(GTK_DEFS) $(GTK_WARNINGS) $<
+
 xscreensaver-settings-Gtk: $(GTK_OBJS)
 	$(CC) $(LDFLAGS) -o $@ $(GTK_OBJS) $(GTK_LIBS)
 
@@ -912,13 +917,8 @@ XScreenSaver_Xm_ad.h::
 	  mv $$TMP $$OUT ;						\
 	fi
 
-
-# Replace this with @INTLTOOL_DESKTOP_RULE@ once
-# https://bugs.launchpad.net/intltool/+bug/1749904 is fixed.
-.desktop.in.desktop:   $(INTLTOOL_MERGE) $(top_srcdir)/po/*.po
-	$(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) \
-	  $(INTLTOOL_V_MERGE_OPTIONS) -d -u \
-	  -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< $@
+@INTLTOOL_DESKTOP_RULE@
+@INTLTOOL_SERVICE_RULE@
 
 
 ##############################################################################
@@ -1001,6 +1001,7 @@ demo-Gtk.o: $(srcdir)/blurb.h
 demo-Gtk.o: ../config.h
 demo-Gtk.o: $(srcdir)/demo-Gtk-conf.h
 demo-Gtk.o: $(srcdir)/remote.h
+demo-Gtk.o: $(srcdir)/screens.h
 demo-Gtk.o: $(srcdir)/types.h
 demo-Gtk.o: $(UTILS_SRC)/resources.h
 demo-Gtk.o: $(UTILS_SRC)/usleep.h
@@ -1020,9 +1021,6 @@ demo-Xm.o: $(UTILS_SRC)/version.h
 demo-Xm.o: $(UTILS_SRC)/visual.h
 demo-Xm.o: $(UTILS_SRC)/xmu.h
 demo-Xm-widgets.o: ../config.h
-passwd-helper.o: $(srcdir)/auth.h
-passwd-helper.o: $(srcdir)/blurb.h
-passwd-helper.o: ../config.h
 passwd-kerberos.o: $(srcdir)/auth.h
 passwd-kerberos.o: $(srcdir)/blurb.h
 passwd-kerberos.o: ../config.h
@@ -1063,7 +1061,6 @@ test-xdpms.o: $(srcdir)/blurb.h
 test-xdpms.o: ../config.h
 test-xinerama.o: $(srcdir)/blurb.h
 test-xinerama.o: ../config.h
-test-xinput.o: $(srcdir)/blurb.h
 test-xinput.o: ../config.h
 test-xinput.o: $(srcdir)/xinput.h
 test-xkb.o: $(srcdir)/blurb.h

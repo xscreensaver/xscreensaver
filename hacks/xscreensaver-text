@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Copyright © 2005-2021 Jamie Zawinski <jwz@jwz.org>
+# Copyright © 2005-2022 Jamie Zawinski <jwz@jwz.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -39,7 +39,7 @@ BEGIN { eval 'use Text::Wrap qw(wrap);' }
 
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my ($version) = ('$Revision: 1.62 $' =~ m/\s(\d[.\d]+)\s/s);
+my ($version) = ('$Revision: 1.66 $' =~ m/\s(\d[.\d]+)\s/s);
 
 my $verbose = 0;
 my $http_proxy = undef;
@@ -385,9 +385,15 @@ sub output() {
     if (open (my $in, "<:utf8", "/etc/os-release")) {
       while (<$in>) {			  # PRETTY_NAME="CentOS Linux 7 (Core)"
         if (m/^PRETTY_NAME="(.*)"/si) {   # PRETTY_NAME="Raspbian 10 (buster)"
+          my $line = $1;
+
           # Annoying that "10.6" is only in /etc/debian_version and
-          # /etc/os-release only contains "10".
-          $body .= "$1\n";
+          # /etc/os-release only contains "10". So splice that in.
+          my $v1 = `cat /etc/debian_version 2>&-`;
+          my ($v2, $v3) = ($v1 =~ m/^((\d+)\.\d+)\s*$/s);
+          $line =~ s/\b\Q$v3\E\b/$v2/s
+            if ($v2 && !($line =~ m/\b\Q$v2\E\b/si));
+          $body .= "$line\n";
           $unamep = 0;
           last;
         }
@@ -415,11 +421,17 @@ sub output() {
         `/usr/sbin/system_profiler SPSoftwareDataType SPHardwareDataType 2>&-`;
       my ($v) = ($sp =~ m/^\s*System Version:\s*(.*)$/mi);
       my ($s) = ($sp =~ m/^\s*(?:CPU|Processor) Speed:\s*(.*)$/mi);
+      my ($c) = ($sp =~ m/^\s*Chip:\s*(.*)$/mi);
+      my ($o) = ($sp =~ m/^\s*Total Number of Cores:\s*(\d+)/mi);
       my ($t) = ($sp =~ m/^\s*(?:Machine|Model) Name:\s*(.*)$/mi);
       my ($m) = ($sp =~ m/^\s*Memory:\s*(.*)$/mi);
+      $c =~ s/^Apple //s if $c;
+      $c .= " $o core" if ($c && $o);
+      $t .= ", $c" if $c;
       $t .= ", $m" if $t;
       $body .= "$v\n" if ($v);
       $body .= "$s $t\n" if ($s && $t);
+      $body .= "$t\n" if (!$s && $t);
       $unamep = !defined ($v);
     }
 
@@ -430,17 +442,27 @@ sub output() {
     # we're running on.  This info also exists in various /proc/ files,
     # but if /proc/ exists, lscpu probably exists as well.
     #
+    $ENV{LANGUAGE} = 'en_US';  # If lscpu prints Japanese, we don't match.
     my $cpu = `lscpu 2>&-`;
     if ($cpu) {
       my ($model) = ($cpu =~ m/^Model name:\s*(.*)$/mi);
      #my ($arch)  = ($cpu =~ m/^Architecture:\s*(.*)$/mi);
       my ($speed) = ($cpu =~ m/^CPU max MHz:\s*(.*)$/mi);
          ($speed) = ($cpu =~ m/^CPU MHz:\s*(.*)$/mi) unless $speed;
-      if ($speed && $speed >= 1000) {
+      my ($speed_ghz) = ($cpu =~ m/^Model name.*CPU @ \s*(.*)GHz$/mi);
+      if ($speed_ghz) {
+        $speed = sprintf("%.1fGHz", $speed_ghz);
+      } elsif ($speed && $speed >= 1000) {
         $speed = sprintf("%.1fGHz", $speed/1000);
-      } else {
+      } elsif ($speed) {
         $speed = sprintf("%.1fMHz", $speed);
       }
+
+      # This file seems to be ARM-specific.  It gives us the better string
+      # "Raspberry Pi 4 Model B Rev 1.4" whereas lscpu gives us "Cortex-A72".
+      my $model2 = `cat /proc/device-tree/model 2>&-`;
+      $model2 =~ s/[\n\000].*$//s;
+      $model = $model2 if $model2;
 
       # Abbreviate stupidly verbose marketing nonsense like:
       # "Intel(R) Xeon(R) CPU E3-1275 v5 @ 3.60GHz" and
@@ -449,6 +471,12 @@ sub output() {
       $model =~ s/\s*\((R|TM)\)//gs;		  # So useful!
       $model =~ s/\s*\b(CPU|Processor)\b//gsi;	  # It is? Really?
       $model =~ s/\b\d+[a-z]+ gen //gsi;	  # Nth Gen
+
+      # Line is too long for gltext:
+      # "Raspberry Pi 4 Model B Rev 1.4" -> "Pi 4b r1.4"
+      $model =~ s@\bRaspberry\b@@si;
+      $model =~ s@ Model ([A-Z\d]+)@\L$1@si;
+      $model =~ s@ Rev\.? @ r@si;
 
       # Maybe we can tell how much RAM is installed.
       my $ram = `cat /proc/meminfo 2>&-`;
@@ -908,6 +936,13 @@ sub main() {
 
   my $load_p = 1;
   my $cocoa_id = undef;
+
+  # Some time between perl 5.16.3 and 5.28.3, invoking a script with >&-
+  # started writing "Unable to flush stdout: Bad file descriptor" to stderr
+  # at exit. So if stdout is closed, open it as /dev/null instead.
+  #
+  open (STDOUT, '>', '/dev/null')
+    if (! defined (syswrite (STDOUT, "")));  # undef if fd closed; 0 if open.
 
   my @oargv = @ARGV;
   while ($#ARGV >= 0) {

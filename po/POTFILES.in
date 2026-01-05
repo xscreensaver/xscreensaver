@@ -1,9 +1,10 @@
-# Auto-generated: Wed Jun  9 08:47:14 PDT 2021
+# Auto-generated: Sun May 29 13:46:24 PDT 2022
 driver/demo-Gtk-conf.c
 driver/demo-Gtk.c
 driver/dialog.c
-driver/screensaver-properties.desktop.in
 driver/subprocs.c
+driver/xscreensaver-settings.desktop.in
+driver/xscreensaver.desktop.in
 driver/xscreensaver.ui
 hacks/config/abstractile.xml
 hacks/config/anemone.xml
@@ -19,6 +20,7 @@ hacks/config/attraction.xml
 hacks/config/atunnel.xml
 hacks/config/barcode.xml
 hacks/config/beats.xml
+hacks/config/binaryhorizon.xml
 hacks/config/binaryring.xml
 hacks/config/blaster.xml
 hacks/config/blinkbox.xml
@@ -38,6 +40,7 @@ hacks/config/cage.xml
 hacks/config/carousel.xml
 hacks/config/ccurve.xml
 hacks/config/celtic.xml
+hacks/config/chompytower.xml
 hacks/config/circuit.xml
 hacks/config/cityflow.xml
 hacks/config/cloudlife.xml
@@ -156,6 +159,8 @@ hacks/config/lmorph.xml
 hacks/config/lockward.xml
 hacks/config/loop.xml
 hacks/config/m6502.xml
+hacks/config/mapscroller.xml
+hacks/config/marbling.xml
 hacks/config/maze.xml
 hacks/config/maze3d.xml
 hacks/config/memscroller.xml
@@ -171,6 +176,7 @@ hacks/config/molecule.xml
 hacks/config/morph3d.xml
 hacks/config/mountain.xml
 hacks/config/munch.xml
+hacks/config/nakagin.xml
 hacks/config/nerverot.xml
 hacks/config/noof.xml
 hacks/config/noseguy.xml
@@ -199,7 +205,6 @@ hacks/config/quasicrystal.xml
 hacks/config/queens.xml
 hacks/config/raverhoop.xml
 hacks/config/razzledazzle.xml
-hacks/config/rd-bomb.xml
 hacks/config/ripples.xml
 hacks/config/rocks.xml
 hacks/config/romanboy.xml
@@ -227,6 +232,7 @@ hacks/config/splodesic.xml
 hacks/config/spotlight.xml
 hacks/config/sproingies.xml
 hacks/config/squiral.xml
+hacks/config/squirtorus.xml
 hacks/config/stairs.xml
 hacks/config/starfish.xml
 hacks/config/starwars.xml

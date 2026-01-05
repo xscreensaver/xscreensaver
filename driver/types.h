@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 1993-2021 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 1993-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -64,10 +64,6 @@ struct saver_preferences {
   Bool install_cmap_p;		/* whether we should use our own colormap
 				   when using the screen's default visual */
 
-# ifdef QUAD_MODE
-  Bool quad_p;			/* whether to run four savers per monitor */
-# endif
-
   screenhack **screenhacks;	/* the programs to run */
   int screenhacks_count;
 
@@ -109,6 +105,7 @@ struct saver_preferences {
   char *load_url_command;	/* How one loads URLs. */
   char *new_login_command;	/* Command for the "New Login" button. */
   char *dialog_theme;		/* Color scheme on the unlock dialog */
+  char *settings_geom;		/* Saved positions of the settings windows */
 
   int auth_warning_slack;	/* Don't warn about login failures if they
                                    all happen within this many seconds of
@@ -143,6 +140,8 @@ struct saver_info {
   Bool demoing_p;		/* Whether we are demoing a single hack
 				   (without UI.) */
   Bool emergency_p;		/* Restarted because of a crash */
+  Bool terminating_p;		/* In the process of shutting down */
+
   XtIntervalId watchdog_id;	/* Timer to implement `prefs.watchdog */
 
   int selection_mode;		/* Set to -1 if the NEXT ClientMessage has just

@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Copyright © 2008-2021 Jamie Zawinski <jwz@jwz.org>
+# Copyright © 2008-2022 Jamie Zawinski <jwz@jwz.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -18,7 +18,7 @@ use diagnostics;
 use strict;
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my ($version) = ('$Revision: 1.14 $' =~ m/\s(\d[.\d]+)\s/s);
+my ($version) = ('$Revision: 1.16 $' =~ m/\s(\d[.\d]+)\s/s);
 
 my $verbose = 0;
 
@@ -47,7 +47,6 @@ my %disable = (
    'polyominoes'	=> 1,
    'providence'		=> 1,
    'pyro'		=> 1,
-   'rdbomb'		=> 2,  # alternate name
    'rocks'		=> 1,
    'sballs'		=> 1,
    'sierpinski'		=> 1,
@@ -142,7 +141,7 @@ sub munge_ad($) {
                            ? $a cmp $b 
                            : $hacks{$a} <=> $hacks{$b}}
                     (keys(%hacks))) {
-    my $cmd = "$hack -root";
+    my $cmd = "$hack --root";
     my $ts = (length($cmd) / 8) * 8;
     while ($ts < 40) { $cmd .= "\t"; $ts += 8; }
 

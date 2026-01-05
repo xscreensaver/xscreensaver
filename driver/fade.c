@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 1992-2021 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 1992-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -105,13 +105,12 @@
  */
 #undef HAVE_RANDR_12
 
-#define HAVE_XINPUT2 1  /* Mandatory */
-
-
-#ifdef HAVE_XINPUT2
-# include <X11/extensions/XInput2.h>
-# include "xinput.h"
+#ifndef HAVE_XINPUT
+# error The XInput2 extension is required
 #endif
+
+#include <X11/extensions/XInput2.h>
+#include "xinput.h"
 
 
 typedef struct {
@@ -157,7 +156,7 @@ double_time (void)
 }
 
 
-#ifdef HAVE_XINPUT2
+#ifdef HAVE_XINPUT
 static int xi_opcode = -1;
 #endif
 
@@ -176,7 +175,7 @@ user_event_p (Display *dpy, XEvent *event, XPointer arg)
   case MotionNotify:
     if (motion_p) return True;
     break;
-# ifdef HAVE_XINPUT2
+# ifdef HAVE_XINPUT
   case GenericEvent:
     {
       XIRawEvent *re;
@@ -186,18 +185,31 @@ user_event_p (Display *dpy, XEvent *event, XPointer arg)
         XGetEventData (dpy, &event->xcookie);
       if (! event->xcookie.data)
         return False;
-      re = event->xcookie.data;    
 
-      if (re->evtype == XI_RawKeyPress ||
-          re->evtype == XI_RawButtonPress)
+      re = event->xcookie.data;
+      switch (re->evtype) {
+      case XI_RawKeyPress:
+      case XI_RawButtonPress:
+      case XI_RawTouchBegin:
+      case XI_KeyPress:
+      case XI_ButtonPress:
+      case XI_TouchBegin:
         return True;
-      else if (motion_p && re->evtype == XI_RawMotion)
-        return True;
+        break;
+      case XI_RawMotion:
+      case XI_RawTouchUpdate:
+      case XI_Motion:
+      case XI_TouchUpdate:
+        if (motion_p) return True;
+        break;
+      default:
+        break;
+      }
 
       /* Calling XFreeEventData here is bad news */
     }
     break;
-# endif /* HAVE_XINPUT2 */
+# endif /* HAVE_XINPUT */
   default: break;
   }
 
@@ -213,7 +225,7 @@ user_active_p (XtAppContext app, Display *dpy, Bool fade_out_p)
   Bool motion_p = fade_out_p;   /* Motion aborts fade-out, not fade-in. */
   motion_p = False;		/* Naah, never abort on motion only */
 
-# ifdef HAVE_XINPUT2
+# ifdef HAVE_XINPUT
   if (xi_opcode == -1)
     {
       Bool ov = verbose_p;
@@ -344,8 +356,8 @@ fade_screens (XtAppContext app, Display *dpy,
   int status = False;
   fade_state *state = 0;
 
-  if (nwindows <= 0) abort();
-  if (!saver_windows) abort();
+  if (nwindows <= 0) return False;
+  if (!saver_windows) return False;
 
   if (!closureP) abort();
   state = (fade_state *) *closureP;
@@ -438,14 +450,14 @@ colormap_fade (XtAppContext app, Display *dpy,
   int status = -1;
   Colormap *window_cmaps = 0;
   int i, j, k;
-  int cmaps_per_screen = 5;
-  int nscreens = ScreenCount(dpy);
-  int ncmaps = nscreens * cmaps_per_screen;
+  unsigned int cmaps_per_screen = 5;
+  unsigned int nscreens = ScreenCount(dpy);
+  unsigned int ncmaps = nscreens * cmaps_per_screen;
   Colormap *fade_cmaps = 0;
   Bool installed = False;
-  int total_ncolors;
+  unsigned int total_ncolors;
   XColor *orig_colors, *current_colors, *screen_colors, *orig_screen_colors;
-  int screen;
+  unsigned int screen;
 
   window_cmaps = (Colormap *) calloc(sizeof(Colormap), nwindows);
   if (!window_cmaps) abort();

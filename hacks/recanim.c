@@ -1,4 +1,4 @@
-/* recanim, Copyright (c) 2014-2021 Jamie Zawinski <jwz@jwz.org>
+/* recanim, Copyright © 2014-2022 Jamie Zawinski <jwz@jwz.org>
  * Record animation frames of the running screenhack.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -23,12 +23,15 @@
 #endif
 
 #ifdef HAVE_GDK_PIXBUF
-# ifdef HAVE_GTK2
+# include <gdk-pixbuf/gdk-pixbuf.h>
+# ifdef HAVE_GDK_PIXBUF_XLIB
 #  include <gdk-pixbuf-xlib/gdk-pixbuf-xlib.h>
-# else  /* !HAVE_GTK2 */
-#  include <gdk-pixbuf/gdk-pixbuf-xlib.h>
-# endif /* !HAVE_GTK2 */
-#endif /* HAVE_GDK_PIXBUF */
+# endif
+#endif
+
+#if (__GNUC__ >= 4)
+# pragma GCC diagnostic pop
+#endif
 
 #ifdef USE_GL
 # ifdef HAVE_JWXYZ
@@ -164,7 +167,9 @@ screenhack_record_anim_init (Screen *screen, Window window, int target_frames)
   if (st->fade_frames >= (st->target_frames / 2) - st->fps)
     st->fade_frames = 0;
 
-# ifdef HAVE_GDK_PIXBUF
+# ifdef HAVE_GDK_PIXBUF_XLIB
+  /* Aug 2022: nothing seems to go wrong if we don't do this?
+     gtk-2.24.33, gdk-pixbuf 2.42.8. */
   {
     Window root;
     int x, y;
@@ -172,17 +177,11 @@ screenhack_record_anim_init (Screen *screen, Window window, int target_frames)
     XGetGeometry (dpy, window, &root, &x, &y, &w, &h, &bw, &d);
     gdk_pixbuf_xlib_init_with_depth (dpy, screen_number (screen), d);
 
-#  ifdef HAVE_GTK2
-#   if !GLIB_CHECK_VERSION(2, 36 ,0)
+#  if !GLIB_CHECK_VERSION(2, 36 ,0)
     g_type_init();
-#   endif
-#  else  /* !HAVE_GTK2 */
-    xlib_rgb_init (dpy, screen);
-#  endif /* !HAVE_GTK2 */
+#  endif
   }
-# else  /* !HAVE_GDK_PIXBUF */
-#  error GDK_PIXBUF is required
-# endif /* !HAVE_GDK_PIXBUF */
+# endif /* !HAVE_GDK_PIXBUF_XLIB */
 
   XGetWindowAttributes (dpy, st->window, &st->xgwa);
 

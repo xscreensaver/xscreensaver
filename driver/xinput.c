@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 1991-2021 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 1991-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -7,6 +7,49 @@
  * documentation.  No representations are made about the suitability of this
  * software for any purpose.  It is provided "as is" without express or 
  * implied warranty.
+ */
+
+/* For our purposes, here are the salient facts about the XInput2 extension:
+
+   - Available by default as of X11R7 in 2009.
+
+   - We receive events from the XIRawEvent family while other processes
+     have the keyboard and mouse grabbed (XI_RawKeyPress, etc.)
+     The entire xscreensaver-auth security model hinges on this fact.
+
+   - We cannot receive events from the XIDeviceEvent family (XI_KeyPress,
+     etc.) so while XIDeviceEvents contain many fields that we would like
+     to have, don't be fooled, those are not available.  XIRawEvents such
+     as XI_RawKeyPress cannot be cast to XIDeviceEvent.
+
+   - XI_RawButtonPress, XI_RawButtonRelease and XI_RawMotion contain no
+     usable position information.  The non-raw versions do, but we don't
+     receive those, so we have to read that info via XQueryPointer.
+
+   - XI_RawKeyPress and XI_RawKeyRelease contain the keycode (in 'detail')
+     but no modifier info, so, again, to be able to tell "a" from "A" we
+     need to call XQueryPointer.
+
+   - XI_RawKeyPress does not auto-repeat the way Xlib KeyPress does.
+
+   - Raw events have no window, subwindow, etc.
+
+   - Event serial numbers are not unique.
+
+   - If *this* process has the keyboard and mouse grabbed, it receives:
+
+     - KeyPress, KeyRelease
+     - ButtonPress, ButtonRelease, MotionNotify
+     - XI_RawButtonPress, XI_RawButtonRelease, XI_RawMotion (doubly reported)
+
+   - If this process *does not* have keyboard and mouse grabbed, it receives:
+
+     - XI_RawKeyPress, XI_RawKeyRelease
+     - XI_RawButtonPress, XI_RawButtonRelease, XI_RawMotion
+
+   The closest thing to actual documentation on XInput2 seems to be a series
+   of blog posts by Peter Hutterer.  There's basically nothing about it on
+   www.x.org.  https://who-t.blogspot.com/2009/07/xi2-recipes-part-4.html
  */
 
 #ifdef HAVE_CONFIG_H
@@ -35,7 +78,6 @@ extern Bool debug_p;
 Bool
 init_xinput (Display *dpy, int *opcode_ret)
 {
-  int nscreens = ScreenCount (dpy);
   XIEventMask evmasks[1];
   unsigned char mask1[(XI_LASTEVENT + 7)/8];
   int major, minor;
@@ -64,6 +106,10 @@ init_xinput (Display *dpy, int *opcode_ret)
 
   memset (mask1, 0, sizeof(mask1));
 
+  /* The XIRawEvent family of events are delivered to us while someone else
+     holds a grab, but the non-raw versions are not.  In fact, attempting to
+     select XI_KeyPress, etc. results in a BadAccess X error.
+   */
   XISetMask (mask1, XI_RawMotion);
   XISetMask (mask1, XI_RawKeyPress);
   XISetMask (mask1, XI_RawKeyRelease);
@@ -73,19 +119,18 @@ init_xinput (Display *dpy, int *opcode_ret)
   XISetMask (mask1, XI_RawTouchUpdate);
   XISetMask (mask1, XI_RawTouchEnd);
 
-  /* If we use XIAllDevices instead, we get double events. */
+  /* If we use XIAllDevices instead, we get duplicate events. */
   evmasks[0].deviceid = XIAllMasterDevices;
   evmasks[0].mask_len = sizeof(mask1);
   evmasks[0].mask = mask1;
 
-  for (i = 0; i < nscreens; i++)
+  /* Only select events on screen 0 -- if we select on each screen,
+     we get duplicate events. */
+  if (XISelectEvents (dpy, RootWindow (dpy, 0), evmasks, countof(evmasks))
+      != Success)
     {
-      Window root = RootWindow (dpy, i);
-      if (XISelectEvents (dpy, root, evmasks, countof(evmasks)) != Success)
-        {
-          fprintf (stderr, "%s: XISelectEvents failed\n", blurb());
-          return False;
-        }
+      fprintf (stderr, "%s: XISelectEvents failed\n", blurb());
+      return False;
     }
 
   XFlush (dpy);
@@ -117,94 +162,20 @@ init_xinput (Display *dpy, int *opcode_ret)
 }
 
 
-/* If there is more than one Screen on the Display, XInput2 sends a duplicate
-   event for each Screen.  You'd think that they would have the 'root' member
-   set to the root window of that screen, so that we could ignore events not
-   destined for our screen, but no, they all have the same root window.  But
-   they also have the same 'serial' and 'time', so (in theory) we can ignore
-   the duplicates by noticing recently-duplicated event serial numbers, which
-   ought never happen.  BUT...!
- */
-static Bool
-duplicate_xinput_event_p (int evtype, XIDeviceEvent *in)
-{
-  static unsigned long dups[50] = { 0, };
-  int i;
-
-  /* Great news, everybody: XEvent.xany.serial is apparently not unique.  Wny?
-     Because fuck you that's why.  XtAppNextEvent is returning a RawKeyRelease
-     followed by a RawKeyPress with the same serial.  It doesn't happen every
-     time, but seems to happen most often if a second key goes down before the
-     first key is released, e.g., which often happens when typing fast.
-
-     I have not seen it duplicating serials between two different KeyPress
-     events, but I have seen it being duplicated between a KeyPress and a
-     non-corresponding KeyRelease event; and between two different KeyRelease
-     events.  It does this even when there is only one Screen.
-
-     So we must compare both 'serial' and 'type' when looking for duplicates.
-     This should be ok if it really does not duplicate serials between
-     unrelated KeyPress events.  And we ignore KeyRelease events, so what
-     happens with those doesn't matter.
-
-     Between this shit and the random noise that shows up in XIDeviceEvent,
-     I'm starting to suspect that maybe, just maybe, the XInput2 library is
-     extremely careless about memory management!
-   */
-  unsigned long key = (in->serial & 0xFFFF) | (evtype << 16);
-
-  for (i = 0; i < countof(dups); i++)
-    if (dups[i] == key)
-      {
-        if (debug_p)
-          fprintf (stderr, "%s: discard duplicate XInput event %08lx\n",
-                   blurb(), key);
-        return True;
-      }
-  for (i = 0; i < countof(dups)-1; i++)
-    dups[i] = dups[i+1];
-  dups[i] = key;
-  return False;
-}
-
-
 /* Convert an XInput2 event to corresponding old-school Xlib event.
    Returns true on success.
  */
-static Bool
-xinput_event_to_xlib_1 (int evtype, XIDeviceEvent *in, XEvent *out)
+Bool
+xinput_event_to_xlib (int evtype, XIDeviceEvent *in, XEvent *out)
 {
   Display *dpy = in->display;
   Bool ok = False;
 
   int root_x = 0, root_y = 0;
+  int win_x = 0,  win_y = 0;
   unsigned int mods = 0;
+  Window subw = 0;
 
-  /* The closest thing to actual documentation on XInput2 seems to be a series
-     of blog posts by Peter Hutterer.  There's basically nothing about it on
-     www.x.org.  In http://who-t.blogspot.com/2009/07/xi2-recipes-part-4.html
-     he says: 
-
-       "XIDeviceEvent [...] contains the state of the modifier keys [...]
-       The base modifiers are the ones currently pressed, latched the ones
-       pressed until a key is pressed that's configured to unlatch it (e.g.
-       some shift-capslock interactions have this behaviour) and finally
-       locked modifiers are the ones permanently active until unlocked
-       (default capslock behaviour in the US layout). The effective modifiers
-       are a bitwise OR of the three above - which is essentially equivalent
-       to the modifiers state supplied in the core protocol events."
-
-     However, I'm seeing random noise in the various XIDeviceEvent.mods fields.
-     Nonsensical values like base = 0x6045FB3D.  So, let's poll the actual
-     modifiers from XQueryPointer.  This can race: maybe the modifier state
-     changed between when the server generated the keyboard event, and when
-     we receive it and poll.  However, if an actual human is typing and
-     releasing their modifier keys on such a tight timeframe... that's
-     probably already not going well.
-
-     I'm also seeing random noise in the event_xy and root_xy fields in
-     motion events.  So just always use XQueryPointer.
-   */
   switch (evtype) {
   case XI_RawKeyPress:
   case XI_RawKeyRelease:
@@ -212,12 +183,12 @@ xinput_event_to_xlib_1 (int evtype, XIDeviceEvent *in, XEvent *out)
   case XI_RawButtonRelease:
   case XI_RawMotion:
     {
-      Window root_ret, child_ret;
+      Window root_ret;
       int win_x, win_y;
       int i;
       for (i = 0; i < ScreenCount (dpy); i++)   /* query on correct screen */
         if (XQueryPointer (dpy, RootWindow (dpy, i),
-                           &root_ret, &child_ret, &root_x, &root_y,
+                           &root_ret, &subw, &root_x, &root_y,
                            &win_x, &win_y, &mods))
           break;
     }
@@ -229,12 +200,12 @@ xinput_event_to_xlib_1 (int evtype, XIDeviceEvent *in, XEvent *out)
   case XI_RawKeyRelease:
     out->xkey.type      = (evtype == XI_RawKeyPress ? KeyPress : KeyRelease);
     out->xkey.display   = in->display;
-    out->xkey.window    = in->event;
     out->xkey.root      = in->root;
-    out->xkey.subwindow = in->child;
+    out->xkey.window    = subw;
+    out->xkey.subwindow = subw;
     out->xkey.time      = in->time;
-    out->xkey.x         = root_x;
-    out->xkey.y         = root_y;
+    out->xkey.x         = win_x;
+    out->xkey.y         = win_y;
     out->xkey.x_root    = root_x;
     out->xkey.y_root    = root_y;
     out->xkey.state     = mods;
@@ -246,12 +217,12 @@ xinput_event_to_xlib_1 (int evtype, XIDeviceEvent *in, XEvent *out)
     out->xbutton.type      = (evtype == XI_RawButtonPress 
                               ? ButtonPress : ButtonRelease);
     out->xbutton.display   = in->display;
-    out->xbutton.window    = in->event;
     out->xbutton.root      = in->root;
-    out->xbutton.subwindow = in->child;
+    out->xbutton.window    = subw;
+    out->xbutton.subwindow = subw;
     out->xbutton.time      = in->time;
-    out->xbutton.x         = root_x;
-    out->xbutton.y         = root_y;
+    out->xbutton.x         = win_x;
+    out->xbutton.y         = win_y;
     out->xbutton.x_root    = root_x;
     out->xbutton.y_root    = root_y;
     out->xbutton.state     = mods;
@@ -261,15 +232,32 @@ xinput_event_to_xlib_1 (int evtype, XIDeviceEvent *in, XEvent *out)
   case XI_RawMotion:
     out->xmotion.type      = MotionNotify;
     out->xmotion.display   = in->display;
-    out->xmotion.window    = in->event;
     out->xmotion.root      = in->root;
-    out->xmotion.subwindow = in->child;
+    out->xmotion.window    = subw;
+    out->xmotion.subwindow = subw;
     out->xmotion.time      = in->time;
-    out->xmotion.x         = root_x;
-    out->xmotion.y         = root_y;
+    out->xmotion.x         = win_x;
+    out->xmotion.y         = win_y;
     out->xmotion.x_root    = root_x;
     out->xmotion.y_root    = root_y;
     out->xmotion.state     = mods;
+    ok = True;
+    break;
+  case XI_RawTouchBegin:
+  case XI_RawTouchEnd:
+    out->xbutton.type      = (evtype == XI_RawTouchBegin 
+                              ? ButtonPress : ButtonRelease);
+    out->xbutton.display   = in->display;
+    out->xbutton.root      = in->root;
+    out->xbutton.window    = subw;
+    out->xbutton.subwindow = subw;
+    out->xbutton.time      = in->time;
+    out->xbutton.x         = win_x;
+    out->xbutton.y         = win_y;
+    out->xbutton.x_root    = root_x;
+    out->xbutton.y_root    = root_y;
+    out->xbutton.state     = mods;
+    out->xbutton.button    = in->detail;
     ok = True;
     break;
   default:
@@ -279,26 +267,16 @@ xinput_event_to_xlib_1 (int evtype, XIDeviceEvent *in, XEvent *out)
   return ok;
 }
 
-Bool
-xinput_event_to_xlib (int evtype, XIDeviceEvent *in, XEvent *out)
-{
-  Bool ok = xinput_event_to_xlib_1 (evtype, in, out);
-  if (ok && duplicate_xinput_event_p (evtype, in))
-    ok = False;
-  return ok;
-}
-
-
 
 static void
-print_kbd_event (XEvent *xev, XComposeStatus *compose, Bool x11_p)
+print_kbd_event (XKeyEvent *xkey, XComposeStatus *compose, Bool x11_p)
 {
   if (debug_p)		/* Passwords show up in plaintext! */
     {
       KeySym keysym = 0;
       char c[100];
       char M[100], *mods = M;
-      int n = XLookupString (&xev->xkey, c, sizeof(c)-1, &keysym, compose);
+      int n = XLookupString (xkey, c, sizeof(c)-1, &keysym, compose);
       const char *ks = keysym ? XKeysymToString (keysym) : "NULL";
       c[n] = 0;
       if      (*c == '\n') strcpy (c, "\\n");
@@ -306,31 +284,31 @@ print_kbd_event (XEvent *xev, XComposeStatus *compose, Bool x11_p)
       else if (*c == '\t') strcpy (c, "\\t");
 
       *mods = 0;
-      if (xev->xkey.state & ShiftMask)   strcat (mods, "-Sh");
-      if (xev->xkey.state & LockMask)    strcat (mods, "-Lk");
-      if (xev->xkey.state & ControlMask) strcat (mods, "-C");
-      if (xev->xkey.state & Mod1Mask)    strcat (mods, "-M1");
-      if (xev->xkey.state & Mod2Mask)    strcat (mods, "-M2");
-      if (xev->xkey.state & Mod3Mask)    strcat (mods, "-M3");
-      if (xev->xkey.state & Mod4Mask)    strcat (mods, "-M4");
-      if (xev->xkey.state & Mod5Mask)    strcat (mods, "-M5");
+      if (xkey->state & ShiftMask)   strcat (mods, "-Sh");
+      if (xkey->state & LockMask)    strcat (mods, "-Lk");
+      if (xkey->state & ControlMask) strcat (mods, "-C");
+      if (xkey->state & Mod1Mask)    strcat (mods, "-M1");
+      if (xkey->state & Mod2Mask)    strcat (mods, "-M2");
+      if (xkey->state & Mod3Mask)    strcat (mods, "-M3");
+      if (xkey->state & Mod4Mask)    strcat (mods, "-M4");
+      if (xkey->state & Mod5Mask)    strcat (mods, "-M5");
       if (*mods) mods++;
       if (!*mods) strcat (mods, "0");
 
       fprintf (stderr, "%s: %s    0x%02X %s %s \"%s\"\n", blurb(),
                (x11_p
-                ? (xev->xkey.type == KeyPress
+                ? (xkey->type == KeyPress
                    ? "X11 KeyPress    "
                    : "X11 KeyRelease  ")
-                : (xev->xkey.type == KeyPress
+                : (xkey->type == KeyPress
                    ? "XI_RawKeyPress  "
                    : "XI_RawKeyRelease")),
-               xev->xkey.keycode, mods, ks, c);
+               xkey->keycode, mods, ks, c);
     }
   else			/* Log only that the KeyPress happened. */
     {
       fprintf (stderr, "%s: X11 Key%s\n", blurb(),
-               (xev->xkey.type == KeyPress ? "Press  " : "Release"));
+               (xkey->type == KeyPress ? "Press  " : "Release"));
     }
 }
 
@@ -345,7 +323,7 @@ print_xinput_event (Display *dpy, XEvent *xev, const char *desc)
   case KeyRelease:
     {
       static XComposeStatus compose = { 0, };
-      print_kbd_event (xev, &compose, True);
+      print_kbd_event (&xev->xkey, &compose, True);
     }
     break;
 
@@ -382,15 +360,15 @@ print_xinput_event (Display *dpy, XEvent *xev, const char *desc)
       {
         /* Fake up an XKeyEvent in order to call XKeysymToString(). */
         XEvent ev2;
-        Bool ok = xinput_event_to_xlib_1 (re->evtype,
-                                          (XIDeviceEvent *) re,
-                                          &ev2);
+        Bool ok = xinput_event_to_xlib (re->evtype,
+                                        (XIDeviceEvent *) re,
+                                        &ev2);
         if (!ok)
           fprintf (stderr, "%s: unable to translate XInput2 event\n", blurb());
         else
           {
             static XComposeStatus compose = { 0, };
-            print_kbd_event (&ev2, &compose, False);
+            print_kbd_event (&ev2.xkey, &compose, False);
           }
         break;
       }
@@ -401,9 +379,18 @@ print_xinput_event (Display *dpy, XEvent *xev, const char *desc)
 
   case XI_RawButtonPress:
   case XI_RawButtonRelease:
-    fprintf (stderr, "%s: XI RawButton%s %d\n", blurb(),
-             (re->evtype == XI_RawButtonPress ? "Press  " : "Release"),
-             re->detail);
+      {
+        Window root_ret, child_ret;
+        int root_x, root_y;
+        int win_x, win_y;
+        unsigned int mask;
+        XQueryPointer (dpy, DefaultRootWindow (dpy),
+                       &root_ret, &child_ret, &root_x, &root_y,
+                       &win_x, &win_y, &mask);
+        fprintf (stderr, "%s: XI _RawButton%s %4d, %-4d\n", blurb(),
+                 (re->evtype == XI_RawButtonPress ? "Press  " : "Release"),
+                 root_x, root_y);
+      }
     break;
 
   case XI_RawMotion:

@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2001-2021 by Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2001-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -55,11 +55,11 @@
 #  pragma GCC diagnostic ignored "-Wpedantic"
 # endif
 
-# ifdef HAVE_GTK2
+# include <gdk-pixbuf/gdk-pixbuf.h>
+
+# ifdef HAVE_GDK_PIXBUF_XLIB
 #  include <gdk-pixbuf-xlib/gdk-pixbuf-xlib.h>
-# else  /* !HAVE_GTK2 */
-#  include <gdk-pixbuf/gdk-pixbuf-xlib.h>
-# endif /* !HAVE_GTK2 */
+# endif
 
 # if (__GNUC__ >= 4)
 #  pragma GCC diagnostic pop
@@ -399,9 +399,7 @@ read_file_gdk (Screen *screen, Window window, Drawable drawable,
   GdkPixbuf *pb;
   Display *dpy = DisplayOfScreen (screen);
   unsigned int win_width, win_height, win_depth;
-# ifdef HAVE_GTK2
   GError *gerr = 0;
-# endif /* HAVE_GTK2 */
 
   /* Find the size of the Drawable. */
   {
@@ -412,28 +410,24 @@ read_file_gdk (Screen *screen, Window window, Drawable drawable,
                   &root, &x, &y, &win_width, &win_height, &bw, &win_depth);
   }
 
+# ifdef HAVE_GDK_PIXBUF_XLIB
+  /* Aug 2022: nothing seems to go wrong if we don't do this at all?
+     gtk-2.24.33, gdk-pixbuf 2.42.8. */
   gdk_pixbuf_xlib_init_with_depth (dpy, screen_number (screen), win_depth);
-# ifdef HAVE_GTK2
+  xlib_rgb_init (dpy, screen_number (screen));
+# endif
+
 # if !GLIB_CHECK_VERSION(2, 36 ,0)
   g_type_init();
 # endif
-# else  /* !HAVE_GTK2 */
-  xlib_rgb_init (dpy, screen);
-# endif /* !HAVE_GTK2 */
 
-  pb = gdk_pixbuf_new_from_file (filename
-# ifdef HAVE_GTK2
-                                 , &gerr
-# endif /* HAVE_GTK2 */
-                                 );
+  pb = gdk_pixbuf_new_from_file (filename, &gerr);
 
   if (!pb)
     {
       fprintf (stderr, "%s: unable to load \"%s\"\n", progname, filename);
-#  ifdef HAVE_GTK2
       if (gerr && gerr->message && *gerr->message)
         fprintf (stderr, "%s: reason: %s\n", progname, gerr->message);
-#  endif /* HAVE_GTK2 */
       return False;
     }
   else
@@ -501,12 +495,76 @@ read_file_gdk (Screen *screen, Window window, Drawable drawable,
        */
       if (srcx > 0) w -= srcx;
       if (srcy > 0) h -= srcy;
+# ifdef HAVE_GDK_PIXBUF_XLIB
       gdk_pixbuf_xlib_render_to_drawable_alpha (pb, drawable,
                                                 srcx, srcy, destx, desty,
                                                 w, h,
                                                 GDK_PIXBUF_ALPHA_FULL, 127,
                                                 XLIB_RGB_DITHER_NORMAL,
                                                 0, 0);
+# else /* !HAVE_GDK_PIXBUF_XLIB */
+      {
+        /* Get the bits from GDK and render them out by hand.
+           #### This only handles 24 or 32-bit RGB TrueColor visuals.
+                Suck it, PseudoColor!
+         */
+        XWindowAttributes xgwa;
+        int w = gdk_pixbuf_get_width (pb);
+        int h = gdk_pixbuf_get_height (pb);
+        guchar *row = gdk_pixbuf_get_pixels (pb);
+        int stride = gdk_pixbuf_get_rowstride (pb);
+        int chan = gdk_pixbuf_get_n_channels (pb);
+        int x, y;
+        XImage *image;
+        XGCValues gcv;
+        GC gc;
+
+        XGetWindowAttributes (dpy, window, &xgwa);
+        image = XCreateImage (dpy, xgwa.visual, xgwa.depth, ZPixmap,
+                              0, 0, w, h, 8, 0);
+        image->data = (char *) malloc (h * image->bytes_per_line);
+        gc = XCreateGC (dpy, drawable, 0, &gcv);
+
+        if (!image->data)
+          {
+            fprintf (stderr, "%s: out of memory (%d x %d)\n", progname, w, h);
+            return False;
+          }
+
+        for (y = 0; y < h; y++)
+          {
+            guchar *i = row;
+            for (x = 0; x < w; x++)
+              {
+                unsigned long rgba = 0;
+                switch (chan) {
+                case 1:
+                  rgba = ((*i << 16) |
+                          (*i <<  8) |
+                          (*i <<  0));
+                  break;
+                case 3:
+                case 4:
+                  rgba = ((i[0] << 16) |
+                          (i[1] <<  8) |
+                          (i[2] <<  0));
+                  break;
+                default:
+                  abort();
+                  break;
+                }
+                i += chan;
+                XPutPixel (image, x, y, rgba);
+              }
+            row += stride;
+          }
+
+        XPutImage (dpy, drawable, gc, image, srcx, srcy, destx, desty, w, h);
+        XDestroyImage (image);
+        XFreeGC (dpy, gc);
+      }
+# endif /* !HAVE_GDK_PIXBUF_XLIB */
+
       if (bg_p)
         {
           XSetWindowBackgroundPixmap (dpy, window, drawable);
@@ -1212,7 +1270,7 @@ get_filename_1 (Screen *screen, const char *directory, grab_type type,
       {
         const char *tmpdir = getenv("TMPDIR");
         if (!tmpdir) tmpdir = "/tmp";
-        outfile = (char *) malloc (strlen(tmpdir) + 20);
+        outfile = (char *) malloc (strlen(tmpdir) + 100);
         sprintf (outfile, "%s/xscreensaver.%08x.png",
                  tmpdir, random() % 0xFFFFFFFF);
         av[ac++] = outfile;
@@ -1276,6 +1334,7 @@ get_filename_1 (Screen *screen, const char *directory, grab_type type,
         int wait_status = 0;
         FILE *f = fdopen (in, "r");
         int L;
+        char *outfile_full;
 
         close (out);  /* don't need this one */
         *buf = 0;
@@ -1296,26 +1355,30 @@ get_filename_1 (Screen *screen, const char *directory, grab_type type,
             outfile = strdup (buf);
           }
 
+        outfile_full = outfile;
         if (*outfile != '/')
           {
             /* Program returned path relative to directory.  Prepend dir
                to buf so that we can properly stat it. */
-            char *s2 = (char *) malloc (strlen(buf) + strlen(directory) + 20);
-            strcpy (s2, directory);
+            outfile_full = (char *)
+              malloc (strlen(buf) + strlen(directory) + 20);
+            strcpy (outfile_full, directory);
             if (directory[strlen(directory)-1] != '/')
-              strcat (s2, "/");
-            strcat (s2, outfile);
-            free (outfile);
-            outfile = s2;
+              strcat (outfile_full, "/");
+            strcat (outfile_full, outfile);
           }
 
-        if (! stat (outfile, &st))
-          return outfile;
+        if (stat (outfile_full, &st))
+          {
+            fprintf (stderr, "%s: file does not exist: \"%s\"\n",
+                     progname, outfile_full);
+            free (outfile);
+            outfile = 0;
+          }
 
-        fprintf (stderr, "%s: file does not exist: \"%s\"\n",
-                 progname, outfile);
-        free (outfile);
-        return 0;
+        if (outfile_full && outfile_full != outfile)
+          free (outfile_full);
+        return outfile;
       }
     }
 
@@ -1966,6 +2029,20 @@ main (int argc, char **argv)
   grab_video_p    = get_boolean_resource(dpy, "grabVideoFrames", "Boolean");
   random_image_p  = get_boolean_resource(dpy, "chooseRandomImages", "Boolean");
   image_directory = get_string_resource (dpy, "imageDirectory", "String");
+
+  if (!strncmp (image_directory, "~/", 2))
+    {
+      const char *home = getenv("HOME");
+      if (home && *home)
+        {
+          char *s2 = (char *)
+            malloc (strlen(image_directory) + strlen(home) + 10);
+          strcpy (s2, home);
+          strcat (s2, image_directory + 1);
+          free (image_directory);
+          image_directory = s2;
+        }
+    }
 
   progname = argv[0] = oprogname;
 

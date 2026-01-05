@@ -1,5 +1,5 @@
 /* ximage-loader.c --- converts image files or data to XImages or Pixmap.
- * xscreensaver, Copyright (c) 1998-2020 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright © 1998-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -35,11 +35,10 @@
 # endif
 
 # include <gdk-pixbuf/gdk-pixbuf.h>
-# ifdef HAVE_GTK2
+
+# ifdef HAVE_GDK_PIXBUF_XLIB
 #  include <gdk-pixbuf-xlib/gdk-pixbuf-xlib.h>
-# else  /* !HAVE_GTK2 */
-#  include <gdk-pixbuf/gdk-pixbuf-xlib.h>
-# endif /* !HAVE_GTK2 */
+# endif
 
 # if (__GNUC__ >= 4)
 #  pragma GCC diagnostic pop
@@ -77,49 +76,38 @@ make_ximage (Display *dpy, Visual *visual, const char *filename,
 {
   GdkPixbuf *pb;
   static int initted = 0;
-# ifdef HAVE_GTK2
   GError *gerr = NULL;
-# endif
 
   if (!initted)
     {
-# ifdef HAVE_GTK2
-#  if !GLIB_CHECK_VERSION(2, 36 ,0)
+# if !GLIB_CHECK_VERSION(2, 36 ,0)
       g_type_init ();
-#  endif
 # endif
       if (dpy)
         {
           /* Turns out gdk-pixbuf works even if you don't have display
              connection, which is good news for analogtv-cli. */
+# ifdef HAVE_GDK_PIXBUF_XLIB
+          /* Aug 2022: nothing seems to go wrong if we don't do this at all?
+             gtk-2.24.33, gdk-pixbuf 2.42.8. */
           gdk_pixbuf_xlib_init (dpy, DefaultScreen (dpy));
           xlib_rgb_init (dpy, DefaultScreenOfDisplay (dpy));
+# endif
         }
       initted = 1;
     }
 
   if (filename)
     {
-# ifdef HAVE_GTK2
       pb = gdk_pixbuf_new_from_file (filename, &gerr);
       if (!pb)
         {
           fprintf (stderr, "%s: %s\n", progname, gerr->message);
           return 0;
         }
-# else
-      pb = gdk_pixbuf_new_from_file (filename);
-      if (!pb)
-        {
-          fprintf (stderr, "%s: GDK unable to load %s: %s\n",
-                   progname, filename, (gerr ? gerr->message : "?"));
-          return 0;
-        }
-# endif /* HAVE_GTK2 */
     }
   else
     {
-# ifdef HAVE_GTK2
       GInputStream *s =
         g_memory_input_stream_new_from_data (image_data, data_size, 0);
       pb = gdk_pixbuf_new_from_stream (s, 0, &gerr);
@@ -134,11 +122,6 @@ make_ximage (Display *dpy, Visual *visual, const char *filename,
                    progname, (gerr ? gerr->message : "?")); */
           return 0;
         }
-# else /* !HAVE_GTK2 */
-      fprintf (stderr, "%s: image loading not supported with GTK 1.x\n",
-               progname);
-      return 0;
-# endif /* !HAVE_GTK2 */
     }
 
   if (!pb) abort();

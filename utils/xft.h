@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2014-2015 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2014-2022 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -60,13 +60,22 @@
 
 # ifdef HAVE_XFT
 
+#  if (__GNUC__ >= 4)
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wlong-long"
+#  endif
+
 #  include <X11/Xft/Xft.h>
+
+#  if (__GNUC__ >= 4)
+#   pragma GCC diagnostic pop
+#  endif
 
 # else  /* !HAVE_XFT -- the rest of the file */
 
 # ifdef HAVE_COCOA
 #  include "jwxyz.h"
-#elif defined(HAVE_ANDROID)
+# elif defined(HAVE_ANDROID)
 #  include "jwxyz.h"
 # else
 #  include <X11/Xlib.h>
