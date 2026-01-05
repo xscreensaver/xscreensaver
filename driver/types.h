@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 1993-2023 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 1993-2025 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -11,6 +11,10 @@
 
 #ifndef __XSCREENSAVER_TYPES_H__
 #define __XSCREENSAVER_TYPES_H__
+
+#ifdef HAVE_WAYLAND
+# include "wayland-dpy.h"
+#endif
 
 typedef struct saver_info saver_info;
 
@@ -77,7 +81,6 @@ struct saver_preferences {
   Time lock_timeout;		/* how long after activation locking starts */
   Time cycle;			/* how long each hack should run */
   Time passwd_timeout;		/* how long before pw dialog goes down */
-  Time watchdog_timeout;	/* how often to re-raise and re-blank screen */
   int pointer_hysteresis;	/* mouse motions less than N/sec are ignored */
 
   Bool dpms_enabled_p;		/* whether to power down the monitor */
@@ -124,6 +127,12 @@ struct saver_info {
   char *version;
   saver_preferences prefs;
 
+# ifdef HAVE_WAYLAND
+  wayland_dpy  *wayland_dpy;
+  wayland_idle *wayland_idle;
+  wayland_dpms *wayland_dpms;
+# endif /* HAVE_WAYLAND */
+
   int nscreens;
   int ssi_count;
   saver_screen_info *screens;
@@ -137,6 +146,10 @@ struct saver_info {
   Bool using_randr_extension;
 # endif
 
+  time_t activity_time;		/* Time at which user last active. */
+  time_t blank_time;		/* Time at which screen blanked. */
+  Bool auth_p;			/* Whether auth dialog currently visible. */
+
   Bool demoing_p;		/* Whether we are demoing a single hack
 				   (without UI.) */
   Bool emergency_p;		/* Restarted because of a crash */
@@ -149,6 +162,8 @@ struct saver_info {
 				   been received; set to N if SELECT or DEMO N
 				   has been received.  (This is kind of nasty.)
 				 */
+
+  Bool all_clientmessages_p;	/* If the daemon isn't running... */
 };
 
 
@@ -201,7 +216,9 @@ struct saver_screen_info {
 
 
 /* From dpms.c */
-extern void sync_server_dpms_settings (Display *, struct saver_preferences *);
+extern void sync_server_dpms_settings (saver_info *);
+extern void sync_server_dpms_settings_1 (Display *, struct saver_preferences *);
+extern void brute_force_dpms (saver_info *, time_t);
 
 
 const char *init_file_name (void);

@@ -1,4 +1,4 @@
-/* xscreensaver-command, Copyright © 2022 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver-command, Copyright © 2022-2025 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -16,16 +16,28 @@
 # include "config.h"
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <X11/Xproto.h>		/* for CARD32 */
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/time.h>
+
+#ifdef HAVE_SYS_WAIT_H
+# include <sys/wait.h>		/* for waitpid() and associated macros */
+#endif
+
 #include "screenshot.h"
 #include "visual.h"
 #include "../driver/blurb.h"
+
+#if defined(__APPLE__) && !defined(HAVE_COCOA)
+# define HAVE_MACOS_X11
+#elif !defined(HAVE_JWXYZ) /* Real X11, possibly Wayland */
+# define HAVE_REAL_X11
+#endif
 
 static Atom XA_SCREENSAVER_SCREENSHOT = 0;
 
@@ -73,10 +85,26 @@ ignore_all_errors_ehandler (Display *dpy, XErrorEvent *error)
 }
 
 
+static double
+double_time (void)
+{
+  struct timeval now;
+# ifdef GETTIMEOFDAY_TWO_ARGS
+  struct timezone tzp;
+  gettimeofday(&now, &tzp);
+# else
+  gettimeofday(&now);
+# endif
+
+  return (now.tv_sec + ((double) now.tv_usec * 0.000001));
+}
+
+
 /* Grab a screenshot and return it.
    It will be the size and extent of the given window,
    or the full screen, as requested.
    Might be None if we failed.
+   Somewhat duplicated in fade.c:xshm_screenshot_grab().
  */
 Pixmap
 screenshot_grab (Display *dpy, Window window, Bool full_screen_p,
@@ -89,6 +117,8 @@ screenshot_grab (Display *dpy, Window window, Bool full_screen_p,
   GC gc;
   struct { int x, y, x2, y2; } root, win;
   XErrorHandler old_handler;
+  Bool external_p = False;
+  double start = double_time();
 
   XGetWindowAttributes (dpy, window, &win_xgwa);
   root_window = XRootWindowOfScreen (win_xgwa.screen);
@@ -100,12 +130,6 @@ screenshot_grab (Display *dpy, Window window, Bool full_screen_p,
         fprintf (stderr, "%s: no screenshot, not TrueColor\n", blurb());
       return None;
     }
-
-# ifdef __APPLE__   /* Can't XCopyArea root window under rootless XQuartz. */
-  if (verbose_p)
-    fprintf (stderr, "%s: no screenshot under XQuartz\n", blurb());
-  return None;
-# endif
 
   root.x  = 0;
   root.y  = 0;
@@ -133,42 +157,131 @@ screenshot_grab (Display *dpy, Window window, Bool full_screen_p,
   if (win.x2 > root.x2) win.x2 = root.x2;
   if (win.y2 > root.y2) win.y2 = root.y2;
 
-  gcv.function = GXcopy;
-  gcv.subwindow_mode = IncludeInferiors;
+# ifdef HAVE_MACOS_X11
+  external_p = True;
+# else  /* X11, possibly Wayland */
+  external_p = getenv ("WAYLAND_DISPLAY") || getenv ("WAYLAND_SOCKET");
+# endif
+
   pixmap = XCreatePixmap (dpy, root_window,
                           win_xgwa.width, win_xgwa.height,
                           win_xgwa.depth);
-  gc = XCreateGC (dpy, pixmap, GCFunction | GCSubwindowMode, &gcv);
+  XSync (dpy, False);  /* So that the pixmap exists before we exec. */
 
-  /* I do not understand why some systems get a BadMatch on this XCopyArea.
-     (Sep 2022, Debian 11.5 x86 under VirtualBox.) */
-  XSync (dpy, False);
-  error_handler_hit_p = False;
-  old_handler = XSetErrorHandler (ignore_all_errors_ehandler);
-
-  XCopyArea (dpy, root_window, pixmap, gc,
-             win.x, win.y,
-             win.x2 - win.x,
-             win.y2 - win.y,
-             0, 0);
-
-  XSync (dpy, False);
-  XSetErrorHandler (old_handler);
-  if (error_handler_hit_p)
+  /* Run xscreensaver-getimage to get a screenshot.  It will, in turn,
+     run "screencapture" or "grim" to write the screenshot to a PNG file,
+     then will load that file onto our Pixmap.
+   */
+  if (external_p)
     {
-      XFreePixmap (dpy, pixmap);
-      pixmap = 0;
+      pid_t forked;
+      char *av[20];
+      int ac = 0;
+      char buf[1024];
+      char rootstr[20], pixstr[20];
+
+      sprintf (rootstr, "0x%0lx", (unsigned long) window);
+      sprintf (pixstr,  "0x%0lx", (unsigned long) pixmap);
+      av[ac++] = "xscreensaver-getimage";
+      if (verbose_p)
+        av[ac++] = "--verbose";
+      av[ac++] = "--desktop";
+      av[ac++] = "--no-images";
+      av[ac++] = "--no-video";
+      av[ac++] = rootstr;
+      av[ac++] = pixstr;
+      av[ac] = 0;
+
+      if (verbose_p)
+        {
+          int i;
+          fprintf (stderr, "%s: screenshot: executing:", blurb());
+          for (i = 0; i < ac; i++)
+            fprintf (stderr, " %s", av[i]);
+          fprintf (stderr, "\n");
+        }
+
+      switch ((int) (forked = fork ())) {
+      case -1:
+        {
+          sprintf (buf, "%s: couldn't fork", blurb());
+          perror (buf);
+          return 0;
+        }
+      case 0:
+        {
+          close (ConnectionNumber (dpy));	/* close display fd */
+          execvp (av[0], av);			/* shouldn't return. */
+          exit (-1);				/* exits fork */
+          break;
+        }
+      default:
+        {
+          int wait_status = 0, exit_status = 0;
+          /* Wait for the child to die. */
+          waitpid (forked, &wait_status, 0);
+          exit_status = WEXITSTATUS (wait_status);
+          /* Treat exit code as a signed 8-bit quantity. */
+          if (exit_status & 0x80) exit_status |= ~0xFF;
+          if (exit_status != 0)
+            {
+              fprintf (stderr, "%s: screenshot: %s exited with %d\n",
+                       blurb(), av[0], exit_status);
+              if (pixmap) XFreePixmap (dpy, pixmap);
+              return None;
+            }
+        }
+      }
+    }
+  else
+    {
+      /* Grab a screenshot using XCopyArea. */
+
+      gcv.function = GXcopy;
+      gcv.subwindow_mode = IncludeInferiors;
+      gc = XCreateGC (dpy, pixmap, GCFunction | GCSubwindowMode, &gcv);
+
+      /* I do not understand why some systems get a BadMatch on this XCopyArea.
+         (Sep 2022, Debian 11.5 x86 under VirtualBox.) */
+      XSync (dpy, False);
+      error_handler_hit_p = False;
+      old_handler = XSetErrorHandler (ignore_all_errors_ehandler);
+
+      XCopyArea (dpy, root_window, pixmap, gc,
+                 win.x, win.y,
+                 win.x2 - win.x,
+                 win.y2 - win.y,
+                 0, 0);
+
+      XSync (dpy, False);
+      XSetErrorHandler (old_handler);
+      if (error_handler_hit_p)
+        {
+          XFreePixmap (dpy, pixmap);
+          pixmap = 0;
+        }
+
+      XFreeGC (dpy, gc);
     }
 
-  XFreeGC (dpy, gc);
+  {
+    double elapsed = double_time() - start;
+    char late[100];
+    if (elapsed >= 0.75)
+      sprintf (late, " -- took %.1f seconds", elapsed);
+    else
+      *late = 0;
 
-  if (verbose_p || !pixmap)
-    fprintf (stderr, "%s: %s screenshot 0x%lx %dx%d"
-             " for window 0x%lx %dx%d+%d+%d\n", blurb(),
-             (pixmap ? "saved" : "failed to save"),
-             (unsigned long) pixmap, win_xgwa.width, win_xgwa.height,
-             (unsigned long) window,
-             owin_xgwa.width, owin_xgwa.height, owin_xgwa.x, owin_xgwa.y);
+    if (verbose_p || !pixmap || *late)
+      fprintf (stderr, "%s: %s screenshot 0x%lx %dx%d"
+               " for window 0x%lx %dx%d+%d+%d%s\n", blurb(),
+               (pixmap ? "saved" : "failed to save"),
+               (unsigned long) pixmap, win_xgwa.width, win_xgwa.height,
+               (unsigned long) window,
+               owin_xgwa.width, owin_xgwa.height, owin_xgwa.x, owin_xgwa.y,
+               late);
+  }
+
   return pixmap;
 }
 
@@ -210,8 +323,9 @@ screenshot_load_prop (Display *dpy, Window window)
 }
 
 
-/* Loads the screenshot from screenshot_save() and returns a new pixmap
-   that is the same size as the window.
+/* Loads the screenshot from screenshot_save() and returns a new pixmap that
+   covers and is the same size as the window.  The saved screenshot is assumed
+   to be the size of the screen.
  */
 Pixmap
 screenshot_load (Display *dpy, Window window, Bool verbose_p)
@@ -327,5 +441,6 @@ screenshot_load (Display *dpy, Window window, Bool verbose_p)
              (unsigned long) window,
              win_xgwa.width, win_xgwa.height, win_xgwa.x, win_xgwa.y,
              (unsigned long) screenshot, root.w, root.h);
+
   return p2;
 }
