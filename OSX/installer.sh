@@ -19,6 +19,8 @@
 #exec >/tmp/xscreensaver.log 2>&1
 #set -x
 
+export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
+
 REQUIRED_SPACE=140	# MB. Highly approximate.
 
 DEBUG=0
@@ -37,6 +39,7 @@ SRC=`dirname "$PACKAGE_PATH"`/"Screen Savers"
 DST1="$DSTVOLUME/Library/Screen Savers"
 DST2="$DSTVOLUME/Applications"
 PU="$DSTVOLUME/$HOME/Library/Screen Savers"
+UPDATER="XScreenSaverUpdater.app"
 
 function error() {
   echo "Error: $@" >&2
@@ -65,32 +68,35 @@ fi
 mkdir -p "$DST1" || error "Unable to create directory $DST1/"
 mkdir -p "$DST2" || error "Unable to create directory $DST2/"
 
-# Install the savers in /System/Library/Screen Savers/
+# Install the savers and the updater in /System/Library/Screen Savers/
+# Install the other apps in /Applications/
 #
-for f in *.saver ; do
-  DD="$DST1/$f"
+for f in *.{saver,app} ; do
+  EXT=`echo "$f" | sed 's/^.*\.//'`
+  if [ "$EXT" = "app" -a "$f" != "$UPDATER" ]; then
+    DST="$DST2"
+  else
+    DST="$DST1"
+  fi
+  DD="$DST/$f"
   echo "Installing $DD" >&2
   rm -rf "$DD" || error "Unable to delete $DD"
-  cp -pr "$f" "$DST1/" || error "Unable to install $f in $DST1/"
+  cp -pR "$f" "$DST/" || error "Unable to install $f in $DST/"
+
+  # Eliminate the "this was downloaded from the interweb" warning.
   xattr -r -d com.apple.quarantine "$DD"
 
-  # If this saver is also installed in the per-user directory,
+  if [ "$EXT" = "app" ]; then
+    # Eliminate the "this is from an unknown developer" warning.
+    spctl --add "$DD"
+  fi
+
+  # If this saver or app is also installed in the per-user directory,
   # delete that copy so that we don't have conflicts.
   #
   if [ "$DEBUG" = 0 ]; then
     rm -rf "$PU/$f"
   fi
-done
-
-
-# Install the apps in /Applications/
-#
-for f in *.app ; do
-  DD="$DST2/$f"
-  echo "Installing $DD" >&2
-  rm -rf "$DD" || error "Unable to delete $DD"
-  cp -pr "$f" "$DST2/" || error "Unable to install $f in $DST2/"
-  xattr -r -d com.apple.quarantine "$DD"
 done
 
 # Launch System Preferences with the Screen Saver pane selected.
