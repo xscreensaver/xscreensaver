@@ -17,6 +17,7 @@
 # include "config.h"
 #endif
 
+#include <ctype.h>
 #include <X11/Intrinsic.h>
 #include <X11/cursorfont.h>
 #include <X11/Xos.h>		/* for time() */
@@ -96,6 +97,9 @@ struct passwd_dialog_data {
   Dimension width;
   Dimension height;
   Dimension border_width;
+
+  Bool show_stars_p; /* "I regret that I have but one asterisk for my country."
+                        -- Nathan Hale, 1776. */
 
   char *heading_label;
   char *body_label;
@@ -191,6 +195,8 @@ make_passwd_window (saver_info *si)
 
   pw->ratio = 1.0;
 
+  pw->show_stars_p = get_boolean_resource("passwd.asterisks", "Boolean");
+  
   pw->heading_label = get_string_resource ("passwd.heading.label",
 					   "Dialog.Label.Label");
   pw->body_label = get_string_resource ("passwd.body.label",
@@ -1384,6 +1390,10 @@ handle_passwd_key (saver_info *si, XKeyEvent *event)
 
   s[1] = 0;
 
+  /* Add 10% to the time remaining every time a key is pressed. */
+  pw->ratio += 0.1;
+  if (pw->ratio > 1) pw->ratio = 1;
+
   switch (*s)
     {
     case '\010': case '\177':				/* Backspace */
@@ -1415,23 +1425,41 @@ handle_passwd_key (saver_info *si, XKeyEvent *event)
       break;
 
     default:
-      i = strlen (typed_passwd);
-      if (i >= pw_size-1)
-	XBell (si->dpy, 0);
+      /* Though technically the only illegal characters in Unix passwords
+         are LF and NUL, most GUI programs (e.g., GDM) use regular text-entry
+         fields that only let you type printable characters.  So, people
+         who use funky characters in their passwords are already broken.
+         We follow that precedent.
+       */
+      if (isprint ((unsigned char) *s))
+        {
+          i = strlen (typed_passwd);
+          if (i >= pw_size-1)
+            XBell (si->dpy, 0);
+          else
+            {
+              typed_passwd [i] = *s;
+              typed_passwd [i+1] = 0;
+            }
+        }
       else
-	{
-	  typed_passwd [i] = *s;
-	  typed_passwd [i+1] = 0;
-	}
+        XBell (si->dpy, 0);
       break;
     }
 
-  i = strlen(typed_passwd);
-  stars = (char *) malloc(i+1);
-  memset (stars, '*', i);
-  stars[i] = 0;
-  update_passwd_window (si, stars, pw->ratio);
-  free (stars);
+  if (pw->show_stars_p)
+    {
+      i = strlen(typed_passwd);
+      stars = (char *) malloc(i+1);
+      memset (stars, '*', i);
+      stars[i] = 0;
+      update_passwd_window (si, stars, pw->ratio);
+      free (stars);
+    }
+  else
+    {
+      update_passwd_window (si, "", pw->ratio);
+    }
 }
 
 

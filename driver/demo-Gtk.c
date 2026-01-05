@@ -1,5 +1,5 @@
 /* demo-Gtk.c --- implements the interactive demo-mode and options dialogs.
- * xscreensaver, Copyright (c) 1993-2005 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright (c) 1993-2006 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -144,6 +144,7 @@ enum {
 
 /* from exec.c */
 extern void exec_command (const char *shell, const char *command, int nice);
+extern int on_path_p (const char *program);
 
 static void hack_subproc_environment (Window preview_window_id, Bool debug_p);
 
@@ -190,6 +191,7 @@ typedef struct {
   int *list_elt_to_hack_number;	/* table for sorting the hack list */
   int *hack_number_to_list_elt;	/* the inverse table */
   Bool *hacks_available_p;	/* whether hacks are on $PATH */
+  int total_available;		/* how many are on $PATH */
   int list_count;		/* how many items are in the list: this may be
                                    less than p->screenhacks_count, if some are
                                    suppressed. */
@@ -645,7 +647,6 @@ run_hack (state *s, int list_elt, Bool report_errors_p)
                 strcpy (buf, "Unknown error!");
               warning_dialog (s->toplevel_widget, buf, False, 100);
             }
-          if (err) free (err);
         }
       else
         {
@@ -845,7 +846,8 @@ doc_menu_cb (GtkMenuItem *menuitem, gpointer user_data)
            p->load_url_command,
            p->help_url, p->help_url, p->help_url, p->help_url);
   strcat (help_command, " ) &");
-  system (help_command);
+  if (system (help_command) < 0)
+    fprintf (stderr, "%s: fork error\n", blurb());
   free (help_command);
 }
 
@@ -889,7 +891,8 @@ restart_menu_cb (GtkWidget *widget, gpointer user_data)
   flush_dialog_changes_and_save (s);
   xscreensaver_command (GDK_DISPLAY(), XA_EXIT, 0, False, NULL);
   sleep (1);
-  system ("xscreensaver -nosplash &");
+  if (system ("xscreensaver -nosplash &") < 0)
+    fprintf (stderr, "%s: fork error\n", blurb());
 
   await_xscreensaver (s);
 }
@@ -1027,6 +1030,7 @@ manual_cb (GtkButton *button, gpointer user_data)
   int list_elt = selected_list_element (s);
   int hack_number;
   char *name, *name2, *cmd, *str;
+  char *oname = 0;
   if (list_elt < 0) return;
   hack_number = s->list_elt_to_hack_number[list_elt];
 
@@ -1035,6 +1039,7 @@ manual_cb (GtkButton *button, gpointer user_data)
 
   name = strdup (p->screenhacks[hack_number]->command);
   name2 = name;
+  oname = name;
   while (isspace (*name2)) name2++;
   str = name2;
   while (*str && !isspace (*str)) str++;
@@ -1051,7 +1056,8 @@ manual_cb (GtkButton *button, gpointer user_data)
                cmd,
                name2, name2, name2, name2);
       strcat (cmd2, " ) &");
-      system (cmd2);
+      if (system (cmd2) < 0)
+        fprintf (stderr, "%s: fork error\n", blurb());
       free (cmd2);
     }
   else
@@ -1061,7 +1067,7 @@ manual_cb (GtkButton *button, gpointer user_data)
                       False, 100);
     }
 
-  free (name);
+  free (oname);
 }
 
 
@@ -1080,9 +1086,11 @@ force_list_select_item (state *s, GtkWidget *list, int list_elt, Bool scroll_p)
 #ifdef HAVE_GTK2
   model = gtk_tree_view_get_model (GTK_TREE_VIEW (list));
   STFU g_assert (model);
-  gtk_tree_model_iter_nth_child (model, &iter, NULL, list_elt);
-  selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (list));
-  gtk_tree_selection_select_iter (selection, &iter);
+  if (gtk_tree_model_iter_nth_child (model, &iter, NULL, list_elt))
+    {
+      selection = gtk_tree_view_get_selection (GTK_TREE_VIEW (list));
+      gtk_tree_selection_select_iter (selection, &iter);
+    }
 #else  /* !HAVE_GTK2 */
   gtk_list_select_item (GTK_LIST (list), list_elt);
 #endif /* !HAVE_GTK2 */
@@ -2349,52 +2357,6 @@ scroll_to_current_hack (state *s)
 }
 
 
-static Bool
-on_path_p (const char *program)
-{
-  int result = False;
-  struct stat st;
-  char *cmd = strdup (program);
-  char *token = strchr (cmd, ' ');
-  char *path = 0;
-  int L;
-
-  if (token) *token = 0;
-  token = 0;
-
-  if (strchr (cmd, '/'))
-    {
-      result = (0 == stat (cmd, &st));
-      goto DONE;
-    }
-
-  path = getenv("PATH");
-  if (!path || !*path)
-    goto DONE;
-
-  L = strlen (cmd);
-  path = strdup (path);
-  token = strtok (path, ":");
-
-  while (token)
-    {
-      char *p2 = (char *) malloc (strlen (token) + L + 3);
-      strcpy (p2, token);
-      strcat (p2, "/");
-      strcat (p2, cmd);
-      result = (0 == stat (p2, &st));
-      if (result)
-        goto DONE;
-      token = strtok (0, ":");
-    }
-
- DONE:
-  free (cmd);
-  if (path) free (path);
-  return result;
-}
-
-
 static void
 populate_hack_list (state *s)
 {
@@ -3315,13 +3277,16 @@ initialize_sort_map (state *s)
     calloc (sizeof(int), p->screenhacks_count + 1);
   s->hacks_available_p = (Bool *)
     calloc (sizeof(Bool), p->screenhacks_count + 1);
+  s->total_available = 0;
 
   /* Check which hacks actually exist on $PATH
    */
   for (i = 0; i < p->screenhacks_count; i++)
     {
       screenhack *hack = p->screenhacks[i];
-      s->hacks_available_p[i] = on_path_p (hack->command);
+      int on = on_path_p (hack->command) ? 1 : 0;
+      s->hacks_available_p[i] = on;
+      s->total_available += on;
     }
 
   /* Initialize list->hack table to unsorted mapping, omitting nonexistent
@@ -3473,11 +3438,14 @@ clear_preview_window (state *s)
     Bool available_p = (hack_number >= 0
                         ? s->hacks_available_p [hack_number]
                         : True);
+    Bool nothing_p = (s->total_available < 5);
+
 #ifdef HAVE_GTK2
     GtkWidget *notebook = name_to_widget (s, "preview_notebook");
     gtk_notebook_set_page (GTK_NOTEBOOK (notebook),
 			   (s->running_preview_error_p
-                            ? (available_p ? 1 : 2)
+                            ? (available_p ? 1 :
+                               nothing_p ? 3 : 2)
                             : 0));
 #else /* !HAVE_GTK2 */
     if (s->running_preview_error_p)
@@ -3718,7 +3686,8 @@ get_best_gl_visual (state *s)
         close (out);  /* don't need this one */
 
         *buf = 0;
-        fgets (buf, sizeof(buf)-1, f);
+        if (!fgets (buf, sizeof(buf)-1, f))
+          *buf = 0;
         fclose (f);
 
         /* Wait for the child to die. */

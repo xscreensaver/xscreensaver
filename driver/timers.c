@@ -331,6 +331,23 @@ reset_timers (saver_info *si)
   if (si->cycle_id) abort ();	/* no cycle timer when inactive */
 
   si->last_activity_time = time ((time_t *) 0);
+
+  /* This will (hopefully, supposedly) tell the server to re-set its
+     DPMS timer.  Without this, the -deactivate clientmessage would
+     prevent xscreensaver from blanking, but would not prevent the
+     monitor from powering down. */
+#if 0
+  /* #### With some servers, this causes the screen to flicker every
+     time a key is pressed!  Ok, I surrender.  I give up on ever
+     having DPMS work properly.
+   */
+  XForceScreenSaver (si->dpy, ScreenSaverReset);
+
+  /* And if the monitor is already powered off, turn it on.
+     You'd think the above would do that, but apparently not? */
+  monitor_power_on (si);
+#endif
+
 }
 
 
@@ -386,11 +403,17 @@ pointer_moved_p (saver_screen_info *ssi, Bool mods_p)
       distance > 0)
     moved_p = True;
 
-  if (ssi->poll_mouse_last_root_x == -1 ||
-      ssi->poll_mouse_last_root_y == -1 ||
-      root_x == -1 ||
-      root_y == -1)
-    moved_p = True;
+  /* If the mouse is not on this screen but used to be, that's motion.
+     If the mouse was not on this screen, but is now, that's motion.
+   */
+  {
+    Bool on_screen_p  = (root_x != -1 && root_y != -1);
+    Bool was_on_screen_p = (ssi->poll_mouse_last_root_x != -1 &&
+                            ssi->poll_mouse_last_root_y != -1);
+
+    if (on_screen_p != was_on_screen_p)
+      moved_p = True;
+  }
 
   if (p->debug_p && (distance != 0 || moved_p))
     {
@@ -404,7 +427,7 @@ pointer_moved_p (saver_screen_info *ssi, Bool mods_p)
                  ssi->poll_mouse_last_root_y);
       fprintf (stderr, " -> ");
       if (root_x == -1)
-        fprintf (stderr, "off screen.");
+        fprintf (stderr, "off screen");
       else
         fprintf (stderr, "%d,%d", root_x, root_y);
       if (ssi->poll_mouse_last_root_x != -1 && root_x != -1)

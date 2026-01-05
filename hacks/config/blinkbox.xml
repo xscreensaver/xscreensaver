@@ -9,12 +9,15 @@
           low="0" high="50000" default="30000"/>
 
   <number id="boxsize" type="spinbutton" arg="-boxsize %"
-          _label="Box Size" low="1" high="8" default="1"/>
+          _label="Box Size" low="1" high="8" default="2"/>
 
   <hgroup>
-   <boolean id="fade"      _label="Fade"       arg-unset="-no-fade"/>
-   <boolean id="dissolve"  _label="Dissolve"   arg-set="-dissolve"/>
-   <boolean id="wire"      _label="Wireframe"  arg-set="-wireframe"/>
+   <boolean id="fade"      _label="Fade"        arg-unset="-no-fade"/>
+   <boolean id="blur"      _label="Motion Blur" arg-unset="-no-blur"/>
+  </hgroup>
+  <hgroup>
+   <boolean id="dissolve"  _label="Dissolve"    arg-set="-dissolve"/>
+   <boolean id="wire"      _label="Wireframe"   arg-set="-wireframe"/>
   </hgroup>
 
   <_description>

@@ -55,7 +55,7 @@ Sets the moving cycle to
 .I period
 seconds. By default, this value is 10 seconds.
 .TP
-.BI "-wait " "microsec"
+.BI "-delay " "microsec"
 Inserts a wait after drawing one view of the clock. By default, t3d waits
 40 ms after each drawing. This helps you to keep the performance loss
 small.
@@ -118,7 +118,7 @@ relation from T3D to Cray's T3D, even the balls surrounding T3D on
 some posters weren't an inspiration for T3D. I don't know anything
 about the other way round.
 
-The programming style of T3D isn't intented as example of good style,
+The programming style of T3D isn't intended as example of good style,
 but as example of how a fast prototyped demo may look like. T3D wasn't
 created to be useful, it was created to be nice.
 
