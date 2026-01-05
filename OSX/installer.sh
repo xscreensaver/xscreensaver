@@ -26,11 +26,20 @@ export PATH="/bin:/sbin:/usr/bin:/usr/sbin:$PATH"
 
 function error() {
   echo "XScreenSaver Installer: Error: $@" >&2
+
+  # Using "System Events" says "No user interaction allowed" on 10.9.
+  # But using "SystemUIServer" or "Automator Runner" still seems to work.
+  #
+  runner="System Events"
+  if [ -d "/System/Library/CoreServices/SystemUIServer.app" ]; then
+    runner="SystemUIServer"
+  elif [ -d "/System/Library/CoreServices/Automator Runner.app" ]; then
+    runner="Automator Runner"
+  fi
+
   (
-    # Using "System Events" says "No user interaction allowed" on 10.9.
-    # But using "Automator Runner" still seems to work.
     osascript <<__EOF__
-      tell app "Automator Runner" to \
+      tell app "$runner" to \
         display dialog "$@" \
         buttons "Bummer" \
         default button 1 \
@@ -40,6 +49,7 @@ __EOF__
   ) </dev/null >/dev/null 2>&1 &
   exit 1
 }
+
 
 #if[ x"$DSTVOLUME"    = x ]; then error "DSTVOLUME unset";    fi
 if [ x"$PACKAGE_PATH" = x ]; then error "PACKAGE_PATH unset"; fi
@@ -56,7 +66,14 @@ SRC=`dirname "$PACKAGE_PATH"`/"Screen Savers"
 DST1="$DSTVOLUME/Library/Screen Savers"
 DST2="$DSTVOLUME/Applications"
 PU="$DSTVOLUME/$HOME/Library/Screen Savers"
-UPDATER="XScreenSaverUpdater.app"
+
+# Because of Sparkle.framework weirdness, ".XScreenSaverUpdater.app"
+# is in the DMG, and we remove the leading dot when installing it.
+# Without this, auto-updates won't work right.
+#
+UPDATER_SRC="XScreenSaver.updater"
+UPDATER_DST="XScreenSaverUpdater.app"
+
 
 cd "$SRC" || error "The 'Screen Savers' folder does not exist.
 
@@ -78,17 +95,26 @@ mkdir -p "$DST2" || error "Unable to create directory $DST2/"
 # Install the savers and the updater in /System/Library/Screen Savers/
 # Install the other apps in /Applications/
 #
-for f in *.{saver,app} ; do
+for f in *.{saver,app} "$UPDATER_SRC" ; do
   EXT=`echo "$f" | sed 's/^.*\.//'`
-  if [ "$EXT" = "app" -a "$f" != "$UPDATER" ]; then
+  if [ "$f" = "$UPDATER_SRC" ]; then
+    DST="$DST1"
+  elif [ "$EXT" = "app" ]; then
     DST="$DST2"
   else
     DST="$DST1"
   fi
+
   DD="$DST/$f"
+
   echo "Installing $DD" >&2
   rm -rf "$DD" || error "Unable to delete $DD"
-  cp -pR "$f" "$DST/" || error "Unable to install $f in $DST/"
+
+  if [ "$f" = "$UPDATER_SRC" ]; then
+    ( cd "$DST/" && tar -xzf - ) < "$f" || error "Unable to unpack $f in $DST/"
+  else
+    cp -pR "$f" "$DD" || error "Unable to install $f in $DST/"
+  fi
 
   # Eliminate the "this was downloaded from the interweb" warning.
   xattr -r -d com.apple.quarantine "$DD"

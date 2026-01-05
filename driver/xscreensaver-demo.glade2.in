@@ -2524,7 +2524,7 @@ This probably means that the &quot;xscreensaver-extras&quot; and
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
   <property name="urgency_hint">False</property>
-  <property name="has_separator">False</property>
+  @COMMENT_DEMO_GLADE2_GTK_2_22_HEAD@<property name="has_separator">False</property>@COMMENT_DEMO_GLADE2_GTK_2_22_TAIL@
 
   <child internal-child="vbox">
     <widget class="GtkVBox" id="dialog_vbox">
