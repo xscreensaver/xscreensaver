@@ -1,4 +1,4 @@
-/* glslideshow, Copyright (c) 2003-2008 Jamie Zawinski <jwz@jwz.org>
+/* glslideshow, Copyright (c) 2003-2011 Jamie Zawinski <jwz@jwz.org>
  * Loads a sequence of images and smoothly pans around them; crossfades
  * when loading new images.
  *
@@ -358,10 +358,16 @@ image_loaded_cb (const char *filename, XRectangle *geom,
       img->geom.height *= scale;
     }
 
-  if (img->title)   /* strip filename to part after last /. */
+  /* xscreensaver-getimage returns paths relative to the image directory
+     now, so leave the sub-directory part in.  Unless it's an absolute path.
+  */
+  if (img->title && img->title[0] == '/')
     {
+      /* strip filename to part between last "/" and last ".". */
       char *s = strrchr (img->title, '/');
       if (s) strcpy (img->title, s+1);
+      s = strrchr (img->title, '.');
+      if (s) *s = 0;
     }
 
   if (debug_p)
@@ -468,30 +474,22 @@ randomize_sprite (ModeInfo *mi, sprite *sp)
   int vp_h = MI_HEIGHT(mi);
   int img_w = sp->img->geom.width;
   int img_h = sp->img->geom.height;
-  int min_w, min_h, max_w, max_h;
+  int min_w, max_w;
   double ratio = (double) img_h / img_w;
 
   if (letterbox_p)
     {
       min_w = img_w;
-      min_h = img_h;
     }
   else
     {
       if (img_w < vp_w)
-        {
-          min_w = vp_w;
-          min_h = img_h * (float) vp_w / img_w;
-        }
+        min_w = vp_w;
       else
-        {
-          min_w = img_w * (float) vp_h / img_h;
-          min_h = vp_h;
-        }
+        min_w = img_w * (float) vp_h / img_h;
     }
 
   max_w = min_w * 100 / zoom;
-  max_h = min_h * 100 / zoom;
 
   sp->from.w = min_w + frand ((max_w - min_w) * 0.4);
   sp->to.w   = max_w - frand ((max_w - min_w) * 0.4);
@@ -1216,7 +1214,6 @@ draw_slideshow (ModeInfo *mi)
 
   draw_sprites (mi);
 
-  ss->fps = fps_compute (mi->fpst, 0);
   if (mi->fps_p) do_fps (mi);
 
   glFinish();

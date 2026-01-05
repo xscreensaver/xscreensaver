@@ -92,22 +92,22 @@ extern const char *progname;
 
 #define Malloc(lvalue,n,type) do {\
 	if (!(lvalue = (type*) calloc((n), sizeof(type)))) \
-	    Err("out of memory");\
+	    abort();\
     } while(0)
 
 #define Realloc(lvalue,n,type) do {\
 	if (!(lvalue = (type*) realloc(lvalue, (n) * sizeof(type)))) \
-	    Err("out of memory");\
+	    abort();\
     } while(0)
 
 #define Calloc(lvalue,n,type) do {\
 	if (!(lvalue = (type*) calloc(n, sizeof(type))))\
-	    Err("out of memory");\
+	    abort();\
     } while(0)
 
 #define Matalloc(lvalue,n,m,type) do {\
 	if (!(lvalue = (type**) matalloc(n, (m) * sizeof(type))))\
-	    Err("out of memory");\
+	    abort();\
     } while(0)
 
 #define Sprintfrac(lvalue,x) do {\
@@ -199,6 +199,16 @@ static const struct {
   /****************************************************************************
    *		Dihedral Schwarz Triangles (D5 only)
    ***************************************************************************/
+
+  /*	{"3|2 5/2",	"xyz",
+				"xyz",
+				"xyz",
+				"",
+				"",
+				0, 0},
+*/
+
+
 
 							   /* (2 2 5) (D1/5) */
   /*  1 */	{"2 5|2",	"Pentagonal Prism",
@@ -447,7 +457,7 @@ static const struct {
 				"Catalan Solid",
 				30, 14},
 
-  /* 33 */	{"2 3 5|",	"Truncated Icosidodechedon",
+  /* 33 */	{"2 3 5|",	"Truncated Icosidodecahedron",
 				"Disdyakistriacontahedron",
 				"Icosahedral (I[1])",
 				"Archimedian Solid",
@@ -2263,7 +2273,7 @@ construct_polyhedron (Polyhedron *P, Vector *v, int V, Vector *f, int F,
         facelets++;
 
       } else if (P->even != -1) {
-        if (hit[i]) {
+        if (hit && hit[i]) {
           push_face3 (result, P->incid[3][i], P->incid[0][i],  ii);
           push_face3 (result, P->incid[1][i], P->incid[2][i],  ii);
         } else {

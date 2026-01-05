@@ -434,11 +434,10 @@ static vertex *vertex_split(hedge *h, vector v)
     hedge *h2, *hn1, *hn2;
     vertex *vtxn;
     edge *en;
-    face *f1, *f2;
+    face *f1;
 
     f1 = h->f;
     h2 = partner(h);
-    f2 = h2->f;
     
     vtxn = vertex_new(f1->s, v);
     hn1 = hedge_new(h, vtxn);
@@ -785,7 +784,6 @@ static void setup_opengl(ModeInfo *mi, jigglystruct *js)
     const GLfloat scolor[4]= {0.9f, 0.9f, 0.9f, 0.5f};
 
     glDrawBuffer(GL_BACK);
-    glClearColor(0, 0, 0, 0);
     glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
 

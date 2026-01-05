@@ -1,5 +1,5 @@
 /* dotfile.c --- management of the ~/.xscreensaver file.
- * xscreensaver, Copyright (c) 1998-2008 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright (c) 1998-2011 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -276,6 +276,7 @@ static const char * const prefs[] = {
   "ignoreUninstalledPrograms",
   "font",
   "dpmsEnabled",
+  "dpmsQuickOff",
   "dpmsStandby",
   "dpmsSuspend",
   "dpmsOff",
@@ -297,11 +298,12 @@ static const char * const prefs[] = {
   "pointerHysteresis",
   "windowCreationTimeout",
   "initialDelay",
-  "sgiSaverExtension",
+  "sgiSaverExtension",		/* not saved -- obsolete */
   "mitSaverExtension",		/* not saved -- obsolete */
-  "xidleExtension",
+  "xidleExtension",		/* not saved -- obsolete */
   "GetViewPortIsFullOfLies",
   "procInterrupts",
+  "xinputExtensionDev",
   "overlayStderr",
   "overlayTextBackground",	/* not saved -- X resources only */
   "overlayTextForeground",	/* not saved -- X resources only */
@@ -816,6 +818,7 @@ write_init_file (Display *dpy,
       CHECK("font")		type = pref_str,  s =    stderr_font;
 
       CHECK("dpmsEnabled")	type = pref_bool, b = p->dpms_enabled_p;
+      CHECK("dpmsQuickOff")	type = pref_bool, b = p->dpms_quickoff_p;
       CHECK("dpmsStandby")	type = pref_time, t = p->dpms_standby;
       CHECK("dpmsSuspend")	type = pref_time, t = p->dpms_suspend;
       CHECK("dpmsOff")		type = pref_time, t = p->dpms_off;
@@ -850,16 +853,17 @@ write_init_file (Display *dpy,
       CHECK("pointerHysteresis")type = pref_int,  i = p->pointer_hysteresis;
       CHECK("windowCreationTimeout")type=pref_time,t= p->notice_events_timeout;
       CHECK("initialDelay")	type = pref_time, t = p->initial_delay;
-      CHECK("sgiSaverExtension")type = pref_bool, b=p->use_sgi_saver_extension;
+      CHECK("sgiSaverExtension") continue;  /* don't save */
       CHECK("mitSaverExtension") continue;  /* don't save */
-      CHECK("xidleExtension")	type = pref_bool, b = p->use_xidle_extension;
+      CHECK("xidleExtension")	 continue;  /* don't save */
       CHECK("procInterrupts")	type = pref_bool, b = p->use_proc_interrupts;
+      CHECK("xinputExtensionDev") type = pref_bool, b = p->use_xinput_extension;
       CHECK("GetViewPortIsFullOfLies")  type = pref_bool,
 					b = p->getviewport_full_of_lies_p;
       CHECK("overlayStderr")	type = pref_bool, b = overlay_stderr_p;
       CHECK("overlayTextBackground") continue;  /* don't save */
       CHECK("overlayTextForeground") continue;  /* don't save */
-      CHECK("bourneShell")	continue;
+      CHECK("bourneShell")	     continue;  /* don't save */
       else			abort();
 # undef CHECK
 
@@ -1071,6 +1075,7 @@ load_init_file (Display *dpy, saver_preferences *p)
 						       "Time");
 
   p->dpms_enabled_p  = get_boolean_resource (dpy, "dpmsEnabled", "Boolean");
+  p->dpms_quickoff_p = get_boolean_resource (dpy, "dpmsQuickOff", "Boolean");
   p->dpms_standby    = 1000 * get_minutes_resource (dpy, "dpmsStandby", "Time");
   p->dpms_suspend    = 1000 * get_minutes_resource (dpy, "dpmsSuspend", "Time");
   p->dpms_off        = 1000 * get_minutes_resource (dpy, "dpmsOff",     "Time");
@@ -1116,14 +1121,21 @@ load_init_file (Display *dpy, saver_preferences *p)
   }
 
   p->use_xidle_extension = get_boolean_resource (dpy, "xidleExtension","Boolean");
-#if 0 /* ignore this, it is evil. */
+#if 0 /* obsolete. */
+  p->use_sgi_saver_extension = get_boolean_resource (dpy,
+                                                     "sgiSaverExtension",
+						     "Boolean");
+#endif
+#if 0 /* obsolete. */
+  p->use_xinput_extension = get_boolean_resource (dpy, "xinputExtensionDev",
+                                                  "Boolean");
+#endif
+#if 0 /* broken and evil. */
   p->use_mit_saver_extension = get_boolean_resource (dpy, 
                                                      "mitSaverExtension",
 						     "Boolean");
 #endif
-  p->use_sgi_saver_extension = get_boolean_resource (dpy,
-                                                     "sgiSaverExtension",
-						     "Boolean");
+
   p->use_proc_interrupts = get_boolean_resource (dpy,
                                                  "procInterrupts", "Boolean");
 

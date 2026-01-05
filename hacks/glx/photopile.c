@@ -1,4 +1,4 @@
-/* photopile, Copyright (c) 2008-2009 Jens Kilian <jjk@acm.org>
+/* photopile, Copyright (c) 2008-2011 Jens Kilian <jjk@acm.org>
  * Based on carousel, Copyright (c) 2005-2008 Jamie Zawinski <jwz@jwz.org>
  * Loads a sequence of images and shuffles them into a pile.
  *
@@ -76,7 +76,7 @@ typedef struct {
 } image;
 
 
-typedef enum { EARLY, IN, NORMAL, LOADING, SHUFFLE } fade_mode;
+typedef enum { EARLY, SHUFFLE, NORMAL, LOADING } fade_mode;
 static int fade_ticks = 60;
 
 typedef struct {
@@ -109,7 +109,8 @@ static int duration;         /* Reload images after this long. */
 static Bool mipmap_p;        /* Use mipmaps instead of single textures. */
 static Bool titles_p;        /* Display image titles. */
 static Bool polaroid_p;      /* Use instant-film look for images. */
-static Bool clip_p;          /* Clip images instead of scaling for -polaroid. */static Bool shadows_p;       /* Draw drop shadows. */
+static Bool clip_p;          /* Clip images instead of scaling for -polaroid. */
+static Bool shadows_p;       /* Draw drop shadows. */
 static Bool debug_p;         /* Be loud and do weird things. */
 
 
@@ -278,8 +279,12 @@ image_loaded_cb (const char *filename, XRectangle *geom,
     free (frame->title);
   frame->title = (filename ? strdup (filename) : 0);
 
-  if (frame->title)   /* strip filename to part after last /. */
+  /* xscreensaver-getimage returns paths relative to the image directory
+     now, so leave the sub-directory part in.  Unless it's an absolute path.
+  */
+  if (frame->title && frame->title[0] == '/')
     {
+      /* strip filename to part after last /. */
       char *s = strrchr (frame->title, '/');
       if (s) strcpy (frame->title, s+1);
     }
@@ -459,6 +464,7 @@ init_photopile (ModeInfo *mi)
 
   if ((ss->glx_context = init_GL(mi)) != NULL) {
     reshape_photopile (mi, MI_WIDTH(mi), MI_HEIGHT(mi));
+    clear_gl_error(); /* WTF? sometimes "invalid op" from glViewport! */
   } else {
     MI_CLEARWINDOW(mi);
   }
@@ -617,7 +623,13 @@ draw_image (ModeInfo *mi, int i, GLfloat t, GLfloat s, GLfloat z)
     {
       int sw, sh;
       GLfloat scale = 0.6;
-      char *title = frame->title ? frame->title : "(untitled)";
+      const char *title = frame->title ? frame->title : "(untitled)";
+
+      /* #### Highly approximate, but doing real clipping is harder... */
+      int max = 35;
+      if (strlen(title) > max)
+        title += strlen(title) - max;
+
       sw = texture_string_width (ss->texfont, title, &sh);
 
       glTranslatef (-sw*scale*0.5, -h - sh*scale, z);
@@ -683,9 +695,11 @@ draw_photopile (ModeInfo *mi)
     /* Handle state transitions. */
     switch (ss->mode)
       {
-      case IN:
+      case SHUFFLE:
         if (--ss->mode_tick <= 0)
           {
+            ss->nframe = (ss->nframe+1) % (MI_COUNT(mi)+1);
+
             ss->mode = NORMAL;
             ss->last_time = time((time_t *) 0);
           }
@@ -703,15 +717,6 @@ draw_photopile (ModeInfo *mi)
             set_new_positions(ss);
             ss->mode = SHUFFLE;
             ss->mode_tick = fade_ticks / speed;
-          }
-        break;
-      case SHUFFLE:
-        if (--ss->mode_tick <= 0)
-          {
-            ss->nframe = (ss->nframe+1) % (MI_COUNT(mi)+1);
-
-            ss->mode = NORMAL;
-            ss->last_time = time((time_t *) 0);
           }
         break;
       default:
@@ -733,13 +738,6 @@ draw_photopile (ModeInfo *mi)
 
             switch (ss->mode)
               {
-              case IN:
-                s *= t;
-                break;
-              case NORMAL:
-              case LOADING:
-                t = 1.0;
-                break;
               case SHUFFLE:
                 if (i == MI_COUNT(mi))
                   {
@@ -749,6 +747,10 @@ draw_photopile (ModeInfo *mi)
                   {
                     s *= 1.0 - t;
                   }
+                break;
+              case NORMAL:
+              case LOADING:
+                t = 1.0;
                 break;
               default:
                 abort();

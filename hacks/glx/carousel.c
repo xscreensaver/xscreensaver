@@ -1,4 +1,4 @@
-/* carousel, Copyright (c) 2005-2008 Jamie Zawinski <jwz@jwz.org>
+/* carousel, Copyright (c) 2005-2011 Jamie Zawinski <jwz@jwz.org>
  * Loads a sequence of images and rotates them around.
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
@@ -285,8 +285,11 @@ image_loaded_cb (const char *filename, XRectangle *geom,
     free (frame->loading.title);
   frame->loading.title = (filename ? strdup (filename) : 0);
 
-  if (frame->loading.title)   /* strip filename to part after last /. */
-    {
+  /* xscreensaver-getimage returns paths relative to the image directory
+     now, so leave the sub-directory part in.  Unless it's an absolute path.
+  */
+  if (frame->loading.title && frame->loading.title[0] == '/')
+    {    /* strip filename to part after last /. */
       char *s = strrchr (frame->loading.title, '/');
       if (s) strcpy (frame->loading.title, s+1);
     }
@@ -496,7 +499,6 @@ loading_msg (ModeInfo *mi, int n)
   carousel_state *ss = &sss[MI_SCREEN(mi)];
   int wire = MI_IS_WIREFRAME(mi);
   char text[100];
-  GLfloat scale;
 
   if (wire) return;
 
@@ -508,8 +510,6 @@ loading_msg (ModeInfo *mi, int n)
 
   if (ss->loading_sw == 0)    /* only do this once, so that the string doesn't move. */
     ss->loading_sw = texture_string_width (ss->texfont, text, &ss->loading_sh);
-
-  scale = ss->loading_sh / (GLfloat) MI_HEIGHT(mi);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -558,6 +558,7 @@ init_carousel (ModeInfo *mi)
 
   if ((ss->glx_context = init_GL(mi)) != NULL) {
     reshape_carousel (mi, MI_WIDTH(mi), MI_HEIGHT(mi));
+    clear_gl_error(); /* WTF? sometimes "invalid op" from glViewport! */
   } else {
     MI_CLEARWINDOW(mi);
   }

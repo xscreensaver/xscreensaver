@@ -1,4 +1,15 @@
-/* DNA Logo, Copyright (c) 2001, 2002, 2003 Jamie Zawinski <jwz@jwz.org>
+/* DNA Logo, Copyright (c) 2001-2011 Jamie Zawinski <jwz@jwz.org>
+ *
+ *      DNA Lounge
+ *
+ *      Restaurant -- Bar -- Nightclub -- Cafe -- Est. 1985.
+ *
+ *      375 Eleventh Street
+ *      San Francisco, CA
+ *      94103
+ *
+ *      http://www.dnalounge.com/
+ *      http://www.dnapizza.com/
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -35,6 +46,7 @@
 			"*frameThickness:   0.03    \n" \
 			"*triangleSize:	    0.045   \n" \
 			"*speed:	    1.0	    \n" \
+			"*mode:		    both"  "\n" \
 			".foreground:	    #00AA00 \n" \
 			"*geometry:	    =640x640\n" \
 
@@ -43,6 +55,18 @@
 #undef countof
 #define countof(x) (sizeof((x))/sizeof((*x)))
 
+#ifdef DXF_OUTPUT_HACK   /* When this is defined, instead of rendering
+                            to the screen, we write a DXF CAD file to stdout.
+                            This is a kludge of shocking magnitude...
+                            Maybe there's some other way to intercept all
+                            glVertex3f calls than with a #define? */
+# define unit_tube dxf_unit_tube
+# define unit_cone dxf_unit_cone
+# define tube_1    dxf_tube_1
+# define tube      dxf_tube
+# define cone      dxf_cone
+#endif /* DXF_OUTPUT_HACK */
+
 #include "xlockmore.h"
 #include "normals.h"
 #include "tube.h"
@@ -50,6 +74,12 @@
 #include "gltrackball.h"
 
 #ifdef USE_GL /* whole file */
+
+typedef enum {
+  HELIX_IN, HELIX, HELIX_OUT, 
+  PIZZA_IN, PIZZA, PIZZA_OUT,
+  BOTH
+} glyph_mode;
 
 typedef struct {
   Bool spinning_p;
@@ -62,6 +92,7 @@ typedef struct {
   GLXContext *glx_context;
 
   GLuint helix_list,  helix_list_wire,  helix_list_facetted;
+  GLuint pizza_list,  pizza_list_wire,  pizza_list_facetted;
   GLuint gasket_list, gasket_list_wire;
   GLuint frame_list,  frame_list_wire;
   int polys[7];
@@ -89,10 +120,14 @@ typedef struct {
   GLfloat triangle_size;
 
   GLfloat speed;
+  glyph_mode mode;
+  glyph_mode anim_state;
+  GLfloat anim_ratio;
 
   spinner gasket_spinnerx, gasket_spinnery, gasket_spinnerz;
   spinner scene_spinnerx,  scene_spinnery;
   spinner helix_spinnerz;
+  spinner pizza_spinnery, pizza_spinnerz;
   spinner frame_spinner;
 
   trackball_state *trackball;
@@ -105,12 +140,282 @@ typedef struct {
 static logo_configuration *dcs = NULL;
 
 static XrmOptionDescRec opts[] = {
-  { "-speed",  ".speed",  XrmoptionSepArg, 0 },
+  { "-speed",  ".speed",  XrmoptionSepArg, 0       },
+  { "-mode",   ".mode",   XrmoptionSepArg, 0       },
+  { "-pizza",  ".mode",   XrmoptionNoArg,  "pizza" },
+  { "-helix",  ".mode",   XrmoptionNoArg,  "helix" },
+  { "-both",   ".mode",   XrmoptionNoArg,  "both"  },
 };
 
 ENTRYPOINT ModeSpecOpt logo_opts = {countof(opts), opts, 0, NULL, NULL};
 
 #define PROBABILITY_SCALE 600
+
+
+#ifdef DXF_OUTPUT_HACK
+
+# define glBegin         dxf_glBegin
+# define glVertex3f      dxf_glVertex3f
+# define glVertex3dv     dxf_glVertex3dv
+# define glEnd           dxf_glEnd
+# define glVertexPointer dxf_glVertexPointer
+# define glDrawArrays    dxf_glDrawArrays
+
+static int dxf_type, dxf_point, dxf_point_total, dxf_layer, dxf_color;
+static GLfloat dxf_quads[4*4];
+
+static void
+dxf_glBegin (int type)
+{
+  dxf_type = type; 
+  dxf_point = 0;
+  dxf_point_total = 0;
+}
+
+static void
+dxf_glVertex3f (GLfloat ox, GLfloat oy, GLfloat oz)
+{
+  int i = 0;
+  GLfloat m[4*4];
+  GLfloat x, y, z;
+
+  /* Transform the point into modelview space. */
+  glGetFloatv (GL_MODELVIEW_MATRIX, m);
+  x = ox * m[0] + oy * m[4] + oz * m[8]  + m[12];
+  y = ox * m[1] + oy * m[5] + oz * m[9]  + m[13];
+  z = ox * m[2] + oy * m[6] + oz * m[10] + m[14];
+
+  dxf_quads[dxf_point*3+0] = x;
+  dxf_quads[dxf_point*3+1] = y;
+  dxf_quads[dxf_point*3+2] = z;
+  dxf_point++;
+  dxf_point_total++;
+
+  switch (dxf_type) {
+  case GL_QUADS:
+    if (dxf_point < 4) return;
+
+    fprintf (stdout, "0\n3DFACE\n8\n%d\n62\n%d\n", dxf_layer, dxf_color);
+    fprintf (stdout, "10\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "20\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "30\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "11\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "21\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "31\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "12\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "22\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "32\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "13\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "23\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "33\n%.6f\n", dxf_quads[i++]);
+    dxf_point = 0;
+    break;
+
+  case GL_QUAD_STRIP:
+    if (dxf_point < 4) return;
+
+    fprintf (stdout, "0\n3DFACE\n8\n%d\n62\n%d\n", dxf_layer, dxf_color);
+    fprintf (stdout, "10\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "20\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "30\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "11\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "21\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "31\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "12\n%.6f\n", dxf_quads[i+3]);  /* funky quad strip */
+    fprintf (stdout, "22\n%.6f\n", dxf_quads[i+4]);  /* vert order: 1243. */
+    fprintf (stdout, "32\n%.6f\n", dxf_quads[i+5]);
+
+    fprintf (stdout, "13\n%.6f\n", dxf_quads[i]);
+    fprintf (stdout, "23\n%.6f\n", dxf_quads[i+1]);
+    fprintf (stdout, "33\n%.6f\n", dxf_quads[i+2]);
+    i += 6;
+
+    dxf_quads[0] = dxf_quads[6];	/* copy point 3 to pos 1 */
+    dxf_quads[1] = dxf_quads[7];
+    dxf_quads[2] = dxf_quads[8];
+    dxf_quads[3] = dxf_quads[9];	/* copy point 4 to pos 2 */
+    dxf_quads[4] = dxf_quads[10];
+    dxf_quads[5] = dxf_quads[11];
+    dxf_point = 2;			/* leave those two points in queue */
+    break;
+
+  case GL_TRIANGLES:
+  case GL_TRIANGLE_FAN:
+    if (dxf_point < 3) return;
+
+    fprintf (stdout, "0\n3DFACE\n8\n%d\n62\n%d\n", dxf_layer, dxf_color);
+    fprintf (stdout, "10\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "20\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "30\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "11\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "21\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "31\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "12\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "22\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "32\n%.6f\n", dxf_quads[i++]);
+
+    i -= 3;
+    fprintf (stdout, "13\n%.6f\n", dxf_quads[i++]);  /* dup pt 4 as pt 3. */
+    fprintf (stdout, "23\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "33\n%.6f\n", dxf_quads[i++]);
+
+    dxf_point = 0;
+    if (dxf_type == GL_TRIANGLE_FAN)
+      {
+        dxf_quads[3] = dxf_quads[6];	/* copy point 3 to point 2 */
+        dxf_quads[4] = dxf_quads[7];
+        dxf_quads[5] = dxf_quads[8];
+        dxf_point = 2;			/* leave two points in queue */
+      }
+    break;
+
+  case GL_TRIANGLE_STRIP:
+    if (dxf_point < 3) return;
+
+    fprintf (stdout, "0\n3DFACE\n8\n%d\n62\n%d\n", dxf_layer, dxf_color);
+
+    fprintf (stdout, "10\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "20\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "30\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "11\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "21\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "31\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "12\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "22\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "32\n%.6f\n", dxf_quads[i++]);
+
+    i -= 3;
+    fprintf (stdout, "13\n%.6f\n", dxf_quads[i++]);  /* dup pt 4 as pt 3. */
+    fprintf (stdout, "23\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "33\n%.6f\n", dxf_quads[i++]);
+
+    dxf_quads[0] = dxf_quads[3];	/* copy point 2 to pos 1 */
+    dxf_quads[1] = dxf_quads[4];
+    dxf_quads[2] = dxf_quads[5];
+    dxf_quads[3] = dxf_quads[6];	/* copy point 3 to pos 2 */
+    dxf_quads[4] = dxf_quads[7];
+    dxf_quads[5] = dxf_quads[8];
+    dxf_point = 2;			/* leave those two points in queue */
+    break;
+
+  case GL_LINES:
+  case GL_LINE_STRIP:
+  case GL_LINE_LOOP:
+
+    if (dxf_point_total == 1)
+      {
+        dxf_quads[6] = ox;
+        dxf_quads[7] = oy;
+        dxf_quads[8] = oz;
+      }
+
+    if (dxf_point < 2) return;
+
+    fprintf (stdout, "0\nLINE\n8\n%d\n62\n%d\n", dxf_layer, dxf_color);
+
+    fprintf (stdout, "10\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "20\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "30\n%.6f\n", dxf_quads[i++]);
+
+    fprintf (stdout, "11\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "21\n%.6f\n", dxf_quads[i++]);
+    fprintf (stdout, "31\n%.6f\n", dxf_quads[i++]);
+
+    dxf_point = 0;
+    if (dxf_type != GL_LINES)
+      {
+        dxf_quads[0] = dxf_quads[3];
+        dxf_quads[1] = dxf_quads[4];
+        dxf_quads[2] = dxf_quads[5];
+        dxf_point = 1;
+      }
+    break;
+
+  default:
+    abort();
+    break;
+  }
+}
+
+
+static void
+dxf_glVertex3dv (const GLdouble *v)
+{
+  glVertex3f (v[0], v[1], v[2]);
+}
+
+
+static void
+dxf_glEnd(void)
+{
+  if (dxf_type == GL_LINE_LOOP)  /* close loop */
+    glVertex3f (dxf_quads[6], dxf_quads[7], dxf_quads[8]);
+  dxf_type = -1;
+  dxf_point = 0;
+  dxf_point_total = 0;
+}
+
+
+static void
+dxf_start (void)
+{
+  fprintf (stdout, "0\nSECTION\n2\nHEADER\n0\nENDSEC\n");
+  fprintf (stdout, "0\nSECTION\n2\nENTITIES\n");
+}
+
+static void
+dxf_end (void)
+{
+  fprintf (stdout, "0\nENDSEC\n0\nEOF\n");
+  exit (0);
+}
+
+
+static const GLvoid *dxf_vp;
+static GLsizei dxf_vp_size;
+static GLsizei dxf_vp_stride;
+
+static void
+dxf_glVertexPointer (GLint size, GLenum type, GLsizei stride,
+                     const GLvoid *pointer)
+{
+  if (type != GL_FLOAT) abort();
+  if (stride <= 0) abort();
+  dxf_vp = pointer;
+  dxf_vp_size = size;
+  dxf_vp_stride = stride;
+}
+
+static void
+dxf_glDrawArrays (GLenum mode, GLint first, GLsizei count)
+{
+  int i;
+  unsigned char *a = (unsigned char *) dxf_vp;
+  dxf_glBegin (mode);
+  for (i = first; i < first+count; i++)
+    {
+      GLfloat *fa = (GLfloat *) a;
+      dxf_glVertex3f (fa[0], fa[1], fa[2]);
+      a += dxf_vp_stride;
+    }
+  dxf_glEnd();
+}
+
+
+# define XYZ tube_XYZ /* avoid conflict with normals.h */
+# include "tube.c"    /* Yes, I really am including a C file. */
+# undef XYZ
+
+#endif /* DXF_OUTPUT_HACK */
 
 
 
@@ -351,6 +656,7 @@ make_ladder (logo_configuration *dc, int facetted, int wire)
   if (!dc->clockwise)
     z = -z, z_inc = -z_inc;
 
+  glFrontFace(GL_CCW);
   for (i = 0; i < nbars; i++)
     {
       int facets = dc->bar_facets / (facetted ? 14 : 1);
@@ -402,6 +708,10 @@ make_gasket (logo_configuration *dc, int wire)
 
   glPushMatrix();
 
+# ifdef DXF_OUTPUT_HACK
+  if (! wire) res *= 8;
+# endif
+
 # define POINT(r,th) \
     ctrl_r [nctrls] = r, \
     ctrl_th[nctrls] = (th * d2r), \
@@ -449,13 +759,13 @@ make_gasket (logo_configuration *dc, int wire)
   POINT (0.880, 319.74);
   POINT (0.990, 320.08);
 
-  POINT (r4,  338.5);
+  POINT (r4,  338.0);
   if (! wire)
     {
-      POINT (r1a, 338.5);      /* cut-out disc */
-      POINT (r1a, 343.5);
+      POINT (r1a, 338.0);      /* cut-out disc */
+      POINT (r1a, 344.0);
     }
-  POINT (r4,  343.5);
+  POINT (r4,  344.0);
   POINT (r4,  356.0);
 
   POINT (0.872, 356.05);   /* top indentation, left half */
@@ -670,7 +980,7 @@ make_gasket (logo_configuration *dc, int wire)
     GLfloat th;
     npoints = 0;
 
-    th = 338.5 * d2r;
+    th = 338.0 * d2r;
     pointsx0[npoints] = r1c * cos(th) * dc->gasket_size;
     pointsy0[npoints] = r1c * sin(th) * dc->gasket_size;
     npoints++;
@@ -678,13 +988,12 @@ make_gasket (logo_configuration *dc, int wire)
     pointsy0[npoints] = r4 * sin(th) * dc->gasket_size;
     npoints++;
 
-    th = 343.5 * d2r;
+    th = 344.0 * d2r;
     pointsx0[npoints] = r1c * cos(th) * dc->gasket_size;
     pointsy0[npoints] = r1c * sin(th) * dc->gasket_size;
     npoints++;
     pointsx0[npoints] = r4 * cos(th) * dc->gasket_size;
     pointsy0[npoints] = r4 * sin(th) * dc->gasket_size;
-    npoints++;
 
     if (! wire)
       {
@@ -728,9 +1037,9 @@ make_gasket (logo_configuration *dc, int wire)
     /* Now make a donut.
      */
     {
-      int nsteps = 12;
+      int nsteps = (wire ? 12 : 64);
       GLfloat r0 = 0.04;
-      GLfloat r1 = 0.060;
+      GLfloat r1 = 0.070;
       GLfloat th, cth, sth;
 
       glPushMatrix ();
@@ -863,7 +1172,9 @@ make_gasket (logo_configuration *dc, int wire)
       }
 
     npoints = 0;
-    for (th = 0; th < M_PI; th += (M_PI / 6))
+    for (th = (wire ? 0 : -0.1);
+         th <= M_PI + 0.1;
+         th += (M_PI / (wire ? 5 : 32)))
       {
         pointsx0[npoints] = w/2 * cos(th);
         pointsy0[npoints] = w/2 * sin(th);
@@ -1058,6 +1369,396 @@ make_frame (logo_configuration *dc, int wire)
   return polys;
 }
 
+
+/* Make some pizza.
+ */
+
+typedef struct {
+  GLdouble *points;
+  int i;
+} tess_out;
+
+
+static void
+tess_error_cb (GLenum errorCode)
+{
+  fprintf (stderr, "%s: tesselation error: %s\n",
+           progname, gluErrorString(errorCode));
+  exit (0);
+}
+
+static void
+tess_combine_cb (GLdouble coords[3], GLdouble *d[4], GLfloat w[4], 
+                 GLdouble **data_out)
+{
+  GLdouble *new = (GLdouble *) malloc (3 * sizeof(*new));
+  new[0] = coords[0];
+  new[1] = coords[1];
+  new[2] = coords[2];
+  *data_out = new;
+}
+
+
+#if 0
+static void
+tess_vertex_cb (void *vertex_data, void *closure)
+{
+  tess_out *to = (tess_out *) closure;
+  GLdouble *v = (GLdouble *) vertex_data;
+  to->points[to->i++] = v[0];
+  to->points[to->i++] = v[1];
+  to->points[to->i++] = v[2];
+}
+#endif
+
+static void
+tess_begin_cb (GLenum which)
+{
+  glBegin(which);
+}
+
+static void
+tess_end_cb (void)
+{
+  glEnd();
+}
+
+
+static int
+make_pizza (logo_configuration *dc, int facetted, int wire)
+{
+  int polys = 0;
+
+  int topfaces = (facetted ? 48 : 120);
+  int discfaces = (facetted ? 12 : 120);
+  int npoints = topfaces * 2 + 100;
+  GLdouble *points = (GLdouble *) calloc (npoints * 3, sizeof(GLdouble));
+  int nholes = 3;
+  GLdouble *holes  = (GLdouble *) calloc (topfaces*nholes*3, sizeof(GLdouble));
+
+  GLfloat step = M_PI * 2 / 6 / topfaces;
+  GLfloat thick2 = (dc->gasket_thickness / dc->gasket_size) / 4;
+  GLfloat th, x, y, s;
+  int i, j, k;
+  tess_out TO, *to = &TO;
+  GLUtesselator *tess = gluNewTess();
+  int endpoints;
+  int endedge1;
+
+  to->points = (GLdouble *) calloc (topfaces * 20, sizeof(GLdouble));
+  to->i = 0;
+
+
+# ifndef  _GLUfuncptr
+#  define _GLUfuncptr void(*)(void)
+# endif
+
+  gluTessCallback(tess,GLU_TESS_BEGIN,      (_GLUfuncptr)tess_begin_cb);
+  gluTessCallback(tess,GLU_TESS_VERTEX,     (_GLUfuncptr)glVertex3dv);
+  gluTessCallback(tess,GLU_TESS_END,        (_GLUfuncptr)tess_end_cb);
+  gluTessCallback(tess,GLU_TESS_COMBINE,    (_GLUfuncptr)tess_combine_cb);
+  gluTessCallback(tess,GLU_TESS_ERROR,      (_GLUfuncptr)tess_error_cb);
+
+  gluTessProperty (tess, GLU_TESS_BOUNDARY_ONLY, wire);
+  gluTessProperty (tess,GLU_TESS_WINDING_RULE, GLU_TESS_WINDING_ODD);
+
+  glPushMatrix();
+
+  s = 1.9;
+  glRotatef (180, 0, 0, 1);
+  glScalef (s, s, s);
+  glRotatef (90, 0, 1, 0);
+  glTranslatef (-0.53, 0, 0);
+  glRotatef (-30, 0, 0, 1);
+
+  /* Compute the wedge */
+  th = 0;
+  j = 0;
+
+  /* Edge 1 */
+  {
+    GLfloat edge[] = {
+      0.000, 0.000,
+      0.000, 0.210,
+      0.042, 0.230,
+      0.042, 0.616,
+      0.000, 0.641,
+    };
+    for (i = 0; i < countof(edge)/2; i++)
+      {
+        points[j++] = edge[i*2+1];
+        points[j++] = edge[i*2];
+        points[j++] = 0;
+      }
+    endedge1 = i;
+  }
+
+  s = 0.798;  /* radius of end of slice, before crust gap */
+  for (i = 0; i < topfaces; i++)
+    {
+      points[j++] = cos(th) * s;
+      points[j++] = sin(th) * s;
+      points[j++] = 0;
+      th += step;
+    }
+
+  /* Edge 2 */
+  {
+    GLfloat edge[] = {
+      0.613, 0.353,
+      0.572, 0.376,
+      0.455, 0.309,
+      0.452, 0.260,
+      0.332, 0.192,
+      0.293, 0.216,
+      0.178, 0.149,
+      0.178, 0.102,
+    };
+    for (i = 0; i < countof(edge)/2; i++)
+      {
+        points[j++] = edge[i*2+1];
+        points[j++] = edge[i*2];
+        points[j++] = 0;
+      }
+    endpoints = j/3;
+  }
+
+
+  /* Draw the rim of the slice */
+  glBegin (wire ? GL_LINES : GL_QUADS);
+  x = points[0];
+  y = points[1];
+  for (i = (wire ? 0 : 1); i < endpoints; i++)
+    {
+      GLdouble *p = points + (i*3);
+
+      do_normal (p[0], p[1],  -thick2,
+                 p[0], p[1],   thick2,
+                 x,    y,     thick2);
+      if (!wire)
+        {
+          glVertex3f (x, y, -thick2);
+          glVertex3f (x, y,  thick2);
+        }
+      glVertex3f (p[0], p[1],  thick2);
+      glVertex3f (p[0], p[1], -thick2);
+      x = p[0];
+      y = p[1];
+      polys++;
+    }
+  do_normal (points[0], points[1],  -thick2,
+             points[0], points[1],   thick2,
+             x,         y,           thick2);
+  glVertex3f (x, y, -thick2);
+  glVertex3f (x, y,  thick2);
+  glVertex3f (points[0], points[1],  thick2);
+  glVertex3f (points[0], points[1], -thick2);
+  polys++;
+  glEnd();
+
+  /* Compute the holes */
+  step = M_PI * 2 / discfaces;
+  for (k = 0; k < nholes; k++)
+    {
+      GLdouble *p = holes + (discfaces * 3 * k);
+      th = 0;
+      j = 0;
+      switch (k) {
+        case 0: x = 0.34; y = 0.17; s = 0.05; break;
+        case 1: x = 0.54; y = 0.17; s = 0.06; break;
+        case 2: x = 0.55; y = 0.36; s = 0.06; break;
+      default: abort(); break;
+      }
+      for (i = 0; i < discfaces; i++)
+        {
+          p[j++] = x + cos(M_PI*2 - th) * s;
+          p[j++] = y + sin(M_PI*2 - th) * s;
+          p[j++] = 0;
+          th += step;
+        }
+    }
+
+
+  /* Draw the inside rim of the holes */
+  for (k = 0; k < nholes; k++)
+    {
+      GLdouble *p = holes + (discfaces * 3 * k);
+      glBegin (wire ? GL_LINES : GL_QUAD_STRIP);
+      for (i = 0; i < discfaces; i++)
+        {
+          GLdouble *p2 = p + (i*3);
+          if (i > 0)
+            do_normal (p2[0],  p2[1],  -thick2,
+                       p2[0],  p2[1],   thick2,
+                       p2[-3], p2[-2],  thick2);
+          glVertex3f (p2[0], p2[1], -thick2);
+          glVertex3f (p2[0], p2[1],  thick2);
+          polys++;
+        }
+      glVertex3f (p[0], p[1], -thick2);
+      glVertex3f (p[0], p[1],  thick2);
+      polys++;
+      glEnd();
+    }
+
+  glTranslatef (0, 0, -thick2);
+  for (y = 0; y <= 1; y++)
+    {
+      if (y) glTranslatef (0, 0, thick2*2);
+
+      /* A non-convex polygon */
+      gluTessBeginPolygon (tess, to);
+
+      glNormal3f (0, 0, (y > 0 ? 1 : -1));
+      gluTessNormal (tess, 0, 0, (y > 0 ? 1 : -1));
+      glFrontFace (GL_CCW);
+
+      /* Tess the wedge */
+      gluTessBeginContour (tess);
+      for (i = 0; i < endpoints; i++)
+        {
+          GLdouble *p = points + (i*3);
+          gluTessVertex (tess, p, p);
+          polys++;
+        }
+      gluTessVertex (tess, points, points);
+      gluTessEndContour (tess);
+
+      /* Tess the holes */
+      for (k = 0; k < nholes; k++)
+        {
+          GLdouble *p = holes + (discfaces * 3 * k);
+          gluTessBeginContour (tess);
+          for (i = 0; i < discfaces; i++)
+            {
+              GLdouble *p2 = p + (i*3);
+              gluTessVertex (tess, p2, p2);
+              polys++;
+            }
+          gluTessEndContour (tess);
+        }
+
+      gluTessEndPolygon (tess);
+    }
+  glTranslatef (0, 0, -thick2);
+
+
+  /* Compute the crust */
+
+  s = 0.861;  /* radius of inside of crust */
+  step = M_PI * 2 / 6 / topfaces;
+  th = 0;
+  j = 0;
+  for (i = 0; i < topfaces; i++)
+    {
+      points[j++] = cos(th) * s;
+      points[j++] = sin(th) * s;
+      points[j++] = 0;
+      th += step;
+    }
+
+  s = 1;
+  for (i = 0; i < topfaces; i++)
+    {
+      points[j++] = cos(th) * s;
+      points[j++] = sin(th) * s;
+      points[j++] = 0;
+      th -= step;
+    }
+
+  /* Draw the rim of the crust */
+  glFrontFace (GL_CCW);
+  glBegin (wire ? GL_LINES : GL_QUAD_STRIP);
+  for (i = 0; i < topfaces * 2; i++)
+    {
+      GLdouble *p = points + (i*3);
+      if (i == 0 || i == (topfaces*2)-1)
+        glNormal3f (0, -1, 0);
+      else if (i == topfaces-1 || i == topfaces)
+        glNormal3f (0, 1, 0);
+      else
+        do_normal (p[-3], p[-2], thick2,
+                   p[0], p[1],   thick2,
+                   p[0], p[1],  -thick2);
+      glVertex3f (p[0], p[1], -thick2);
+      glVertex3f (p[0], p[1],  thick2);
+      polys++;
+    }
+  glVertex3f (points[0], points[1], -thick2);
+  glVertex3f (points[0], points[1],  thick2);
+  polys++;
+  glEnd();
+
+  if (wire)
+    {
+      glBegin (GL_LINE_STRIP);
+      for (i = 0; i < topfaces * 2; i++)
+        {
+          GLdouble *p = points + (i*3);
+          glVertex3f (p[0], p[1], -thick2);
+          polys++;
+        }
+      glVertex3f (points[0], points[1], -thick2);
+      glEnd();
+
+      glBegin (GL_LINE_STRIP);
+      for (i = 0; i < topfaces * 2; i++)
+        {
+          GLdouble *p = points + (i*3);
+          glVertex3f (p[0], p[1], thick2);
+          polys++;
+        }
+      glVertex3f (points[0], points[1], thick2);
+      glEnd();
+    }
+
+  /* Draw the top of the crust */
+  if (! wire)
+    {
+      glFrontFace (GL_CW);
+      glBegin (wire ? GL_LINE_STRIP : GL_QUAD_STRIP);
+      glNormal3f (0, 0, -1);
+      if (!wire)
+        for (i = 0; i < topfaces; i++)
+          {
+            int ii = topfaces + (topfaces - i - 1);
+            GLdouble *p1 = points + (i*3);
+            GLdouble *p2 = points + (ii*3);
+            glVertex3f (p1[0], p1[1], -thick2);
+            glVertex3f (p2[0], p2[1], -thick2);
+            polys++;
+          }
+      polys++;
+      glEnd();
+
+      /* Draw the bottom of the crust */
+      glFrontFace (GL_CCW);
+      glBegin (wire ? GL_LINES : GL_QUAD_STRIP);
+      glNormal3f (0, 0, 1);
+      for (i = 0; i < topfaces; i++)
+        {
+          int ii = topfaces + (topfaces - i - 1);
+          GLdouble *p1 = points + (i*3);
+          GLdouble *p2 = points + (ii*3);
+          glVertex3f (p1[0], p1[1], thick2);
+          glVertex3f (p2[0], p2[1], thick2);
+          polys++;
+        }
+      polys++;
+      glEnd();
+    }
+
+  gluDeleteTess (tess);
+  free (points);
+  free (holes);
+  free (to->points);
+
+  glPopMatrix();
+
+  return polys;
+}
+
+
 
 
 /* Window management, etc
@@ -1163,7 +1864,29 @@ init_logo (ModeInfo *mi)
   dc->frame_thickness = get_float_resource(mi->dpy, "frameThickness", "Float");
   dc->triangle_size   = get_float_resource(mi->dpy, "triangleSize",   "Float");
 
-  dc->speed          = get_float_resource(mi->dpy, "speed",         "Float");
+  dc->speed          = get_float_resource(mi->dpy,   "speed",         "Float");
+
+  {
+    char *s = get_string_resource (MI_DISPLAY (mi), "mode", "String");
+    if (!s || !*s || !strcasecmp (s, "helix"))
+      dc->mode = HELIX;
+    else if (!strcasecmp (s, "pizza"))
+      dc->mode = PIZZA;
+    else if (!strcasecmp (s, "both"))
+      dc->mode = BOTH;
+    else
+      {
+        fprintf (stderr, "%s: mode must be helix, pizza or both, not \"%s\"\n", 
+                 progname, s);
+        exit (1);
+      }
+    if (s) free (s);
+
+    dc->anim_state = (dc->mode == BOTH
+                      ? ((random() & 1) ? HELIX : PIZZA)
+                      : dc->mode);
+    dc->anim_ratio = 0;
+  }
 
   {
     XColor xcolor;
@@ -1190,12 +1913,18 @@ init_logo (ModeInfo *mi)
 
   dc->trackball = gltrackball_init ();
 
-  dc->gasket_spinnery.probability = 0.1;
   dc->gasket_spinnerx.probability = 0.1;
+  dc->gasket_spinnery.probability = 0.1;
   dc->gasket_spinnerz.probability = 1.0;
+
   dc->helix_spinnerz.probability  = 0.6;
+
+  dc->pizza_spinnerz.probability  = 0.6;
+  dc->pizza_spinnery.probability  = 0.6;
+
   dc->scene_spinnerx.probability  = 0.1;
   dc->scene_spinnery.probability  = 0.0;
+
   dc->frame_spinner.probability   = 5.0;
 
   /* start the frame off-screen */
@@ -1210,6 +1939,34 @@ init_logo (ModeInfo *mi)
                                    * ((random() & 1) ? 1 : -1)
                                    * dc->speed);
     }
+
+# ifdef DXF_OUTPUT_HACK
+  {
+    dc->frame_depth = dc->gasket_depth;
+    dxf_layer = 1;
+    dxf_color = 3;
+    dxf_start();
+    glPushMatrix();
+    glRotatef(90, 1, 0, 0);
+    glRotatef(90, 0, 0, 1);
+    make_pizza (dc, 0, 0);
+
+    glPushMatrix();
+    glRotatef(helix_rot, 0, 0, 1);
+    make_ladder (dc, 0, 0);
+    make_helix  (dc, 0, 0);
+    glRotatef (180, 0, 0, 1);
+    make_helix  (dc, 0, 0);
+    glPopMatrix();
+
+    dxf_layer++;
+    make_gasket (dc, 0);
+    dxf_layer++;
+    make_frame (dc, 0);
+    glPopMatrix();
+    dxf_end();
+  }
+# endif
 
   glPushMatrix();
   dc->helix_list = glGenLists (1);
@@ -1243,6 +2000,21 @@ init_logo (ModeInfo *mi)
   if (do_helix)  dc->polys[2] += make_helix  (dc, 1, 0);
   glEndList ();
   glPopMatrix();
+
+  dc->pizza_list = glGenLists (1);
+  glNewList (dc->pizza_list, GL_COMPILE);
+  if (do_frame) dc->polys[5] += make_pizza (dc, 0, 0);
+  glEndList ();
+
+  dc->pizza_list_wire = glGenLists (1);
+  glNewList (dc->pizza_list_wire, GL_COMPILE);
+  if (do_frame) dc->polys[6] += make_pizza (dc, 1, 1);
+  glEndList ();
+
+  dc->pizza_list_facetted = glGenLists (1);
+  glNewList (dc->pizza_list_facetted, GL_COMPILE);
+  if (do_frame) dc->polys[6] += make_pizza (dc, 1, 0);
+  glEndList ();
 
   dc->gasket_list = glGenLists (1);
   glNewList (dc->gasket_list, GL_COMPILE);
@@ -1370,6 +2142,7 @@ draw_logo (ModeInfo *mi)
   GLfloat gcolor[4];
   GLfloat specular[]  = {0.8, 0.8, 0.8, 1.0};
   GLfloat shininess   = 50.0;
+  Bool pizza_p;
 
   if (!dc->glx_context)
     return;
@@ -1377,7 +2150,8 @@ draw_logo (ModeInfo *mi)
   mi->polygon_count = 0;
   glXMakeCurrent(MI_DISPLAY(mi), MI_WINDOW(mi), *(dc->glx_context));
 
-  if (dc->wire_overlay == 0 &&
+  if (!wire &&
+      dc->wire_overlay == 0 &&
       (random() % (int) (PROBABILITY_SCALE / 0.2)) == 0)
     dc->wire_overlay = ((random() % 200) +
                         (random() % 200) +
@@ -1387,15 +2161,77 @@ draw_logo (ModeInfo *mi)
   tick_spinner (mi, &dc->gasket_spinnery);
   tick_spinner (mi, &dc->gasket_spinnerz);
   tick_spinner (mi, &dc->helix_spinnerz);
+  tick_spinner (mi, &dc->pizza_spinnery);
+  tick_spinner (mi, &dc->pizza_spinnerz);
   tick_spinner (mi, &dc->scene_spinnerx);
   tick_spinner (mi, &dc->scene_spinnery);
   tick_spinner (mi, &dc->frame_spinner);
   link_spinners (mi, &dc->scene_spinnerx, &dc->scene_spinnery);
 
+  switch (dc->anim_state)
+    {
+    case HELIX:
+      if (dc->mode == BOTH &&
+          (random() % (int) (PROBABILITY_SCALE / 0.2)) == 0)
+        dc->anim_state = HELIX_OUT;
+      break;
+
+    case HELIX_OUT:
+      dc->anim_ratio += 0.1 * dc->speed;
+      if (dc->anim_ratio >= 1.0)
+        {
+          dc->anim_ratio = 0.0;
+          dc->anim_state = PIZZA_IN;
+        }
+      break;
+
+    case PIZZA_IN:
+      dc->anim_ratio += 0.1 * dc->speed;
+      if (dc->anim_ratio >= 1.0)
+        {
+          dc->anim_ratio = 0.0;
+          dc->anim_state = PIZZA;
+        }
+      break;
+
+    case PIZZA:
+      if (dc->mode == BOTH &&
+          (random() % (int) (PROBABILITY_SCALE / 0.2)) == 0)
+        dc->anim_state = PIZZA_OUT;
+      break;
+
+    case PIZZA_OUT:
+      dc->anim_ratio += 0.1 * dc->speed;
+      if (dc->anim_ratio >= 1.0)
+        {
+          dc->anim_ratio = 0.0;
+          dc->anim_state = HELIX_IN;
+        }
+      break;
+
+    case HELIX_IN:
+      dc->anim_ratio += 0.1 * dc->speed;
+      if (dc->anim_ratio >= 1.0)
+        {
+          dc->anim_ratio = 0.0;
+          dc->anim_state = HELIX;
+        }
+      break;
+
+    default:
+      abort();
+      break;
+    }
+
+  pizza_p = (dc->anim_state == PIZZA ||
+             dc->anim_state == PIZZA_IN ||
+             dc->anim_state == PIZZA_OUT);
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glPushMatrix ();
   {
+    GLfloat scale = 0;
     glScalef(3, 3, 3);
 
     glColor3f(dc->color[0], dc->color[1], dc->color[2]);
@@ -1406,7 +2242,7 @@ draw_logo (ModeInfo *mi)
                    ? dc->frame_spinner.position
                    : -dc->frame_spinner.position);
       GLfloat size = (p > 0.5 ? 1-p : p);
-      GLfloat scale = 1 + (size * 10);
+      scale = 1 + (size * 10);
       glPushMatrix();
       /* gltrackball_rotate (dc->trackball); */
       glRotatef(90, 1, 0, 0);
@@ -1480,24 +2316,55 @@ draw_logo (ModeInfo *mi)
     }
     glPopMatrix();
 
-    glRotatef (360 * sin (M_PI/2 * dc->helix_spinnerz.position), 0, 0, 1);
+    if (pizza_p)
+      {
+        glRotatef (360 * sin (M_PI/2 * dc->pizza_spinnery.position), 1, 0, 0);
+        glRotatef (360 * sin (M_PI/2 * dc->pizza_spinnerz.position), 0, 0, 1);
+      }
+    else
+      {
+        glRotatef (360 * sin (M_PI/2 * dc->helix_spinnerz.position), 0, 0, 1);
+      }
+
+    scale = ((dc->anim_state == PIZZA_IN || dc->anim_state == HELIX_IN)
+             ? dc->anim_ratio
+             : ((dc->anim_state == PIZZA_OUT || dc->anim_state == HELIX_OUT)
+                ? 1.0 - dc->anim_ratio
+                : 1.0));
+    if (scale <= 0) scale = 0.001;
+    glScalef (scale, scale, scale);
 
     if (wire)
       {
-        glCallList (dc->helix_list_wire);
+        if (pizza_p)
+          glCallList (dc->pizza_list_wire);
+        else
+          glCallList (dc->helix_list_wire);
         mi->polygon_count += dc->polys[1];
       }
     else if (dc->wire_overlay != 0)
       {
-        glCallList (dc->helix_list_facetted);
+        if (pizza_p)
+          glCallList (dc->pizza_list_facetted);
+        else
+          glCallList (dc->helix_list_facetted);
+
         glDisable (GL_LIGHTING);
-        glCallList (dc->helix_list_wire);
+
+        if (pizza_p)
+          glCallList (dc->pizza_list_wire);
+        else
+          glCallList (dc->helix_list_wire);
+
         mi->polygon_count += dc->polys[2];
         if (!wire) glEnable (GL_LIGHTING);
       }
     else
       {
-        glCallList (dc->helix_list);
+        if (pizza_p)
+          glCallList (dc->pizza_list);
+        else
+          glCallList (dc->helix_list);
         mi->polygon_count += dc->polys[0];
       }
   }

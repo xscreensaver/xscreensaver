@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1991-2008 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1991-2011 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -143,6 +143,11 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <X11/Xlib.h>
+
+#ifdef ENABLE_NLS
+# include <locale.h>
+# include <libintl.h>
+#endif /* ENABLE_NLS */
 
 #include <X11/Xlibint.h>
 
@@ -860,12 +865,14 @@ initialize_server_extensions (saver_info *si)
   Bool server_has_sgi_saver_extension_p = False;
   Bool server_has_mit_saver_extension_p = False;
   Bool system_has_proc_interrupts_p = False;
+  Bool server_has_xinput_extension_p = False;
   const char *piwhy = 0;
 
   si->using_xidle_extension = p->use_xidle_extension;
   si->using_sgi_saver_extension = p->use_sgi_saver_extension;
   si->using_mit_saver_extension = p->use_mit_saver_extension;
   si->using_proc_interrupts = p->use_proc_interrupts;
+  si->using_xinput_extension = p->use_xinput_extension;
 
 #ifdef HAVE_XIDLE_EXTENSION
   {
@@ -887,6 +894,10 @@ initialize_server_extensions (saver_info *si)
 #endif
 #ifdef HAVE_PROC_INTERRUPTS
   system_has_proc_interrupts_p = query_proc_interrupts_available (si, &piwhy);
+#endif
+
+#ifdef HAVE_XINPUT
+  server_has_xinput_extension_p = query_xinput_extension (si);
 #endif
 
   if (!server_has_xidle_extension_p)
@@ -931,6 +942,8 @@ initialize_server_extensions (saver_info *si)
       int nscreens = ScreenCount (si->dpy);  /* number of *real* screens */
       int i;
 
+      si->using_randr_extension = TRUE;
+
       if (p->verbose_p)
 	fprintf (stderr, "%s: selecting RANDR events\n", blurb());
       for (i = 0; i < nscreens; i++)
@@ -942,6 +955,28 @@ initialize_server_extensions (saver_info *si)
 #  endif /* !RRScreenChangeNotifyMask */
     }
 # endif /* HAVE_RANDR */
+
+#ifdef HAVE_XINPUT
+  if (!server_has_xinput_extension_p)
+    si->using_xinput_extension = False;
+  else
+    {
+      if (si->using_xinput_extension)
+        init_xinput_extension(si);
+
+      if (p->verbose_p)
+        {
+          if (si->using_xinput_extension)
+            fprintf (stderr,
+                     "%s: selecting events from %d XInputExtension devices.\n",
+                     blurb(), si->num_xinput_devices);
+          else
+            fprintf (stderr,
+                     "%s: not using XInputExtension.\n",
+                     blurb());
+        }
+    }
+#endif
 
   if (!system_has_proc_interrupts_p)
     {
@@ -1192,6 +1227,23 @@ main_loop (saver_info *si)
         for (i = 0; i < si->nscreens; i++)
           spawn_screenhack (&si->screens[i]);
 
+      /* If we are blanking only, optionally power down monitor right now.
+         To do this, we might need to temporarily re-enable DPMS first.
+       */
+      if (p->mode == BLANK_ONLY &&
+          p->dpms_enabled_p && 
+          p->dpms_quickoff_p)
+        {
+          sync_server_dpms_settings (si->dpy, True,
+                                     p->dpms_standby / 1000,
+                                     p->dpms_suspend / 1000,
+                                     (p->dpms_off
+                                      ? (p->dpms_off / 1000)
+                                      : 0xFFFF),
+                                     False);
+          monitor_power_on (si, False);
+        }
+
       /* Don't start the cycle timer in demo mode. */
       if (!si->demoing_p && p->cycle)
 	si->cycle_id = XtAppAddTimeOut (si->app,
@@ -1346,6 +1398,33 @@ main (int argc, char **argv)
   saver_preferences *p = &si->prefs;
   struct passwd *spasswd;
   int i;
+
+  /* It turns out that if we do setlocale (LC_ALL, "") here, people
+     running in Japanese locales get font craziness on the password
+     dialog, presumably because it is displaying Japanese characters
+     in a non-Japanese font.  However, if we don't call setlocale()
+     at all, then XLookupString() never returns multi-byte UTF-8
+     characters when people type non-Latin1 characters on the
+     keyboard.
+
+     The current theory (and at this point, I'm really guessing!) is
+     that using LC_CTYPE instead of LC_ALL will make XLookupString()
+     behave usefully, without having the side-effect of screwing up
+     the fonts on the unlock dialog.
+
+     See https://bugs.launchpad.net/ubuntu/+source/xscreensaver/+bug/671923
+     from comment #20 onward.
+
+       -- jwz, 24-Sep-2011
+   */
+#ifdef ENABLE_NLS
+  if (!setlocale (LC_CTYPE, ""))
+    fprintf (stderr, "%s: warning: could not set default locale\n",
+             progname);
+
+  bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
+  textdomain (GETTEXT_PACKAGE);
+#endif /* ENABLE_NLS */
 
   memset(si, 0, sizeof(*si));
   global_si_kludge = si;	/* I hate C so much... */
@@ -2132,6 +2211,8 @@ analyze_display (saver_info *si)
    }, { "NV-GLX",                               "NVidia GLX",
         True,  0
    }, { "Apple-DRI",                            "Apple-DRI (XDarwin)",
+        True,  0
+   }, { "XInputExtension",                      "XInput",
         True,  0
    },
   };

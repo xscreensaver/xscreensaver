@@ -419,8 +419,6 @@ init_flipflop(ModeInfo *mi)
     c->sheet = (randsheet*) malloc(sizeof(randsheet)); 
     randsheet_create( c->sheet ); 
 
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-
     clearbits = GL_COLOR_BUFFER_BIT;
 
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
@@ -729,12 +727,10 @@ randsheet_new_move( randsheet* rs )
 static void
 randsheet_move( randsheet *rs, float rot )
 {
-    int i, j, index;
+    int index;
     float tmp;
     for( index = 0 ; index < numsquares; index++ )
         {
-            i = rs->xpos[ index ];
-            j = rs->ypos[ index ];
             switch( rs->direction[ index ] )
                 {
                 case 0:

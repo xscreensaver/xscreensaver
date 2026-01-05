@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1992-2010 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1992-2011 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -545,6 +545,7 @@ struct pipe_closure {
   Screen *screen;
   Window xwindow;
   Drawable drawable;
+  char *directory;
   void (*callback) (Screen *, Window, Drawable,
                     const char *name, XRectangle *geom,
                     void *closure);
@@ -559,6 +560,8 @@ pipe_cb (XtPointer closure, int *source, XtInputId *id)
    */
   struct pipe_closure *clo2 = (struct pipe_closure *) closure;
   char buf[10240];
+  const char *dir = clo2->directory;
+  char *absfile = 0;
   fgets (buf, sizeof(buf)-1, clo2->pipe);
   pclose (clo2->pipe);
   clo2->pipe = 0;
@@ -573,8 +576,17 @@ pipe_cb (XtPointer closure, int *source, XtInputId *id)
   Display *dpy = DisplayOfScreen (clo2->screen);
   XRectangle geom;
 
+  if (*buf && *buf != '/')		/* pathname is relative to dir. */
+    {
+      absfile = malloc (strlen(dir) + strlen(buf) + 10);
+      strcpy (absfile, dir);
+      if (dir[strlen(dir)-1] != '/')
+        strcat (absfile, "/");
+      strcat (absfile, buf);
+    }
+
   if (! osx_load_image_file (clo2->screen, clo2->xwindow, clo2->drawable,
-                             buf, &geom)) {
+                             (absfile ? absfile : buf), &geom)) {
     /* unable to load image - draw colorbars 
      */
     XWindowAttributes xgwa;
@@ -582,13 +594,13 @@ pipe_cb (XtPointer closure, int *source, XtInputId *id)
     Window r;
     int x, y;
     unsigned int w, h, bbw, d;
-    struct stat *st;
+    struct stat st;
 
     /* Log something to syslog so we can tell the difference between
        corrupted images and broken symlinks. */
     if (!*buf)
       fprintf (stderr, "%s: no image filename found\n", progname);
-    else if (! stat (buf, st))
+    else if (! stat (buf, &st))
       fprintf (stderr, "%s: %s: unparsable\n", progname, buf);
     else
       {
@@ -605,9 +617,11 @@ pipe_cb (XtPointer closure, int *source, XtInputId *id)
     geom.height = h;
   }
 
+  if (absfile) free (absfile);
   clo2->callback (clo2->screen, clo2->xwindow, clo2->drawable, buf, &geom,
                   clo2->closure);
   clo2->callback = 0;
+  free (clo2->directory);
   free (clo2);
 }
 
@@ -645,6 +659,7 @@ osx_load_image_file_async (Screen *screen, Window xwindow, Drawable drawable,
 
   Display *dpy = DisplayOfScreen (screen);
   struct pipe_closure *clo2 = (struct pipe_closure *) calloc (1, sizeof(*clo2));
+  clo2->directory = strdup (dir);
   clo2->pipe = open_image_name_pipe (dir);
   clo2->id = XtAppAddInput (XtDisplayToApplicationContext (dpy), 
                             fileno (clo2->pipe),
@@ -730,11 +745,9 @@ load_random_image_1 (Screen *screen, Window window, Drawable drawable,
     done = True;
   }
 
-  if (! done) {
+  if (! done)
     draw_colorbars (screen, xgwa.visual, drawable, xgwa.colormap,
                     0, 0, xgwa.width, xgwa.height);
-    done = True;
-  }
 
   if (callback) {
     /* If we got here, we loaded synchronously even though they wanted async.

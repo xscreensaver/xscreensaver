@@ -1,13 +1,14 @@
-# XScreenSaver for MacOS X, Copyright (c) 2006 by Jamie Zawinski.
+# XScreenSaver for MacOS X, Copyright (c) 2006-2011 by Jamie Zawinski.
 
 XCODE_TARGET = "All Savers"
+XCODEBUILD=/Developer/usr/bin/xcodebuild
 
 default: release
 all: debug release
 
 clean:
 	-rm -rf build
-#	cd ..; xcodebuild -target $(XCODE_TARGET) clean
+#	cd ..; $(XCODEBUILD) -target $(XCODE_TARGET) clean
 
 distclean:
 	-rm -f config.status config.cache config.log \
@@ -18,17 +19,17 @@ distclean:
 distdepend:: update_plist_version
 
 debug: distdepend
-	cd ..; xcodebuild -target $(XCODE_TARGET) -configuration Debug   build
+	cd ..; $(XCODEBUILD) -target $(XCODE_TARGET) -configuration Debug   build
 
 release:: distdepend
-	cd ..; xcodebuild -target $(XCODE_TARGET) -configuration Release build
+	cd ..; $(XCODEBUILD) -target $(XCODE_TARGET) -configuration Release build
 
 release:: check_versions
 
 release:: sign
 
 sign:
-	@for f in build/Release/*.saver ; do \
+	@for f in build/Release/*.{saver,app} ; do \
 	  codesign -vfs 'Jamie Zawinski' $$f ; \
 	 done
 
@@ -38,7 +39,7 @@ check_versions:
   V=`sed -n 's/[^0-9]*\([0-9]\.[0-9][^. ]*\).*/\1/p' $$SRC` ;		\
   DIR=build/Release ;							\
   RESULT=0 ;								\
-  for S in $$DIR/*.saver ; do						\
+  for S in $$DIR/*.{saver,app} ; do					\
    for P in $$S/Contents/Info.plist ; do				\
      V2=`perl -0000 -n -e						\
 	'm@<key>CFBundleVersion</key>\s*<string>(.*?)</string>@si 	\
@@ -67,7 +68,7 @@ update_plist_version:
   SRC=../utils/version.h ;						      \
   V=`sed -n 's/[^0-9]*\([0-9]\.[0-9][^. ]*\).*/\1/p' $$SRC` ;		      \
   T=/tmp/xs.$$$$ ;							      \
-  for S in XScreenSaver.plist SaverTester.plist ; do			      \
+  for S in XScreenSaver.plist SaverRunner.plist ; do			      \
     /bin/echo -n "Updating version number in $$S to \"$$V\"... " ;	      \
     KEYS="CFBundleVersion|CFBundleShortVersionString" ;			      \
     perl -0777 -pne							      \
@@ -90,6 +91,7 @@ dmg:: distdepend check_versions
   V=`sed -n 's/[^0-9]*\([0-9]\.[0-9][^. ]*\).*/\1/p' $$SRC` ;		      \
   TMPDIR="build" ;							      \
   SRC="build/Release" ;							      \
+  EXTRAS=../../xdaliclock/OSX/build/Release/*.saver ;			      \
   BASE="xscreensaver-$$V" ;						      \
   OUTDIR="../archive" ;							      \
   DMG="$$OUTDIR/$$BASE.dmg" ;						      \
@@ -106,9 +108,10 @@ dmg:: distdepend check_versions
       ../hacks/Makefile.in ;						      \
       perl -0 -ne							      \
      's/\\\\\\n//g; m/^RETIRED_GL_EXES\s*=\s*(.*)$$/m && print "$$1\n"'	      \
-      ../hacks/glx/Makefile.in` ;					      \
+      ../hacks/glx/Makefile.in ;					      \
+     echo savertester` ;						      \
 									      \
-  for f in $$SRC/*.saver ; do						      \
+  for f in $$SRC/*.{saver,app} $$EXTRAS ; do				      \
    ok=yes ;								      \
    ff=`echo $$f | perl -e '$$_=<>; s@^.*/(.*)\..*$$@\L$$1@; print'`;	      \
    for r in $$retired ; do						      \
@@ -127,6 +130,7 @@ dmg:: distdepend check_versions
   cp -p XScreenSaverDMG.icns "$$STAGE/.VolumeIcon.icns" ;		      \
   /Developer/Tools/SetFile -a C "$$STAGE" ;				      \
   /Developer/Tools/SetFile -a E "$$STAGE/ READ ME.rtf" ;		      \
+  seticon -d ../../xdaliclock/OSX/daliclockSaver.icns $$STAGE/DaliClock.saver;\
   hdiutil makehybrid -quiet -ov -hfs -hfs-volume-name "$$VOLNAME"	      \
     -hfs-openfolder "$$STAGE" "$$STAGE" -o "$$TMPDMG" ;			      \
   rm -rf "$$STAGE" ;							      \

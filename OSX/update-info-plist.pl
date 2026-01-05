@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Copyright © 2006-2009 Jamie Zawinski <jwz@jwz.org>
+# Copyright © 2006-2011 Jamie Zawinski <jwz@jwz.org>
 #
 # Permission to use, copy, modify, distribute, and sell this software and its
 # documentation for any purpose is hereby granted without fee, provided that
@@ -23,7 +23,10 @@ require 5;
 use strict;
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my $version = q{ $Revision: 1.13 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
+my $version = q{ $Revision: 1.17 $ }; $version =~ s/^[^0-9]+([0-9.]+).*$/$1/;
+
+$ENV{PATH} = "/usr/local/bin:$ENV{PATH}";   # for seticon
+
 
 my $verbose = 1;
 
@@ -31,11 +34,10 @@ sub read_info_plist($) {
   my ($app_dir) = @_;
   my $file = "$app_dir/Contents/Info.plist";
   $file =~ s@/+@/@g;
-  local *IN;
-  my $body = '';
-  error ("$file: $!") unless open (IN, "<$file");
-  while (<IN>) { $body .= $_; }
-  close IN;
+  open (my $in, '<', $file) || error ("$file: $!");
+  local $/ = undef;  # read entire file
+  my $body = <$in>;
+  close $in;
   return ($file, $body);
 }
 
@@ -44,14 +46,18 @@ sub read_saver_xml($) {
   my ($app_dir) = @_;
   error ("$app_dir: no name") 
     unless ($app_dir =~ m@/([^/.]+).(app|saver)/?$@x);
-  my $name = lc($1);
-  my $file = "$app_dir/Contents/Resources/$name.xml";
+  my $name  = $1;
+  my $file  = "$app_dir/Contents/Resources/" . lc($name) . ".xml";
+  my $file2 = "$app_dir/Contents/PlugIns/$name.saver/Contents/Resources/" .
+              lc($name) . ".xml";
   $file =~ s@/+@/@g;
-  local *IN;
-  my $body = '';
-  error ("$file: $!") unless open (IN, "<$file");
-  while (<IN>) { $body .= $_; }
-  close IN;
+  my $in;
+  open ($in, '<', $file) || 
+  open ($in, '<', $file2) || 
+    error ("$file: $!");
+  local $/ = undef;  # read entire file
+  my $body = <$in>;
+  close $in;
   return ($file, $body);
 }
 
@@ -188,7 +194,8 @@ sub set_icon($) {
 
   # "seticon" is from osxutils, http://osxutils.sourceforge.net/
 
-  my $icon = "$app_dir/../../../XScreenSaver.icns";
+  my $icon = ($app_dir =~ m/\.saver$/ ? 'XScreenSaver' : 'SaverRunner');
+  $icon = "$app_dir/../../../$icon.icns";
   my @cmd = ("seticon", "-d", $icon, $app_dir);
   print STDERR "$progname: exec: " . join(' ', @cmd) . "\n"
     if ($verbose > 1);
@@ -260,13 +267,14 @@ sub usage() {
 }
 
 sub main() {
+
   my @files = ();
-  while ($#ARGV >= 0) {
-    $_ = shift @ARGV;
-    if ($_ eq "--verbose") { $verbose++; }
-    elsif (m/^-v+$/) { $verbose += length($_)-1; }
-    elsif (m/^-./) { usage; }
-    else { push @files, $_; }
+  while ($_ = $ARGV[0]) {
+    shift @ARGV;
+    if    (m/^--?verbose$/s)  { $verbose++; }
+    elsif (m/^-v+$/)          { $verbose += length($_)-1; }
+    elsif (m/^--?q(uiet)?$/s) { $verbose = 0; }
+    else                      { push @files, $_; }
   }
   usage() unless ($#files >= 0);
   foreach (@files) {

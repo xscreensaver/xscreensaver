@@ -1,5 +1,5 @@
 /* xlockmore.c --- xscreensaver compatibility layer for xlockmore modules.
- * xscreensaver, Copyright (c) 1997-2008 Jamie Zawinski <jwz@jwz.org>
+ * xscreensaver, Copyright (c) 1997-2011 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -282,7 +282,6 @@ xlockmore_init (Display *dpy, Window window,
   XGCValues gcv;
   XColor color;
   int i;
-  int orig_pause;
   Bool root_p;
 
   if (! xlmft)
@@ -444,12 +443,12 @@ xlockmore_init (Display *dpy, Window window,
   mi->use_shm = get_boolean_resource (dpy, "useSHM", "Boolean");
 #endif /* !HAVE_XSHM_EXTENSION */
   mi->fps_p = get_boolean_resource (dpy, "doFPS", "DoFPS");
+  mi->recursion_depth = -1;  /* see fps.c */
 
   if (mi->pause < 0)
     mi->pause = 0;
   else if (mi->pause > 100000000)
     mi->pause = 100000000;
-  orig_pause = mi->pause;
 
   /* If this hack uses fonts (meaning, mentioned "font" in DEFAULTS)
      then load it. */
@@ -524,6 +523,15 @@ xlockmore_event (Display *dpy, Window window, void *closure, XEvent *event)
   else
     return False;
 }
+
+void
+xlockmore_do_fps (Display *dpy, Window w, fps_state *fpst, void *closure)
+{
+  ModeInfo *mi = (ModeInfo *) closure;
+  fps_compute (fpst, 0, mi ? mi->recursion_depth : -1);
+  fps_draw (fpst);
+}
+
 
 static void
 xlockmore_free (Display *dpy, Window window, void *closure)

@@ -216,7 +216,6 @@ ENTRYPOINT void init_blocktube (ModeInfo *mi)
         fprintf(stderr, "%s: out of memory\n", progname);
         exit(1);
       }
-      lp = &lps[MI_SCREEN(mi)];
     }
 
     lp = &lps[MI_SCREEN(mi)];
@@ -261,7 +260,6 @@ ENTRYPOINT void init_blocktube (ModeInfo *mi)
     glShadeModel(GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClearDepth(1.0f);
 
     if (!do_texture && !wire) {

@@ -850,8 +850,6 @@ init_tentacles (ModeInfo *mi)
       fprintf(stderr, "%s: out of memory\n", progname);
       exit(1);
     }
-
-    tc = &tcs[MI_SCREEN(mi)];
   }
 
   tc = &tcs[MI_SCREEN(mi)];
@@ -964,7 +962,7 @@ init_tentacles (ModeInfo *mi)
     glEnable (GL_BLEND);
 
     /* Dark gray instead of black, so the outlines show up */
-    glClearColor (0.08, 0.08, 0.08, 1.0);
+    glClearColor (0.13, 0.13, 0.13, 1.0);
   }
 
   compute_unit_torus (mi, 0.5, 

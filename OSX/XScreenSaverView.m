@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2006-2010 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 2006-2011 Jamie Zawinski <jwz@jwz.org>
 *
 * Permission to use, copy, modify, distribute, and sell this software and its
 * documentation for any purpose is hereby granted without fee, provided that
@@ -64,6 +64,7 @@ int mono_p = 0;
   
   void *addr = CFBundleGetDataPointerForName (cfb, (CFStringRef) table_name);
   NSAssert2 (addr, @"no symbol \"%@\" in bundle %@", table_name, path);
+  CFRelease (cfb);
 
 //  NSLog (@"%@ = 0x%08X", table_name, (unsigned long) addr);
   return (struct xscreensaver_function_table *) addr;
@@ -133,6 +134,7 @@ add_default_options (const XrmOptionDescRec *opts,
     { "-text-literal",           ".textLiteral",       XrmoptionSepArg, 0 },
     { "-text-file",              ".textFile",          XrmoptionSepArg, 0 },
     { "-text-url",               ".textURL",           XrmoptionSepArg, 0 },
+    { "-text-program",           ".textProgram",       XrmoptionSepArg, 0 },
     { "-grab-desktop",           ".grabDesktopImages", XrmoptionNoArg, "True" },
     { "-no-grab-desktop",        ".grabDesktopImages", XrmoptionNoArg, "False"},
     { "-choose-random-images",   ".chooseRandomImages",XrmoptionNoArg, "True" },
@@ -144,11 +146,13 @@ add_default_options (const XrmOptionDescRec *opts,
   };
   static const char *default_defaults [] = {
     ".doFPS:              False",
-    ".doubleBuffer:       True",  // for most OpenGL hacks
+    ".doubleBuffer:       True",
+    ".multiSample:        False",
     ".textMode:           date",
  // ".textLiteral:        ",
  // ".textFile:           ",
- // ".textURL:            ",
+    ".textURL:            http://twitter.com/statuses/public_timeline.atom",
+ // ".textProgram:        ",
     ".grabDesktopImages:  yes",
     ".chooseRandomImages: no",
     ".imageDirectory:     ~/Pictures",
@@ -313,7 +317,7 @@ add_default_options (const XrmOptionDescRec *opts,
 static void
 screenhack_do_fps (Display *dpy, Window w, fps_state *fpst, void *closure)
 {
-  fps_compute (fpst, 0);
+  fps_compute (fpst, 0, -1);
   fps_draw (fpst);
 }
 
@@ -534,6 +538,12 @@ screenhack_do_fps (Display *dpy, Window w, fps_state *fpst, void *closure)
   [sheet retain];
 
   return sheet;
+}
+
+
+- (NSUserDefaultsController *) userDefaultsController
+{
+  return [prefsReader userDefaultsController];
 }
 
 

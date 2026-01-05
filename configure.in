@@ -37,28 +37,32 @@ AH_TEMPLATE([HAVE_XHPDISABLERESET],
 	    thing which allows the Ctrl-Sh-Reset key sequence to be
 	    temporarily disabled.)])
 
-AH_TEMPLATE([HAVE_XIDLE_EXTENSION],
-	    [Define this if you have the XIDLE extension installed. If you
-	    have the XIDLE extension, this is recommended.  (You have this
-	    extension if the file /usr/include/X11/extensions/xidle.h
-	    exists.) Turning on this flag lets XScreenSaver work better with
-	    servers which support this extension; but it will still work
-	    with servers which do not suport it, so it's a good idea to
-	    compile in support for it if you can.])
+# This only ever existed in X11R4 and X11R5.
+#AH_TEMPLATE([HAVE_XIDLE_EXTENSION],
+#	    [Define this if you have the XIDLE extension installed. If you
+#	    have the XIDLE extension, this is recommended.  (You have this
+#	    extension if the file /usr/include/X11/extensions/xidle.h
+#	    exists.) Turning on this flag lets XScreenSaver work better with
+#	    servers which support this extension; but it will still work
+#	    with servers which do not suport it, so it's a good idea to
+#	    compile in support for it if you can.])
 
-AH_TEMPLATE([HAVE_MIT_SAVER_EXTENSION],
-	    [Define this if you have the MIT-SCREEN-SAVER extension
-            installed.  See the caveats about this extension, above.
-            (It's available if /usr/include/X11/extensions/scrnsaver.h
-            exists.)])
+# Using this extension will crash your X server and make fading not work.
+#AH_TEMPLATE([HAVE_MIT_SAVER_EXTENSION],
+#	    [Define this if you have the MIT-SCREEN-SAVER extension
+#            installed.  See the caveats about this extension, above.
+#            (It's available if /usr/include/X11/extensions/scrnsaver.h
+#            exists.)])
 
-AH_TEMPLATE([HAVE_SGI_SAVER_EXTENSION],
-	    [Define this if you have the SGI SCREEN_SAVER extension.  This is
-	    standard on Irix systems, and not available elsewhere.])
+# This only ever existed on SGI hardware.
+#AH_TEMPLATE([HAVE_SGI_SAVER_EXTENSION],
+#	    [Define this if you have the SGI SCREEN_SAVER extension.  This is
+#	    standard on Irix systems, and not available elsewhere.])
 
-AH_TEMPLATE([HAVE_SGI_VC_EXTENSION],
-	    [Define this if you have the SGI-VIDEO-CONTROL extension.  This
-	    is standard on Irix systems, and not available elsewhere.])
+# This only ever existed on SGI hardware.
+#AH_TEMPLATE([HAVE_SGI_VC_EXTENSION],
+#	    [Define this if you have the SGI-VIDEO-CONTROL extension.  This
+#	    is standard on Irix systems, and not available elsewhere.])
 
 AH_TEMPLATE([HAVE_DPMS_EXTENSION],
 	    [Define this if you have the XDPMS extension.  This is standard
@@ -93,6 +97,12 @@ AH_TEMPLATE([HAVE_XINERAMA],
 	    standard on sufficiently-recent XFree86 systems, and possibly
 	    elsewhere.  (It's available if the file
 	    /usr/include/X11/extensions/Xinerama.h exists.)])
+
+AH_TEMPLATE([HAVE_XINPUT],
+	    [Define this if you have the Xinput extension.  This is
+	    standard since X11R5, and is thus almost everywhere.
+	    (It's available if the file /usr/include/X11/extensions/XInput.h
+	    exists.)])
 
 AH_TEMPLATE([HAVE_XF86MISCSETGRABKEYSSTATE],
 	    [Define this if you have the XF86MiscSetGrabKeysState function
@@ -1310,7 +1320,7 @@ fi
 ###############################################################################
 #
 #       Handle the --with-configdir option
-#       Help for --with-x-app-defaults option added..
+#       Help for --with-x-app-defaults option added.
 #
 ###############################################################################
 
@@ -1351,37 +1361,37 @@ fi
 #
 ###############################################################################
 
-have_sgi=no
-with_sgi_req=unspecified
-AC_ARG_WITH(sgi-ext,
-[Except where noted, all of the --with options below can also take a
-directory argument: for example, `--with-motif=/opt/Motif'.  That would
-cause /opt/Motif/include/ to be added to the -I list, and /opt/Motif/lib/
-to be added to the -L list, assuming those directories exist.  
-
-By default, support for each of these options will be built in, if the
-relevant library routines exist.  At run time, they will then be used
-only if the X server being used supports them.  Each --with option has
-a corresponding --without option, to override building support for them
-at all.
-
-Screen blanking and idle-detection options:
-
-  --with-sgi-ext          Include support for the SGI SCREEN_SAVER extension.],
-  [with_sgi="$withval"; with_sgi_req="$withval"],[with_sgi=yes])
-
-HANDLE_X_PATH_ARG(with_sgi, --with-sgi-ext, SGI SCREEN_SAVER)
-
-if test "$with_sgi" = yes; then
-  AC_CHECK_X_HEADER(X11/extensions/XScreenSaver.h,
-                    [have_sgi=yes
-                     AC_DEFINE(HAVE_SGI_SAVER_EXTENSION)],,
-                    [#include <X11/Xlib.h>])
-
-elif test "$with_sgi" != no; then
-  echo "error: must be yes or no: --with-sgi-ext=$with_sgi"
-  exit 1
-fi
+#have_sgi=no
+#with_sgi_req=unspecified
+#AC_ARG_WITH(sgi-ext,
+#[Except where noted, all of the --with options below can also take a
+#directory argument: for example, `--with-motif=/opt/Motif'.  That would
+#cause /opt/Motif/include/ to be added to the -I list, and /opt/Motif/lib/
+#to be added to the -L list, assuming those directories exist.  
+#
+#By default, support for each of these options will be built in, if the
+#relevant library routines exist.  At run time, they will then be used
+#only if the X server being used supports them.  Each --with option has
+#a corresponding --without option, to override building support for them
+#at all.
+#
+#Screen blanking and idle-detection options:
+#
+#  --with-sgi-ext          Include support for the SGI SCREEN_SAVER extension.],
+#  [with_sgi="$withval"; with_sgi_req="$withval"],[with_sgi=yes])
+#
+#HANDLE_X_PATH_ARG(with_sgi, --with-sgi-ext, SGI SCREEN_SAVER)
+#
+#if test "$with_sgi" = yes; then
+#  AC_CHECK_X_HEADER(X11/extensions/XScreenSaver.h,
+#                    [have_sgi=yes
+#                     AC_DEFINE(HAVE_SGI_SAVER_EXTENSION)],,
+#                    [#include <X11/Xlib.h>])
+#
+#elif test "$with_sgi" != no; then
+#  echo "error: must be yes or no: --with-sgi-ext=$with_sgi"
+#  exit 1
+#fi
 
 
 ###############################################################################
@@ -1390,23 +1400,23 @@ fi
 #
 ###############################################################################
 
-have_xidle=no
-with_xidle_req=unspecified
-AC_ARG_WITH(xidle-ext,
-[  --with-xidle-ext        Include support for the XIDLE extension.],
-  [with_xidle="$withval"; with_xidle_req="$withval"],[with_xidle=yes])
-
-HANDLE_X_PATH_ARG(with_xidle, --with-xidle-ext, XIDLE)
-
-if test "$with_xidle" = yes; then
-  AC_CHECK_X_HEADER(X11/extensions/xidle.h,
-                    [have_xidle=yes
-                     AC_DEFINE(HAVE_XIDLE_EXTENSION)],,
-                    [#include <X11/Xlib.h>])
-elif test "$with_xidle" != no; then
-  echo "error: must be yes or no: --with-xidle-ext=$with_xidle"
-  exit 1
-fi
+#have_xidle=no
+#with_xidle_req=unspecified
+#AC_ARG_WITH(xidle-ext,
+#[  --with-xidle-ext        Include support for the XIDLE extension.],
+#  [with_xidle="$withval"; with_xidle_req="$withval"],[with_xidle=yes])
+#
+#HANDLE_X_PATH_ARG(with_xidle, --with-xidle-ext, XIDLE)
+#
+#if test "$with_xidle" = yes; then
+#  AC_CHECK_X_HEADER(X11/extensions/xidle.h,
+#                    [have_xidle=yes
+#                     AC_DEFINE(HAVE_XIDLE_EXTENSION)],,
+#                    [#include <X11/Xlib.h>])
+#elif test "$with_xidle" != no; then
+#  echo "error: must be yes or no: --with-xidle-ext=$with_xidle"
+#  exit 1
+#fi
 
 
 ###############################################################################
@@ -1415,37 +1425,37 @@ fi
 #
 ###############################################################################
 
-have_sgivc=no
-with_sgivc_req=unspecified
-AC_ARG_WITH(sgivc-ext,
-[  --with-sgivc-ext        Include support for the SGI-VIDEO-CONTROL extension.],
-  [with_sgivc="$withval"; with_sgivc_req="$withval"],[with_sgivc=yes])
-
-HANDLE_X_PATH_ARG(with_sgivc, --with-sgivc-ext, SGI-VIDEO-CONTROL)
-
-if test "$with_sgivc" = yes; then
-
-  # first check for XSGIvc.h
-  AC_CHECK_X_HEADER(X11/extensions/XSGIvc.h, [have_sgivc=yes],,
-                    [#include <X11/Xlib.h>])
-
-  # if that succeeded, then check for the -lXsgivc
-  if test "$have_sgivc" = yes; then
-    have_sgivc=no
-    AC_CHECK_X_LIB(Xsgivc, XSGIvcQueryGammaMap,
-                  [have_sgivc=yes; SAVER_LIBS="$SAVER_LIBS -lXsgivc"], [true],
-                  -lXext -lX11)
-  fi
-
-  # if that succeeded, then we've really got it.
-  if test "$have_sgivc" = yes; then
-    AC_DEFINE(HAVE_SGI_VC_EXTENSION)
-  fi
-
-elif test "$with_sgivc" != no; then
-  echo "error: must be yes or no: --with-sgivc-ext=$with_sgivc"
-  exit 1
-fi
+#have_sgivc=no
+#with_sgivc_req=unspecified
+#AC_ARG_WITH(sgivc-ext,
+#[  --with-sgivc-ext        Include support for the SGI-VIDEO-CONTROL extension.],
+#  [with_sgivc="$withval"; with_sgivc_req="$withval"],[with_sgivc=yes])
+#
+#HANDLE_X_PATH_ARG(with_sgivc, --with-sgivc-ext, SGI-VIDEO-CONTROL)
+#
+#if test "$with_sgivc" = yes; then
+#
+#  # first check for XSGIvc.h
+#  AC_CHECK_X_HEADER(X11/extensions/XSGIvc.h, [have_sgivc=yes],,
+#                    [#include <X11/Xlib.h>])
+#
+#  # if that succeeded, then check for the -lXsgivc
+#  if test "$have_sgivc" = yes; then
+#    have_sgivc=no
+#    AC_CHECK_X_LIB(Xsgivc, XSGIvcQueryGammaMap,
+#                  [have_sgivc=yes; SAVER_LIBS="$SAVER_LIBS -lXsgivc"], [true],
+#                  -lXext -lX11)
+#  fi
+#
+#  # if that succeeded, then we've really got it.
+#  if test "$have_sgivc" = yes; then
+#    AC_DEFINE(HAVE_SGI_VC_EXTENSION)
+#  fi
+#
+#elif test "$with_sgivc" != no; then
+#  echo "error: must be yes or no: --with-sgivc-ext=$with_sgivc"
+#  exit 1
+#fi
 
 
 ###############################################################################
@@ -1539,6 +1549,45 @@ if test "$with_xinerama" = yes; then
 
 elif test "$with_xinerama" != no; then
   echo "error: must be yes or no: --with-xinerama-ext=$with_xinerama"
+  exit 1
+fi
+
+
+###############################################################################
+#
+#       Check for the XINPUT server extension.
+#
+###############################################################################
+
+have_xinput=no
+with_xinput_req=unspecified
+AC_ARG_WITH(xinput-ext,
+[  --with-xinput-ext       Include support for the XInput extension.],
+  [with_xinput="$withval"; with_xinput_req="$withval"], [with_xinput=yes])
+
+HANDLE_X_PATH_ARG(with_xinput, --with-xinput-ext, XINPUT)
+
+if test "$with_xinput" = yes; then
+
+  # first check for Xinput.h
+  AC_CHECK_X_HEADER(X11/extensions/XInput.h, [have_xinput=yes],,
+                    [#include <X11/Xlib.h>])
+
+  # if that succeeded, then check for libXi
+  if test "$have_xinput" = yes; then
+    have_xinput=no
+    AC_CHECK_X_LIB(Xi, XListInputDevices,
+                   [have_xinput=yes; SAVER_LIBS="$SAVER_LIBS -lXi"],
+                   [true], -lXext -lX11)
+  fi
+
+  # if that succeeded, then we've really got it.
+  if test "$have_xinput" = yes; then
+    AC_DEFINE(HAVE_XINPUT)
+  fi
+
+elif test "$with_xinput" != no; then
+  echo "error: must be yes or no: --with-xinput-ext=$with_xinput"
   exit 1
 fi
 
@@ -1871,8 +1920,8 @@ AC_ARG_WITH(pam,
   [with_pam="$withval"; with_pam_req="$withval"],[with_pam=$with_pam_default])
 
 AC_ARG_WITH([pam_service_name],
-	    AC_HELP_STRING([--with-pam-service-name=NAME],
-	    		   [NAME is the name of the PAM service that
+	    AC_HELP_STRING([--with-pam-service-name],
+	    		   [NAME arg is the name of the PAM service that
 	    		   xscreensaver will authenticate as.]),
 	    [pam_service_name="$withval"],[pam_service_name="xscreensaver"])
 
@@ -2297,15 +2346,15 @@ esac
 #
 ###############################################################################
 
-have_login_manager=no
 with_login_manager_req=unspecified
-default_login_manager='gdmflexiserver -ls'
+default_login_manager_1='gdmflexiserver -ls'
+default_login_manager_2='kdmctl reserve'
 
 AC_ARG_WITH(login-manager,
 [  --with-login-manager    Put a "New Login" button on the unlock dialog that
-                          runs a login manager such as gdmflexiserver.],
+                          runs a login manager like gdmflexiserver or kdmctl.],
   [with_login_manager="$withval"; with_login_manager_req="$withval"],
-  [with_login_manager=no])
+  [with_login_manager=yes])
 # no HANDLE_X_PATH_ARG for this one
 
 if test "$enable_locking" = no ; then
@@ -2313,55 +2362,68 @@ if test "$enable_locking" = no ; then
   with_login_manager=no
 fi
 
-if test -n "$with_login_manager_req" ; then
-  ac_cv_login_manager_program=""
+case "$with_login_manager_req" in
+  no)
+    with_login_manager=""
+  ;;
 
- if test "$with_login_manager_req" = "yes" ; then
-   with_login_manager_req=$default_login_manager
- fi
+  yes|unspecified)
+    # Try both defaults, use the one that exists.
 
-  case "$with_login_manager_req" in
-    no)
-      with_login_manager=""
-    ;;
-    /*)
-      # absolute path
-      set dummy $with_login_manager_req ; login_manager_tmp=$2
-      AC_MSG_CHECKING([for $login_manager_tmp])
-      if test -x "$login_manager_tmp" ; then
-        AC_MSG_RESULT(yes)
-      else
-        AC_MSG_RESULT(no)
-        with_login_manager=""
-      fi
-    ;;
-    *)
-      # relative path
-      set dummy $with_login_manager_req ; login_manager_tmp=$2
-      # don't cache
-      unset ac_cv_path_login_manager_tmp
+    set dummy $default_login_manager_1 ; login_manager_tmp=$2
+    unset ac_cv_path_login_manager_tmp  # don't cache
+    AC_PATH_PROG(login_manager_tmp, $login_manager_tmp, [])
+    if test ! -z "$login_manager_tmp" ; then
+      with_login_manager="$default_login_manager_1"
+    else
+      set dummy $default_login_manager_2 ; login_manager_tmp=$2
+      unset ac_cv_path_login_manager_tmp  # don't cache
       AC_PATH_PROG(login_manager_tmp, $login_manager_tmp, [])
-      if test -z "$login_manager_tmp" ; then
-        with_login_manager=""
+      if test ! -z "$login_manager_tmp" ; then
+        with_login_manager="$default_login_manager_2"
       else
-        with_login_manager="$login_manager_tmp"
+        with_login_manager=""
       fi
-    ;;
-  esac
-  ac_cv_login_manager_program="$with_login_manager"
+    fi
+  ;;
 
-elif test -n "$ac_cv_login_manager_program"; then
-  AC_MSG_RESULT([checking for login_manager... (cached) $ac_cv_login_manager_program])
-fi
+  /*)
+    # absolute path specified on cmd line
+    set dummy $with_login_manager_req ; login_manager_tmp=$2
+    AC_MSG_CHECKING([for $login_manager_tmp])
+    if test -x "$login_manager_tmp" ; then
+      AC_MSG_RESULT(yes)
+    else
+      AC_MSG_RESULT(no)
+      with_login_manager=""
+    fi
+  ;;
+
+  *)
+    # relative path specified on cmd line
+    set dummy $with_login_manager_req ; login_manager_tmp=$2
+    unset ac_cv_path_login_manager_tmp    # don't cache
+    AC_PATH_PROG(login_manager_tmp, $login_manager_tmp, [])
+    if test -z "$login_manager_tmp" ; then
+      with_login_manager=""
+    else
+      with_login_manager="$login_manager_tmp"
+    fi
+  ;;
+esac
+ac_cv_login_manager_program="$with_login_manager"
 
 NEW_LOGIN_COMMAND_P=''
 NEW_LOGIN_COMMAND="$ac_cv_login_manager_program"
 
+AC_MSG_CHECKING(for login manager)
 if test -z "$NEW_LOGIN_COMMAND" ; then
-  NEW_LOGIN_COMMAND="$default_login_manager"
+  NEW_LOGIN_COMMAND="$default_login_manager_1"
   NEW_LOGIN_COMMAND_P='! '
+  AC_MSG_RESULT($NEW_LOGIN_COMMAND (disabled))
+else
+  AC_MSG_RESULT($NEW_LOGIN_COMMAND)
 fi
-
 
 
 ###############################################################################
@@ -2529,7 +2591,7 @@ fi
 have_motif=no
 with_motif_req=unspecified
 AC_ARG_WITH(motif,[  --with-motif            Use the Motif toolkit for the user interface
-                          (not recommended.)],
+                          (no longer supported.)],
   [with_motif="$withval"; with_motif_req="$withval"],[with_motif=no])
 
 HANDLE_X_PATH_ARG(with_motif, --with-motif, Motif)
@@ -2767,6 +2829,15 @@ if test "$with_gl" = yes; then
       AC_MSG_RESULT(adding "$osx_crud" to GL_LIBS)
       GL_LIBS="$GL_LIBS $osx_crud"
       unset osx_crud
+
+      # New lossage in 10.6.8: we can't allow -L/opt/local/lib to be in the
+      # link line, or at runtime XQueryExtension gets a segv due to some kind
+      # of library version skew.  Libs must come from /usr/X11/lib even if
+      # $prefix and/or $exec_prefix are set to /opt/local/.
+      #
+      AC_MSG_RESULT(omitting "$libdir" from LDFLAGS)
+      libdir=''
+
     fi
 
 
@@ -3350,8 +3421,8 @@ have_imagedir=no
 with_imagedir_req=unspecified
 
 AC_ARG_WITH(image-directory,
-[  --with-image-directory=DIR  By default, some demos may display random images
-                          from this directory.],
+[  --with-image-directory  Arg is the default directory from which some demos
+                          will choose random images to display.],
   [with_imagedir="$withval"; with_imagedir_req="$withval"],
   [with_imagedir=yes])
 # no HANDLE_X_PATH_ARG for this one
@@ -3444,10 +3515,13 @@ case "$with_textfile" in
       "/usr/share/doc/xserver-common/copyright"	   \
       "/usr/share/doc/xserver-xorg-core/copyright" \
       "/usr/X11R6/README"			   \
+      "/usr/share/doc/libX11*/COPYING"		   \
+      "/usr/X11/share/X11/doc/README*"		   \
       "/usr/share/doc/debian/debian-manifesto"     \
     ; do
       if test -z "$with_textfile"; then
         AC_MSG_CHECKING([for text file $f])
+	f=`/bin/ls $f 2>&- | head -1`
         if test -f "$f" ; then
           AC_MSG_RESULT(yes)
           with_textfile="$f"
@@ -3482,7 +3556,7 @@ have_browser=no
 with_browser_req=unspecified
 
 AC_ARG_WITH(browser,
-[  --with-browser=BROWSER   Specify the browser to show help URL.],
+[  --with-browser=BROWSER  Specify the web browser used to show the help URL.],
   [with_browser="$withval"; with_browser_req="$withval"],
   [with_browser=no ])
 # no HANDLE_X_PATH_ARG for this one

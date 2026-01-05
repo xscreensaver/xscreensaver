@@ -48,6 +48,7 @@
 				AF77798F09B6604C00EA3033 /* PBXTargetDependency */,
 				AF77798D09B6604C00EA3033 /* PBXTargetDependency */,
 				AF77798B09B6604C00EA3033 /* PBXTargetDependency */,
+				AF2D4F8B13E91108002AA818 /* PBXTargetDependency */,
 				AF77798909B6604C00EA3033 /* PBXTargetDependency */,
 				AF77798709B6604B00EA3033 /* PBXTargetDependency */,
 				AF77798509B6604B00EA3033 /* PBXTargetDependency */,
@@ -99,6 +100,7 @@
 				AF77792109B6604800EA3033 /* PBXTargetDependency */,
 				AF77791F09B6604800EA3033 /* PBXTargetDependency */,
 				AF77791D09B6604800EA3033 /* PBXTargetDependency */,
+				AF2D4F8D13E9111D002AA818 /* PBXTargetDependency */,
 				AF77791B09B6604700EA3033 /* PBXTargetDependency */,
 				AF77791909B6604700EA3033 /* PBXTargetDependency */,
 				AF77791709B6604700EA3033 /* PBXTargetDependency */,
@@ -373,6 +375,22 @@
 		AF1A17810D6D6F62008AF328 /* lcdscrub.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF1A17800D6D6F62008AF328 /* lcdscrub.xml */; };
 		AF1A26760990E77C00147B80 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
 		AF241F83107C38DF00046A84 /* dropshadow.c in Sources */ = {isa = PBXBuildFile; fileRef = AF241F81107C38DF00046A84 /* dropshadow.c */; };
+		AF2D4D8413E902F5002AA818 /* SaverRunner.nib in Resources */ = {isa = PBXBuildFile; fileRef = AF9772E10989DFC6001F8B92 /* SaverRunner.nib */; };
+		AF2D4D8613E902F5002AA818 /* SaverRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = AFE1FD400981E32E00F7970E /* SaverRunner.m */; };
+		AF2D4D8713E902F5002AA818 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
+		AF2D4D8913E902F5002AA818 /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
+		AF2D4D8A13E902F5002AA818 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		AF2D4D8B13E902F5002AA818 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
+		AF2D4DBD13E90372002AA818 /* Phosphor.saver in Copy Plugins */ = {isa = PBXBuildFile; fileRef = AF7776F609B63ABF00EA3033 /* Phosphor.saver */; };
+		AF2D4F7113E91093002AA818 /* SaverRunner.nib in Resources */ = {isa = PBXBuildFile; fileRef = AF9772E10989DFC6001F8B92 /* SaverRunner.nib */; };
+		AF2D4F7513E91093002AA818 /* SaverRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = AFE1FD400981E32E00F7970E /* SaverRunner.m */; };
+		AF2D4F7613E91093002AA818 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
+		AF2D4F7813E91093002AA818 /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
+		AF2D4F7913E91093002AA818 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		AF2D4F7A13E91093002AA818 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
+		AF2D4FA913E9115E002AA818 /* Apple2.saver in Copy Plugins */ = {isa = PBXBuildFile; fileRef = AF9D4DFE09B5BB19006E59CF /* Apple2.saver */; };
+		AF2D522613E954A0002AA818 /* SaverRunner.icns in Resources */ = {isa = PBXBuildFile; fileRef = AF2D522513E954A0002AA818 /* SaverRunner.icns */; };
+		AF2D522713E954A0002AA818 /* SaverRunner.icns in Resources */ = {isa = PBXBuildFile; fileRef = AF2D522513E954A0002AA818 /* SaverRunner.icns */; };
 		AF32D9E70F3AD0B40080F535 /* XScreenSaverSubclass.m in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC7A0099580E70075E99B /* XScreenSaverSubclass.m */; };
 		AF32D9E90F3AD0B40080F535 /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
 		AF32D9EA0F3AD0B40080F535 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
@@ -382,10 +400,54 @@
 		AF32D9EE0F3AD0B40080F535 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF48112B0990A2C700FB32B8 /* Carbon.framework */; };
 		AF32D9FB0F3AD1200080F535 /* rubikblocks.c in Sources */ = {isa = PBXBuildFile; fileRef = AF32D9FA0F3AD1200080F535 /* rubikblocks.c */; };
 		AF32D9FD0F3AD1330080F535 /* rubikblocks.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF32D9FC0F3AD1330080F535 /* rubikblocks.xml */; };
+		AF3581C31431D47B00E09C51 /* voronoi.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF0DCA610C4CBB8E00D76972 /* voronoi.xml */; };
+		AF3581C41431D47B00E09C51 /* hilbert.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF78D18E142DD99A002AAF77 /* hilbert.xml */; };
+		AF3581C61431D47B00E09C51 /* XScreenSaverSubclass.m in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC7A0099580E70075E99B /* XScreenSaverSubclass.m */; };
+		AF3581C71431D47B00E09C51 /* voronoi.c in Sources */ = {isa = PBXBuildFile; fileRef = AF0DCA5F0C4CBB7300D76972 /* voronoi.c */; };
+		AF3581C81431D47B00E09C51 /* hilbert.c in Sources */ = {isa = PBXBuildFile; fileRef = AF78D18A142DD96E002AAF77 /* hilbert.c */; };
+		AF3581CA1431D47B00E09C51 /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
+		AF3581CB1431D47B00E09C51 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
+		AF3581CC1431D47B00E09C51 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		AF3581CD1431D47B00E09C51 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF480FE70990375900FB32B8 /* AGL.framework */; };
+		AF3581CE1431D47B00E09C51 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF480DF1098F528500FB32B8 /* OpenGL.framework */; };
+		AF3581CF1431D47B00E09C51 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF48112B0990A2C700FB32B8 /* Carbon.framework */; };
+		AF3581DA1431D5FC00E09C51 /* companion_disc.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D61431D5FC00E09C51 /* companion_disc.c */; };
+		AF3581DB1431D5FC00E09C51 /* companion_disc.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D61431D5FC00E09C51 /* companion_disc.c */; };
+		AF3581DC1431D5FC00E09C51 /* companion_disc.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D61431D5FC00E09C51 /* companion_disc.c */; };
+		AF3581DD1431D5FC00E09C51 /* companion_heart.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D71431D5FC00E09C51 /* companion_heart.c */; };
+		AF3581DE1431D5FC00E09C51 /* companion_heart.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D71431D5FC00E09C51 /* companion_heart.c */; };
+		AF3581DF1431D5FC00E09C51 /* companion_heart.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D71431D5FC00E09C51 /* companion_heart.c */; };
+		AF3581E01431D5FC00E09C51 /* companion_quad.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D81431D5FC00E09C51 /* companion_quad.c */; };
+		AF3581E11431D5FC00E09C51 /* companion_quad.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D81431D5FC00E09C51 /* companion_quad.c */; };
+		AF3581E21431D5FC00E09C51 /* companion_quad.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D81431D5FC00E09C51 /* companion_quad.c */; };
+		AF3581E31431D5FC00E09C51 /* companion.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D91431D5FC00E09C51 /* companion.c */; };
+		AF3581E41431D5FC00E09C51 /* companion.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D91431D5FC00E09C51 /* companion.c */; };
+		AF3581E51431D5FC00E09C51 /* companion.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D91431D5FC00E09C51 /* companion.c */; };
+		AF3581E71431D61D00E09C51 /* companioncube.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF3581E61431D61D00E09C51 /* companioncube.xml */; };
+		AF3581E81431D61D00E09C51 /* companioncube.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF3581E61431D61D00E09C51 /* companioncube.xml */; };
+		AF3581FF143330F900E09C51 /* voronoi.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF0DCA610C4CBB8E00D76972 /* voronoi.xml */; };
+		AF358200143330F900E09C51 /* hilbert.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF78D18E142DD99A002AAF77 /* hilbert.xml */; };
+		AF358201143330F900E09C51 /* companioncube.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF3581E61431D61D00E09C51 /* companioncube.xml */; };
+		AF358203143330F900E09C51 /* XScreenSaverSubclass.m in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC7A0099580E70075E99B /* XScreenSaverSubclass.m */; };
+		AF358204143330F900E09C51 /* voronoi.c in Sources */ = {isa = PBXBuildFile; fileRef = AF0DCA5F0C4CBB7300D76972 /* voronoi.c */; };
+		AF358205143330F900E09C51 /* hilbert.c in Sources */ = {isa = PBXBuildFile; fileRef = AF78D18A142DD96E002AAF77 /* hilbert.c */; };
+		AF358206143330F900E09C51 /* companion_disc.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D61431D5FC00E09C51 /* companion_disc.c */; };
+		AF358207143330F900E09C51 /* companion_heart.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D71431D5FC00E09C51 /* companion_heart.c */; };
+		AF358208143330F900E09C51 /* companion_quad.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D81431D5FC00E09C51 /* companion_quad.c */; };
+		AF358209143330F900E09C51 /* companion.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3581D91431D5FC00E09C51 /* companion.c */; };
+		AF35820B143330F900E09C51 /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
+		AF35820C143330F900E09C51 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
+		AF35820D143330F900E09C51 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		AF35820E143330F900E09C51 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF480FE70990375900FB32B8 /* AGL.framework */; };
+		AF35820F143330F900E09C51 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF480DF1098F528500FB32B8 /* OpenGL.framework */; };
+		AF358210143330F900E09C51 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF48112B0990A2C700FB32B8 /* Carbon.framework */; };
+		AF35821C1433314C00E09C51 /* tronbit_idle1.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3582171433314C00E09C51 /* tronbit_idle1.c */; };
+		AF35821D1433314C00E09C51 /* tronbit_idle2.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3582181433314C00E09C51 /* tronbit_idle2.c */; };
+		AF35821E1433314C00E09C51 /* tronbit_no.c in Sources */ = {isa = PBXBuildFile; fileRef = AF3582191433314C00E09C51 /* tronbit_no.c */; };
+		AF35821F1433314C00E09C51 /* tronbit_yes.c in Sources */ = {isa = PBXBuildFile; fileRef = AF35821A1433314C00E09C51 /* tronbit_yes.c */; };
+		AF3582201433314C00E09C51 /* tronbit.c in Sources */ = {isa = PBXBuildFile; fileRef = AF35821B1433314C00E09C51 /* tronbit.c */; };
+		AF3582221433318500E09C51 /* tronbit.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF3582211433318500E09C51 /* tronbit.xml */; };
 		AF35E8900E63823600691F2F /* XScreenSaverSubclass.m in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC7A0099580E70075E99B /* XScreenSaverSubclass.m */; };
-		AF35E8910E63823600691F2F /* sonar-icmp.c in Sources */ = {isa = PBXBuildFile; fileRef = AFE30BFF0E52B1DC00CCF4A5 /* sonar-icmp.c */; };
-		AF35E8920E63823600691F2F /* sonar-sim.c in Sources */ = {isa = PBXBuildFile; fileRef = AFE30C000E52B1DC00CCF4A5 /* sonar-sim.c */; };
-		AF35E8930E63823600691F2F /* sonar.c in Sources */ = {isa = PBXBuildFile; fileRef = AFE30C010E52B1DC00CCF4A5 /* sonar.c */; };
 		AF35E8950E63823600691F2F /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
 		AF35E8960E63823600691F2F /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
 		AF35E8970E63823600691F2F /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -977,6 +1039,21 @@
 		AF7778C509B65CFE00EA3033 /* font-ximage.c in Sources */ = {isa = PBXBuildFile; fileRef = AF7778C209B65CFE00EA3033 /* font-ximage.c */; };
 		AF7778C609B65CFE00EA3033 /* font-ximage.c in Sources */ = {isa = PBXBuildFile; fileRef = AF7778C209B65CFE00EA3033 /* font-ximage.c */; };
 		AF7778C709B65CFE00EA3033 /* font-ximage.h in Headers */ = {isa = PBXBuildFile; fileRef = AF7778C309B65CFE00EA3033 /* font-ximage.h */; };
+		AF78D179142DD8F3002AAF77 /* voronoi.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF0DCA610C4CBB8E00D76972 /* voronoi.xml */; };
+		AF78D17B142DD8F3002AAF77 /* XScreenSaverSubclass.m in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC7A0099580E70075E99B /* XScreenSaverSubclass.m */; };
+		AF78D17C142DD8F3002AAF77 /* voronoi.c in Sources */ = {isa = PBXBuildFile; fileRef = AF0DCA5F0C4CBB7300D76972 /* voronoi.c */; };
+		AF78D17E142DD8F3002AAF77 /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
+		AF78D17F142DD8F3002AAF77 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
+		AF78D180142DD8F3002AAF77 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		AF78D181142DD8F3002AAF77 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF480FE70990375900FB32B8 /* AGL.framework */; };
+		AF78D182142DD8F3002AAF77 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF480DF1098F528500FB32B8 /* OpenGL.framework */; };
+		AF78D183142DD8F3002AAF77 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF48112B0990A2C700FB32B8 /* Carbon.framework */; };
+		AF78D18B142DD96E002AAF77 /* hilbert.c in Sources */ = {isa = PBXBuildFile; fileRef = AF78D18A142DD96E002AAF77 /* hilbert.c */; };
+		AF78D18C142DD96E002AAF77 /* hilbert.c in Sources */ = {isa = PBXBuildFile; fileRef = AF78D18A142DD96E002AAF77 /* hilbert.c */; };
+		AF78D18D142DD96E002AAF77 /* hilbert.c in Sources */ = {isa = PBXBuildFile; fileRef = AF78D18A142DD96E002AAF77 /* hilbert.c */; };
+		AF78D18F142DD99A002AAF77 /* hilbert.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF78D18E142DD99A002AAF77 /* hilbert.xml */; };
+		AF78D190142DD99B002AAF77 /* hilbert.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF78D18E142DD99A002AAF77 /* hilbert.xml */; };
+		AF78D191142DD99B002AAF77 /* hilbert.xml in Resources */ = {isa = PBXBuildFile; fileRef = AF78D18E142DD99A002AAF77 /* hilbert.xml */; };
 		AF794F6A099748450059A8B0 /* XScreenSaverSubclass.m in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC7A0099580E70075E99B /* XScreenSaverSubclass.m */; };
 		AF794F6D099748450059A8B0 /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
 		AF794F6E099748450059A8B0 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
@@ -1093,10 +1170,10 @@
 		AF9770780989D2F6001F8B92 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		AF97707F0989D327001F8B92 /* attraction.c in Sources */ = {isa = PBXBuildFile; fileRef = AF976DFA09896BEB001F8B92 /* attraction.c */; };
 		AF9770800989D32E001F8B92 /* attraction.xml in Resources */ = {isa = PBXBuildFile; fileRef = AFC258710988A468000655EE /* attraction.xml */; };
-		AF9771DF0989DC88001F8B92 /* SaverTester.m in Sources */ = {isa = PBXBuildFile; fileRef = AFE1FD400981E32E00F7970E /* SaverTester.m */; };
+		AF9771DF0989DC88001F8B92 /* SaverRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = AFE1FD400981E32E00F7970E /* SaverRunner.m */; };
 		AF9772C80989DCD5001F8B92 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		AF9772CB0989DCFD001F8B92 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		AF9772E30989DFC6001F8B92 /* SaverTester.nib in Resources */ = {isa = PBXBuildFile; fileRef = AF9772E10989DFC6001F8B92 /* SaverTester.nib */; };
+		AF9772E30989DFC6001F8B92 /* SaverRunner.nib in Resources */ = {isa = PBXBuildFile; fileRef = AF9772E10989DFC6001F8B92 /* SaverRunner.nib */; };
 		AF998ED60A083A280051049D /* xscreensaver-text in Resources */ = {isa = PBXBuildFile; fileRef = AF0FAF0B09CA6FF900EE1051 /* xscreensaver-text */; };
 		AF998EE10A083DB30051049D /* XScreenSaverSubclass.m in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC7A0099580E70075E99B /* XScreenSaverSubclass.m */; };
 		AF998EE30A083DB30051049D /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
@@ -2186,6 +2263,48 @@
 			remoteGlobalIDString = AF1A17610D6D6EE3008AF328;
 			remoteInfo = LCDscrub;
 		};
+		AF2D4D8113E902F5002AA818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF4808C0098C3B6C00FB32B8;
+			remoteInfo = jwxyz;
+		};
+		AF2D4D9D13E90347002AA818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF7776E409B63ABF00EA3033;
+			remoteInfo = Phosphor;
+		};
+		AF2D4F6C13E91093002AA818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF4808C0098C3B6C00FB32B8;
+			remoteInfo = jwxyz;
+		};
+		AF2D4F8A13E91108002AA818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF2D4F6A13E91093002AA818;
+			remoteInfo = Apple2App;
+		};
+		AF2D4F8C13E9111D002AA818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF2D4D7F13E902F5002AA818;
+			remoteInfo = PhosphorApp;
+		};
+		AF2D4F8E13E91127002AA818 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF9D4DEC09B5BB19006E59CF;
+			remoteInfo = Apple2;
+		};
 		AF32D9E20F3AD0B40080F535 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -2199,6 +2318,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = AF32D9E00F3AD0B40080F535;
 			remoteInfo = RubikBlocks;
+		};
+		AF3581C11431D47B00E09C51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF4808C0098C3B6C00FB32B8;
+			remoteInfo = jwxyz;
+		};
+		AF3581FD143330F900E09C51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF4808C0098C3B6C00FB32B8;
+			remoteInfo = jwxyz;
 		};
 		AF35E88C0E63823600691F2F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -4118,6 +4251,13 @@
 			remoteGlobalIDString = AFA5604A09936E2100F3E977;
 			remoteInfo = AntInspect;
 		};
+		AF78D177142DD8F3002AAF77 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF4808C0098C3B6C00FB32B8;
+			remoteInfo = jwxyz;
+		};
 		AF794F66099748450059A8B0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -5114,6 +5254,31 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		AF2D4DDE13E903F2002AA818 /* Copy Plugins */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AF2D4DBD13E90372002AA818 /* Phosphor.saver in Copy Plugins */,
+			);
+			name = "Copy Plugins";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF2D4F7213E91093002AA818 /* Copy Plugins */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AF2D4FA913E9115E002AA818 /* Apple2.saver in Copy Plugins */,
+			);
+			name = "Copy Plugins";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* InfoPlist.strings */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = InfoPlist.strings; path = OSX/English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -5149,6 +5314,9 @@
 		AF1A17800D6D6F62008AF328 /* lcdscrub.xml */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = text.xml; path = lcdscrub.xml; sourceTree = "<group>"; };
 		AF241F81107C38DF00046A84 /* dropshadow.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = dropshadow.c; path = hacks/glx/dropshadow.c; sourceTree = "<group>"; };
 		AF241F82107C38DF00046A84 /* dropshadow.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; name = dropshadow.h; path = hacks/glx/dropshadow.h; sourceTree = "<group>"; };
+		AF2D4D8F13E902F5002AA818 /* Phosphor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Phosphor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF2D4F7E13E91093002AA818 /* Apple2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Apple2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF2D522513E954A0002AA818 /* SaverRunner.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = SaverRunner.icns; path = OSX/SaverRunner.icns; sourceTree = "<group>"; };
 		AF32D9F40F3AD0B40080F535 /* RubikBlocks.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RubikBlocks.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF32D9FA0F3AD1200080F535 /* rubikblocks.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = rubikblocks.c; path = hacks/glx/rubikblocks.c; sourceTree = "<group>"; };
 		AF32D9FC0F3AD1330080F535 /* rubikblocks.xml */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = text.xml; path = rubikblocks.xml; sourceTree = "<group>"; };
@@ -5156,6 +5324,19 @@
 		AF34085509B80AB000F2CEC1 /* StonerView.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StonerView.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF34085609B80AB000F2CEC1 /* Gleidescope.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Gleidescope.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF34085709B80AB000F2CEC1 /* FontGlide.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FontGlide.saver; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF3581D51431D47B00E09C51 /* CompanionCube.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CompanionCube.saver; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF3581D61431D5FC00E09C51 /* companion_disc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = companion_disc.c; path = hacks/glx/companion_disc.c; sourceTree = "<group>"; };
+		AF3581D71431D5FC00E09C51 /* companion_heart.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = companion_heart.c; path = hacks/glx/companion_heart.c; sourceTree = "<group>"; };
+		AF3581D81431D5FC00E09C51 /* companion_quad.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = companion_quad.c; path = hacks/glx/companion_quad.c; sourceTree = "<group>"; };
+		AF3581D91431D5FC00E09C51 /* companion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = companion.c; path = hacks/glx/companion.c; sourceTree = "<group>"; };
+		AF3581E61431D61D00E09C51 /* companioncube.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = companioncube.xml; sourceTree = "<group>"; };
+		AF358216143330F900E09C51 /* TronBit.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "TronBit.saver"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF3582171433314C00E09C51 /* tronbit_idle1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tronbit_idle1.c; path = hacks/glx/tronbit_idle1.c; sourceTree = "<group>"; };
+		AF3582181433314C00E09C51 /* tronbit_idle2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tronbit_idle2.c; path = hacks/glx/tronbit_idle2.c; sourceTree = "<group>"; };
+		AF3582191433314C00E09C51 /* tronbit_no.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tronbit_no.c; path = hacks/glx/tronbit_no.c; sourceTree = "<group>"; };
+		AF35821A1433314C00E09C51 /* tronbit_yes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tronbit_yes.c; path = hacks/glx/tronbit_yes.c; sourceTree = "<group>"; };
+		AF35821B1433314C00E09C51 /* tronbit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tronbit.c; path = hacks/glx/tronbit.c; sourceTree = "<group>"; };
+		AF3582211433318500E09C51 /* tronbit.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = tronbit.xml; sourceTree = "<group>"; };
 		AF35E8A00E63823600691F2F /* Jigsaw.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Jigsaw.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF35EB250E6382BA00691F2F /* jigsaw.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = jigsaw.c; path = hacks/glx/jigsaw.c; sourceTree = "<group>"; };
 		AF3C71590D624BF50030CC0D /* Hypnowheel.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Hypnowheel.saver; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -5378,6 +5559,9 @@
 		AF7778C109B65C6A00EA3033 /* e_textures.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; name = e_textures.h; path = hacks/glx/e_textures.h; sourceTree = "<group>"; };
 		AF7778C209B65CFE00EA3033 /* font-ximage.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = "font-ximage.c"; path = "hacks/glx/font-ximage.c"; sourceTree = "<group>"; };
 		AF7778C309B65CFE00EA3033 /* font-ximage.h */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.h; name = "font-ximage.h"; path = "hacks/glx/font-ximage.h"; sourceTree = "<group>"; };
+		AF78D189142DD8F3002AAF77 /* Hilbert.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Hilbert.saver; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF78D18A142DD96E002AAF77 /* hilbert.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = hilbert.c; path = hacks/glx/hilbert.c; sourceTree = "<group>"; };
+		AF78D18E142DD99A002AAF77 /* hilbert.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = hilbert.xml; sourceTree = "<group>"; };
 		AF794F74099748450059A8B0 /* Demon.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Demon.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF794F7E099748860059A8B0 /* demon.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = demon.c; path = hacks/demon.c; sourceTree = "<group>"; };
 		AF794F9E09974A320059A8B0 /* Fiberlamp.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Fiberlamp.saver; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -5425,8 +5609,8 @@
 		AF9770400989D1E6001F8B92 /* Rorschach.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Rorschach.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF97707D0989D2F6001F8B92 /* Attraction.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Attraction.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF9771D70989DC4A001F8B92 /* SaverTester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SaverTester.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AF9771D90989DC4A001F8B92 /* SaverTester.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = SaverTester.plist; path = OSX/SaverTester.plist; sourceTree = "<group>"; };
-		AF9772E20989DFC6001F8B92 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = OSX/English.lproj/SaverTester.nib; sourceTree = "<group>"; };
+		AF9771D90989DC4A001F8B92 /* SaverRunner.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = SaverRunner.plist; path = OSX/SaverRunner.plist; sourceTree = "<group>"; };
+		AF9772E20989DFC6001F8B92 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = OSX/English.lproj/SaverRunner.nib; sourceTree = "<group>"; };
 		AF998EEE0A083DB30051049D /* TopBlock.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TopBlock.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF998EF80A083E750051049D /* topblock.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = topblock.c; path = hacks/glx/topblock.c; sourceTree = "<group>"; };
 		AF998EFA0A083E8C0051049D /* topblock.xml */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = text.xml; path = topblock.xml; sourceTree = "<group>"; };
@@ -5931,8 +6115,8 @@
 		AFD5730C099702C800BA26F7 /* julia.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = julia.c; path = hacks/julia.c; sourceTree = "<group>"; };
 		AFD5736D0997411200BA26F7 /* Strange.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Strange.saver; sourceTree = BUILT_PRODUCTS_DIR; };
 		AFD57371099741A200BA26F7 /* strange.c */ = {isa = PBXFileReference; fileEncoding = 5; lastKnownFileType = sourcecode.c.c; name = strange.c; path = hacks/strange.c; sourceTree = "<group>"; };
-		AFE1FD3F0981E32E00F7970E /* SaverTester.h */ = {isa = PBXFileReference; fileEncoding = 12; lastKnownFileType = sourcecode.c.h; name = SaverTester.h; path = OSX/SaverTester.h; sourceTree = "<group>"; };
-		AFE1FD400981E32E00F7970E /* SaverTester.m */ = {isa = PBXFileReference; fileEncoding = 12; lastKnownFileType = sourcecode.c.objc; name = SaverTester.m; path = OSX/SaverTester.m; sourceTree = "<group>"; };
+		AFE1FD3F0981E32E00F7970E /* SaverRunner.h */ = {isa = PBXFileReference; fileEncoding = 12; lastKnownFileType = sourcecode.c.h; name = SaverRunner.h; path = OSX/SaverRunner.h; sourceTree = "<group>"; };
+		AFE1FD400981E32E00F7970E /* SaverRunner.m */ = {isa = PBXFileReference; fileEncoding = 12; lastKnownFileType = sourcecode.c.objc; name = SaverRunner.m; path = OSX/SaverRunner.m; sourceTree = "<group>"; };
 		AFE1FD410981E32E00F7970E /* InvertedSlider.h */ = {isa = PBXFileReference; fileEncoding = 12; lastKnownFileType = sourcecode.c.h; name = InvertedSlider.h; path = OSX/InvertedSlider.h; sourceTree = "<group>"; };
 		AFE1FD420981E32E00F7970E /* InvertedSlider.m */ = {isa = PBXFileReference; fileEncoding = 12; lastKnownFileType = sourcecode.c.objc; name = InvertedSlider.m; path = OSX/InvertedSlider.m; sourceTree = "<group>"; };
 		AFE1FD430981E32E00F7970E /* jwxyz.h */ = {isa = PBXFileReference; fileEncoding = 12; lastKnownFileType = sourcecode.c.h; name = jwxyz.h; path = OSX/jwxyz.h; sourceTree = "<group>"; };
@@ -6033,6 +6217,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AF2D4D8813E902F5002AA818 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF2D4D8913E902F5002AA818 /* libjwxyz.a in Frameworks */,
+				AF2D4D8A13E902F5002AA818 /* Cocoa.framework in Frameworks */,
+				AF2D4D8B13E902F5002AA818 /* ScreenSaver.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF2D4F7713E91093002AA818 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF2D4F7813E91093002AA818 /* libjwxyz.a in Frameworks */,
+				AF2D4F7913E91093002AA818 /* Cocoa.framework in Frameworks */,
+				AF2D4F7A13E91093002AA818 /* ScreenSaver.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF32D9E80F3AD0B40080F535 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -6043,6 +6247,32 @@
 				AF32D9EC0F3AD0B40080F535 /* AGL.framework in Frameworks */,
 				AF32D9ED0F3AD0B40080F535 /* OpenGL.framework in Frameworks */,
 				AF32D9EE0F3AD0B40080F535 /* Carbon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF3581C91431D47B00E09C51 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF3581CA1431D47B00E09C51 /* libjwxyz.a in Frameworks */,
+				AF3581CB1431D47B00E09C51 /* ScreenSaver.framework in Frameworks */,
+				AF3581CC1431D47B00E09C51 /* Cocoa.framework in Frameworks */,
+				AF3581CD1431D47B00E09C51 /* AGL.framework in Frameworks */,
+				AF3581CE1431D47B00E09C51 /* OpenGL.framework in Frameworks */,
+				AF3581CF1431D47B00E09C51 /* Carbon.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF35820A143330F900E09C51 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF35820B143330F900E09C51 /* libjwxyz.a in Frameworks */,
+				AF35820C143330F900E09C51 /* ScreenSaver.framework in Frameworks */,
+				AF35820D143330F900E09C51 /* Cocoa.framework in Frameworks */,
+				AF35820E143330F900E09C51 /* AGL.framework in Frameworks */,
+				AF35820F143330F900E09C51 /* OpenGL.framework in Frameworks */,
+				AF358210143330F900E09C51 /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6919,6 +7149,19 @@
 				AF7778AE09B659C800EA3033 /* libjwxyz.a in Frameworks */,
 				AF7778AF09B659C800EA3033 /* ScreenSaver.framework in Frameworks */,
 				AF7778B009B659C800EA3033 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF78D17D142DD8F3002AAF77 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF78D17E142DD8F3002AAF77 /* libjwxyz.a in Frameworks */,
+				AF78D17F142DD8F3002AAF77 /* ScreenSaver.framework in Frameworks */,
+				AF78D180142DD8F3002AAF77 /* Cocoa.framework in Frameworks */,
+				AF78D181142DD8F3002AAF77 /* AGL.framework in Frameworks */,
+				AF78D182142DD8F3002AAF77 /* OpenGL.framework in Frameworks */,
+				AF78D183142DD8F3002AAF77 /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -8658,6 +8901,11 @@
 				AFD51B300F063B4A00471C02 /* Photopile.saver */,
 				AF32D9F40F3AD0B40080F535 /* RubikBlocks.saver */,
 				AF4A345D102A593600A81B2A /* Surfaces.saver */,
+				AF2D4D8F13E902F5002AA818 /* Phosphor.app */,
+				AF2D4F7E13E91093002AA818 /* Apple2.app */,
+				AF78D189142DD8F3002AAF77 /* Hilbert.saver */,
+				AF3581D51431D47B00E09C51 /* CompanionCube.saver */,
+				AF358216143330F900E09C51 /* TronBit.saver */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -8665,7 +8913,7 @@
 		29B97314FDCFA39411CA2CEA /* xscreensaver */ = {
 			isa = PBXGroup;
 			children = (
-				AF480AB9098C66E200FB32B8 /* SaverTester */,
+				AF480AB9098C66E200FB32B8 /* SaverRunner */,
 				080E96DDFE201D6D7F000001 /* libjwxyz */,
 				AFE1FD520981E35400F7970E /* Utils */,
 				AFE1FD610981E3E700F7970E /* Hacks */,
@@ -8673,7 +8921,6 @@
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				AF0F46DC104E1809000A929C /* AppKit.framework */,
 			);
 			name = xscreensaver;
 			sourceTree = "<group>";
@@ -8683,8 +8930,9 @@
 			children = (
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				AF14EE300E3CEF1A004CBBD2 /* XScreenSaver.icns */,
-				AF9772E10989DFC6001F8B92 /* SaverTester.nib */,
-				AF9771D90989DC4A001F8B92 /* SaverTester.plist */,
+				AF9772E10989DFC6001F8B92 /* SaverRunner.nib */,
+				AF2D522513E954A0002AA818 /* SaverRunner.icns */,
+				AF9771D90989DC4A001F8B92 /* SaverRunner.plist */,
 				8D1107310486CEB800E47090 /* XScreenSaver.plist */,
 				AF0FAF1209CA712600EE1051 /* xscreensaver-getimage-file */,
 				AF0FAF0B09CA6FF900EE1051 /* xscreensaver-text */,
@@ -8695,6 +8943,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AF0F46DC104E1809000A929C /* AppKit.framework */,
 				AF976ED30989BF59001F8B92 /* ScreenSaver.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 				AF480DF1098F528500FB32B8 /* OpenGL.framework */,
@@ -8705,19 +8954,28 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		AF480AB9098C66E200FB32B8 /* SaverTester */ = {
+		AF480AB9098C66E200FB32B8 /* SaverRunner */ = {
 			isa = PBXGroup;
 			children = (
-				AFE1FD3F0981E32E00F7970E /* SaverTester.h */,
-				AFE1FD400981E32E00F7970E /* SaverTester.m */,
+				AFE1FD3F0981E32E00F7970E /* SaverRunner.h */,
+				AFE1FD400981E32E00F7970E /* SaverRunner.m */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
-			name = SaverTester;
+			name = SaverRunner;
 			sourceTree = "<group>";
 		};
 		AF480DC7098F4EB500FB32B8 /* XScreenSaver */ = {
 			isa = PBXGroup;
 			children = (
+				AF3582171433314C00E09C51 /* tronbit_idle1.c */,
+				AF3582181433314C00E09C51 /* tronbit_idle2.c */,
+				AF3582191433314C00E09C51 /* tronbit_no.c */,
+				AF35821A1433314C00E09C51 /* tronbit_yes.c */,
+				AF35821B1433314C00E09C51 /* tronbit.c */,
+				AF3581D61431D5FC00E09C51 /* companion_disc.c */,
+				AF3581D71431D5FC00E09C51 /* companion_heart.c */,
+				AF3581D81431D5FC00E09C51 /* companion_quad.c */,
+				AF3581D91431D5FC00E09C51 /* companion.c */,
 				AFE6A4340CDD800F002805BF /* abstractile.c */,
 				AF9D475809B53091006E59CF /* slidescreen.c */,
 				AF9D467809B5110B006E59CF /* decayscreen.c */,
@@ -8943,6 +9201,7 @@
 				AF48E1630A0C268500F94CF9 /* glschool_alg.h */,
 				AF48E1640A0C268500F94CF9 /* glschool_gl.c */,
 				AF48E1650A0C268500F94CF9 /* glschool_gl.h */,
+				AF78D18A142DD96E002AAF77 /* hilbert.c */,
 				AFA55F59099362DF00F3E977 /* hypertorus.c */,
 				AFA55F3F0993626E00F3E977 /* klein.c */,
 				AFA55F210993620200F3E977 /* jigglypuff.c */,
@@ -9066,6 +9325,8 @@
 		AFC258670988A468000655EE /* config */ = {
 			isa = PBXGroup;
 			children = (
+				AF3582211433318500E09C51 /* tronbit.xml */,
+				AF3581E61431D61D00E09C51 /* companioncube.xml */,
 				AF32D9FC0F3AD1330080F535 /* rubikblocks.xml */,
 				AFE6A4360CDD8026002805BF /* abstractile.xml */,
 				AFE6A40D0CDD7BDC002805BF /* moebiusgears.xml */,
@@ -9164,6 +9425,7 @@
 				AFC258C30988A468000655EE /* halo.xml */,
 				AFE2A4740E2E911200ADB298 /* skytentacles.xml */,
 				AFC258C40988A468000655EE /* helix.xml */,
+				AF78D18E142DD99A002AAF77 /* hilbert.xml */,
 				AFC258C50988A468000655EE /* hopalong.xml */,
 				AFC258C60988A468000655EE /* hyperball.xml */,
 				AFC258C70988A468000655EE /* hypercube.xml */,
@@ -9495,7 +9757,7 @@
 				AF0DCA430C4CBB0D00D76972 /* PBXTargetDependency */,
 			);
 			name = Voronoi;
-			productName = TopBlock;
+			productName = Voronoi;
 			productReference = AF0DCA560C4CBB0D00D76972 /* Voronoi.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -9515,9 +9777,51 @@
 				AF1A17620D6D6EE3008AF328 /* PBXTargetDependency */,
 			);
 			name = LCDscrub;
-			productName = Zoom;
+			productName = LCDscrub;
 			productReference = AF1A17730D6D6EE3008AF328 /* LCDscrub.saver */;
 			productType = "com.apple.product-type.bundle";
+		};
+		AF2D4D7F13E902F5002AA818 /* PhosphorApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AF2D4D8C13E902F5002AA818 /* Build configuration list for PBXNativeTarget "PhosphorApp" */;
+			buildPhases = (
+				AF2D4D8213E902F5002AA818 /* Resources */,
+				AF2D4DDE13E903F2002AA818 /* Copy Plugins */,
+				AF2D4D8513E902F5002AA818 /* Sources */,
+				AF2D4D8813E902F5002AA818 /* Frameworks */,
+				AF2D51F413E94AC4002AA818 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AF2D4D8013E902F5002AA818 /* PBXTargetDependency */,
+				AF2D4D9E13E90347002AA818 /* PBXTargetDependency */,
+			);
+			name = PhosphorApp;
+			productName = PhosphorApp;
+			productReference = AF2D4D8F13E902F5002AA818 /* Phosphor.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AF2D4F6A13E91093002AA818 /* Apple2App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AF2D4F7B13E91093002AA818 /* Build configuration list for PBXNativeTarget "Apple2App" */;
+			buildPhases = (
+				AF2D4F6F13E91093002AA818 /* Resources */,
+				AF2D4F7213E91093002AA818 /* Copy Plugins */,
+				AF2D4F7413E91093002AA818 /* Sources */,
+				AF2D4F7713E91093002AA818 /* Frameworks */,
+				AF2D51FD13E94B2D002AA818 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AF2D4F8F13E91127002AA818 /* PBXTargetDependency */,
+				AF2D4F6B13E91093002AA818 /* PBXTargetDependency */,
+			);
+			name = Apple2App;
+			productName = Apple2App;
+			productReference = AF2D4F7E13E91093002AA818 /* Apple2.app */;
+			productType = "com.apple.product-type.application";
 		};
 		AF32D9E00F3AD0B40080F535 /* RubikBlocks */ = {
 			isa = PBXNativeTarget;
@@ -9535,8 +9839,48 @@
 				AF32D9E10F3AD0B40080F535 /* PBXTargetDependency */,
 			);
 			name = RubikBlocks;
-			productName = Rubik;
+			productName = RubikBlocks;
 			productReference = AF32D9F40F3AD0B40080F535 /* RubikBlocks.saver */;
+			productType = "com.apple.product-type.bundle";
+		};
+		AF3581BF1431D47B00E09C51 /* CompanionCube */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AF3581D21431D47B00E09C51 /* Build configuration list for PBXNativeTarget "CompanionCube" */;
+			buildPhases = (
+				AF3581C21431D47B00E09C51 /* Resources */,
+				AF3581C51431D47B00E09C51 /* Sources */,
+				AF3581C91431D47B00E09C51 /* Frameworks */,
+				AF3581D01431D47B00E09C51 /* Rez */,
+				AF3581D11431D47B00E09C51 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AF3581C01431D47B00E09C51 /* PBXTargetDependency */,
+			);
+			name = CompanionCube;
+			productName = CompanionCube;
+			productReference = AF3581D51431D47B00E09C51 /* CompanionCube.saver */;
+			productType = "com.apple.product-type.bundle";
+		};
+		AF3581FB143330F900E09C51 /* TronBit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AF358213143330F900E09C51 /* Build configuration list for PBXNativeTarget "TronBit" */;
+			buildPhases = (
+				AF3581FE143330F900E09C51 /* Resources */,
+				AF358202143330F900E09C51 /* Sources */,
+				AF35820A143330F900E09C51 /* Frameworks */,
+				AF358211143330F900E09C51 /* Rez */,
+				AF358212143330F900E09C51 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AF3581FC143330F900E09C51 /* PBXTargetDependency */,
+			);
+			name = TronBit;
+			productName = CompanionCube;
+			productReference = AF358216143330F900E09C51 /* TronBit.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
 		AF35E88A0E63823600691F2F /* Jigsaw */ = {
@@ -9555,7 +9899,7 @@
 				AF35E88B0E63823600691F2F /* PBXTargetDependency */,
 			);
 			name = Jigsaw;
-			productName = TopBlock;
+			productName = Jigsaw;
 			productReference = AF35E8A00E63823600691F2F /* Jigsaw.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -9575,7 +9919,7 @@
 				AF3C71460D624BF50030CC0D /* PBXTargetDependency */,
 			);
 			name = Hypnowheel;
-			productName = TopBlock;
+			productName = Hypnowheel;
 			productReference = AF3C71590D624BF50030CC0D /* Hypnowheel.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -10692,7 +11036,7 @@
 				AF4A344A102A593600A81B2A /* PBXTargetDependency */,
 			);
 			name = Surfaces;
-			productName = Klein;
+			productName = Surfaces;
 			productReference = AF4A345D102A593600A81B2A /* Surfaces.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -10712,7 +11056,7 @@
 				AF4FD6E70CE7A486005EE58E /* PBXTargetDependency */,
 			);
 			name = Lockward;
-			productName = TopBlock;
+			productName = Lockward;
 			productReference = AF4FD6FA0CE7A486005EE58E /* Lockward.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -10732,7 +11076,7 @@
 				AF4FF4BB0D52CBDE00666F98 /* PBXTargetDependency */,
 			);
 			name = CubicGrid;
-			productName = Cubenetic;
+			productName = CubicGrid;
 			productReference = AF4FF4CE0D52CBDE00666F98 /* CubicGrid.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -11174,6 +11518,26 @@
 			name = BlitSpin;
 			productName = BlitSpin;
 			productReference = AF7778B509B659C800EA3033 /* BlitSpin.saver */;
+			productType = "com.apple.product-type.bundle";
+		};
+		AF78D175142DD8F3002AAF77 /* Hilbert */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AF78D186142DD8F3002AAF77 /* Build configuration list for PBXNativeTarget "Hilbert" */;
+			buildPhases = (
+				AF78D178142DD8F3002AAF77 /* Resources */,
+				AF78D17A142DD8F3002AAF77 /* Sources */,
+				AF78D17D142DD8F3002AAF77 /* Frameworks */,
+				AF78D184142DD8F3002AAF77 /* Rez */,
+				AF78D185142DD8F3002AAF77 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AF78D176142DD8F3002AAF77 /* PBXTargetDependency */,
+			);
+			name = Hilbert;
+			productName = Hilbert;
+			productReference = AF78D189142DD8F3002AAF77 /* Hilbert.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
 		AF794F64099748450059A8B0 /* Demon */ = {
@@ -13009,7 +13373,7 @@
 				AFD51B1C0F063B4A00471C02 /* PBXTargetDependency */,
 			);
 			name = Photopile;
-			productName = Carousel;
+			productName = Photopile;
 			productReference = AFD51B300F063B4A00471C02 /* Photopile.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -13689,7 +14053,7 @@
 				AFE2A4570E2E904600ADB298 /* PBXTargetDependency */,
 			);
 			name = SkyTentacles;
-			productName = TopBlock;
+			productName = SkyTentacles;
 			productReference = AFE2A46A0E2E904600ADB298 /* SkyTentacles.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -13709,7 +14073,7 @@
 				AFE30BE90E52B14700CCF4A5 /* PBXTargetDependency */,
 			);
 			name = Sonar;
-			productName = TopBlock;
+			productName = Sonar;
 			productReference = AFE30BFC0E52B14700CCF4A5 /* Sonar.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -13729,7 +14093,7 @@
 				AFE6A1830CDD7B2E002805BF /* PBXTargetDependency */,
 			);
 			name = MoebiusGears;
-			productName = Pinion;
+			productName = MoebiusGears;
 			productReference = AFE6A1970CDD7B2E002805BF /* MoebiusGears.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -13749,7 +14113,7 @@
 				AFE6A41C0CDD7FAA002805BF /* PBXTargetDependency */,
 			);
 			name = Abstractile;
-			productName = Zoom;
+			productName = Abstractile;
 			productReference = AFE6A42D0CDD7FAA002805BF /* Abstractile.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -13769,7 +14133,7 @@
 				AFF463370C4403E400EE6509 /* PBXTargetDependency */,
 			);
 			name = CWaves;
-			productName = CCurve;
+			productName = CWaves;
 			productReference = AFF463470C4403E400EE6509 /* CWaves.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -13789,7 +14153,7 @@
 				AFF463590C440AEF00EE6509 /* PBXTargetDependency */,
 			);
 			name = GLCells;
-			productName = GLBlur;
+			productName = GLCells;
 			productReference = AFF4636C0C440AEF00EE6509 /* GLCells.saver */;
 			productType = "com.apple.product-type.bundle";
 		};
@@ -13800,7 +14164,14 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "xscreensaver" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* xscreensaver */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -13812,6 +14183,7 @@
 				AF47721E099D4F67001F091E /* Anemone */,
 				AF4773C1099D67B9001F091E /* Anemotaxis */,
 				AF9D4DEC09B5BB19006E59CF /* Apple2 */,
+				AF2D4F6A13E91093002AA818 /* Apple2App */,
 				AF9770660989D2F6001F8B92 /* Attraction */,
 				AF975A86099C6BC300B05160 /* Barcode */,
 				AF47768F099DAA6F001F091E /* Blaster */,
@@ -13864,6 +14236,7 @@
 				AF4778AB099DDB79001F091E /* Penetrate */,
 				AF477670099DA849001F091E /* Petri */,
 				AF7776E409B63ABF00EA3033 /* Phosphor */,
+				AF2D4D7F13E902F5002AA818 /* PhosphorApp */,
 				AF477283099D5926001F091E /* Piecewise */,
 				AF9D4CE709B5AA8E006E59CF /* Pong */,
 				AF47726B099D57B9001F091E /* PopSquares */,
@@ -13940,6 +14313,7 @@
 				AFA55946099330B000F3E977 /* Cage */,
 				AF77784409B6528100EA3033 /* Carousel */,
 				AFA55BAB099340CE00F3E977 /* Circuit */,
+				AF3581BF1431D47B00E09C51 /* CompanionCube */,
 				AFA563130993951000F3E977 /* Crackberg */,
 				AFA56351099396C000F3E977 /* Cube21 */,
 				AFA55D620993584B00F3E977 /* Cubenetic */,
@@ -13967,6 +14341,7 @@
 				AF7777D009B64C6B00EA3033 /* GLSlideshow */,
 				AFA55C77099349A600F3E977 /* GLSnake */,
 				AFD56DF10996A03800BA26F7 /* GLText */,
+				AF78D175142DD8F3002AAF77 /* Hilbert */,
 				AFA55F420993629000F3E977 /* Hypertorus */,
 				AF3C71450D624BF50030CC0D /* Hypnowheel */,
 				AFA55F06099361B700F3E977 /* JigglyPuff */,
@@ -14008,6 +14383,7 @@
 				AFA562F20993943B00F3E977 /* Tangram */,
 				AFA56379099397B300F3E977 /* TimeTunnel */,
 				AF998EDA0A083DB30051049D /* TopBlock */,
+				AF3581FB143330F900E09C51 /* TronBit */,
 				AF0DCA420C4CBB0D00D76972 /* Voronoi */,
 				AF137D410F075C9B004DE3B2 /* Obsolete */,
 				AFD570C90996B9F800BA26F7 /* Ant */,
@@ -14078,11 +14454,53 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AF2D4D8213E902F5002AA818 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF2D4D8413E902F5002AA818 /* SaverRunner.nib in Resources */,
+				AF2D522613E954A0002AA818 /* SaverRunner.icns in Resources */,
+				AF78D190142DD99B002AAF77 /* hilbert.xml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF2D4F6F13E91093002AA818 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF2D4F7113E91093002AA818 /* SaverRunner.nib in Resources */,
+				AF2D522713E954A0002AA818 /* SaverRunner.icns in Resources */,
+				AF78D18F142DD99A002AAF77 /* hilbert.xml in Resources */,
+				AF3581E71431D61D00E09C51 /* companioncube.xml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF32D9E30F3AD0B40080F535 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				AF32D9FD0F3AD1330080F535 /* rubikblocks.xml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF3581C21431D47B00E09C51 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF3581C31431D47B00E09C51 /* voronoi.xml in Resources */,
+				AF3581C41431D47B00E09C51 /* hilbert.xml in Resources */,
+				AF3581E81431D61D00E09C51 /* companioncube.xml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF3581FE143330F900E09C51 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF3581FF143330F900E09C51 /* voronoi.xml in Resources */,
+				AF358200143330F900E09C51 /* hilbert.xml in Resources */,
+				AF358201143330F900E09C51 /* companioncube.xml in Resources */,
+				AF3582221433318500E09C51 /* tronbit.xml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -14749,6 +15167,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AF78D178142DD8F3002AAF77 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF78D179142DD8F3002AAF77 /* voronoi.xml in Resources */,
+				AF78D191142DD99B002AAF77 /* hilbert.xml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF794F67099748450059A8B0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -14915,7 +15342,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AF14EE310E3CEF1A004CBBD2 /* XScreenSaver.icns in Resources */,
-				AF9772E30989DFC6001F8B92 /* SaverTester.nib in Resources */,
+				AF9772E30989DFC6001F8B92 /* SaverRunner.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -15856,6 +16283,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AF3581D01431D47B00E09C51 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF358211143330F900E09C51 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF35E89B0E63823600691F2F /* Rez */ = {
 			isa = PBXRezBuildPhase;
 			buildActionMask = 2147483647;
@@ -16417,6 +16858,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		AF7778B109B659C800EA3033 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF78D184142DD8F3002AAF77 /* Rez */ = {
 			isa = PBXRezBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -17340,7 +17788,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AF0DCA520C4CBB0D00D76972 /* ShellScript */ = {
@@ -17354,7 +17802,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AF1A176F0D6D6EE3008AF328 /* ShellScript */ = {
@@ -17368,8 +17816,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
+		};
+		AF2D51F413E94AC4002AA818 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX/Contents/PlugIns/*.saver\n$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX\n";
+		};
+		AF2D51FD13E94B2D002AA818 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX/Contents/PlugIns/*.saver\n$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX\n";
 		};
 		AF32D9F00F3AD0B40080F535 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -17382,7 +17856,35 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			showEnvVarsInLog = 0;
+		};
+		AF3581D11431D47B00E09C51 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			showEnvVarsInLog = 0;
+		};
+		AF358212143330F900E09C51 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AF35E89C0E63823600691F2F /* ShellScript */ = {
@@ -17396,7 +17898,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AF3C71550D624BF50030CC0D /* ShellScript */ = {
@@ -17410,7 +17912,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AF48DEFF0A0C25E000F94CF9 /* ShellScript */ = {
@@ -17424,7 +17926,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AF4A3459102A593600A81B2A /* ShellScript */ = {
@@ -17438,7 +17940,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AF4FD6F60CE7A486005EE58E /* ShellScript */ = {
@@ -17452,7 +17954,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AF4FF4CA0D52CBDE00666F98 /* ShellScript */ = {
@@ -17466,7 +17968,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			showEnvVarsInLog = 0;
+		};
+		AF78D185142DD8F3002AAF77 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AF998EEA0A083DB30051049D /* ShellScript */ = {
@@ -17480,7 +17996,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3393C0B058505002B0E7D /* ShellScript */ = {
@@ -17494,7 +18010,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA33C010B058E17002B0E7D /* ShellScript */ = {
@@ -17521,7 +18037,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D69409C03B6200E4CFCA /* ShellScript */ = {
@@ -17535,7 +18051,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D85B09C03BD300E4CFCA /* ShellScript */ = {
@@ -17549,7 +18065,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D85D09C03BD700E4CFCA /* ShellScript */ = {
@@ -17563,7 +18079,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D85F09C03BDA00E4CFCA /* ShellScript */ = {
@@ -17577,7 +18093,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D86109C03BDE00E4CFCA /* ShellScript */ = {
@@ -17591,7 +18107,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D86309C03BE200E4CFCA /* ShellScript */ = {
@@ -17605,7 +18121,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D86509C03BE500E4CFCA /* ShellScript */ = {
@@ -17619,7 +18135,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D86709C03BE800E4CFCA /* ShellScript */ = {
@@ -17633,7 +18149,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D86909C03BEC00E4CFCA /* ShellScript */ = {
@@ -17647,7 +18163,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D86B09C03BEF00E4CFCA /* ShellScript */ = {
@@ -17661,7 +18177,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D86D09C03BF300E4CFCA /* ShellScript */ = {
@@ -17675,7 +18191,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D86F09C03BF700E4CFCA /* ShellScript */ = {
@@ -17689,7 +18205,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D87109C03BFB00E4CFCA /* ShellScript */ = {
@@ -17703,7 +18219,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D87309C03C0000E4CFCA /* ShellScript */ = {
@@ -17717,7 +18233,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D87509C03C0400E4CFCA /* ShellScript */ = {
@@ -17731,7 +18247,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D87709C03C0A00E4CFCA /* ShellScript */ = {
@@ -17745,7 +18261,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D87909C03C1200E4CFCA /* ShellScript */ = {
@@ -17759,7 +18275,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D87B09C03C1700E4CFCA /* ShellScript */ = {
@@ -17773,7 +18289,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D87D09C03C1B00E4CFCA /* ShellScript */ = {
@@ -17787,7 +18303,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D87F09C03C1E00E4CFCA /* ShellScript */ = {
@@ -17801,7 +18317,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D88109C03C2100E4CFCA /* ShellScript */ = {
@@ -17815,7 +18331,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D88309C03C2400E4CFCA /* ShellScript */ = {
@@ -17829,7 +18345,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D88509C03C2700E4CFCA /* ShellScript */ = {
@@ -17843,7 +18359,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D88709C03C2A00E4CFCA /* ShellScript */ = {
@@ -17857,7 +18373,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D88909C03C2E00E4CFCA /* ShellScript */ = {
@@ -17871,7 +18387,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D88B09C03C3200E4CFCA /* ShellScript */ = {
@@ -17885,7 +18401,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D88D09C03C3600E4CFCA /* ShellScript */ = {
@@ -17899,7 +18415,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D88F09C03C3900E4CFCA /* ShellScript */ = {
@@ -17913,7 +18429,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D89109C03C3C00E4CFCA /* ShellScript */ = {
@@ -17927,7 +18443,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D89309C03C4000E4CFCA /* ShellScript */ = {
@@ -17941,7 +18457,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D89509C03C4400E4CFCA /* ShellScript */ = {
@@ -17955,7 +18471,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D89709C03C4700E4CFCA /* ShellScript */ = {
@@ -17969,7 +18485,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D89B09C03C4D00E4CFCA /* ShellScript */ = {
@@ -17983,7 +18499,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D89D09C03C5000E4CFCA /* ShellScript */ = {
@@ -17997,7 +18513,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D89F09C03C5300E4CFCA /* ShellScript */ = {
@@ -18011,7 +18527,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8A109C03C5600E4CFCA /* ShellScript */ = {
@@ -18025,7 +18541,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8A309C03C5F00E4CFCA /* ShellScript */ = {
@@ -18039,7 +18555,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8A509C03C6200E4CFCA /* ShellScript */ = {
@@ -18053,7 +18569,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8A909C03C6900E4CFCA /* ShellScript */ = {
@@ -18067,7 +18583,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8AB09C03C6D00E4CFCA /* ShellScript */ = {
@@ -18081,7 +18597,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8AD09C03C7000E4CFCA /* ShellScript */ = {
@@ -18095,7 +18611,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8AF09C03C7300E4CFCA /* ShellScript */ = {
@@ -18109,7 +18625,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8B109C03C7600E4CFCA /* ShellScript */ = {
@@ -18123,7 +18639,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8B309C03C7900E4CFCA /* ShellScript */ = {
@@ -18137,7 +18653,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8B509C03C7C00E4CFCA /* ShellScript */ = {
@@ -18151,7 +18667,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8B709C03C7F00E4CFCA /* ShellScript */ = {
@@ -18165,7 +18681,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8B909C03C8200E4CFCA /* ShellScript */ = {
@@ -18179,7 +18695,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8BB09C03C8600E4CFCA /* ShellScript */ = {
@@ -18193,7 +18709,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8BD09C03C8900E4CFCA /* ShellScript */ = {
@@ -18207,7 +18723,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8BF09C03C8D00E4CFCA /* ShellScript */ = {
@@ -18221,7 +18737,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8C109C03C9000E4CFCA /* ShellScript */ = {
@@ -18235,7 +18751,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8C309C03C9300E4CFCA /* ShellScript */ = {
@@ -18249,7 +18765,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8C509C03C9600E4CFCA /* ShellScript */ = {
@@ -18263,7 +18779,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8C709C03C9900E4CFCA /* ShellScript */ = {
@@ -18277,7 +18793,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8C909C03C9E00E4CFCA /* ShellScript */ = {
@@ -18291,7 +18807,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8CB09C03CA100E4CFCA /* ShellScript */ = {
@@ -18305,7 +18821,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8CD09C03CA400E4CFCA /* ShellScript */ = {
@@ -18319,7 +18835,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8CF09C03CA800E4CFCA /* ShellScript */ = {
@@ -18333,7 +18849,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8D109C03CAB00E4CFCA /* ShellScript */ = {
@@ -18347,7 +18863,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8D309C03CAE00E4CFCA /* ShellScript */ = {
@@ -18361,7 +18877,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8D709C03CB400E4CFCA /* ShellScript */ = {
@@ -18375,7 +18891,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8D909C03CB700E4CFCA /* ShellScript */ = {
@@ -18389,7 +18905,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8DB09C03CBA00E4CFCA /* ShellScript */ = {
@@ -18403,7 +18919,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8DD09C03CBD00E4CFCA /* ShellScript */ = {
@@ -18417,7 +18933,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8DF09C03CC000E4CFCA /* ShellScript */ = {
@@ -18431,7 +18947,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8E109C03CC400E4CFCA /* ShellScript */ = {
@@ -18445,7 +18961,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8E309C03CCA00E4CFCA /* ShellScript */ = {
@@ -18459,7 +18975,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8E509C03CCD00E4CFCA /* ShellScript */ = {
@@ -18473,7 +18989,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8E709C03CD100E4CFCA /* ShellScript */ = {
@@ -18487,7 +19003,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8E909C03CD500E4CFCA /* ShellScript */ = {
@@ -18501,7 +19017,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8EB09C03CD800E4CFCA /* ShellScript */ = {
@@ -18515,7 +19031,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8ED09C03CDB00E4CFCA /* ShellScript */ = {
@@ -18529,7 +19045,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8EF09C03CDE00E4CFCA /* ShellScript */ = {
@@ -18543,7 +19059,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8F109C03CE100E4CFCA /* ShellScript */ = {
@@ -18557,7 +19073,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8F309C03CE400E4CFCA /* ShellScript */ = {
@@ -18571,7 +19087,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8F509C03CE800E4CFCA /* ShellScript */ = {
@@ -18585,7 +19101,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8F709C03CEA00E4CFCA /* ShellScript */ = {
@@ -18599,7 +19115,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8F909C03CED00E4CFCA /* ShellScript */ = {
@@ -18613,7 +19129,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8FB09C03CF100E4CFCA /* ShellScript */ = {
@@ -18627,7 +19143,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8FD09C03CF400E4CFCA /* ShellScript */ = {
@@ -18641,7 +19157,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D8FF09C03CF700E4CFCA /* ShellScript */ = {
@@ -18655,7 +19171,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D90109C03D0000E4CFCA /* ShellScript */ = {
@@ -18669,7 +19185,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D90309C03D0400E4CFCA /* ShellScript */ = {
@@ -18683,7 +19199,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D90509C03D0700E4CFCA /* ShellScript */ = {
@@ -18697,7 +19213,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D90709C03D0B00E4CFCA /* ShellScript */ = {
@@ -18711,7 +19227,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D90909C03D0E00E4CFCA /* ShellScript */ = {
@@ -18725,7 +19241,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D90B09C03D1100E4CFCA /* ShellScript */ = {
@@ -18739,7 +19255,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D90D09C03D1400E4CFCA /* ShellScript */ = {
@@ -18753,7 +19269,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D90F09C03D1800E4CFCA /* ShellScript */ = {
@@ -18767,7 +19283,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D91109C03D1B00E4CFCA /* ShellScript */ = {
@@ -18781,7 +19297,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D91309C03D1E00E4CFCA /* ShellScript */ = {
@@ -18795,7 +19311,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D91509C03D2100E4CFCA /* ShellScript */ = {
@@ -18809,7 +19325,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D91709C03D2400E4CFCA /* ShellScript */ = {
@@ -18823,7 +19339,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D91909C03D2700E4CFCA /* ShellScript */ = {
@@ -18837,7 +19353,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D91D09C03D3000E4CFCA /* ShellScript */ = {
@@ -18851,7 +19367,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D91F09C03D3300E4CFCA /* ShellScript */ = {
@@ -18865,7 +19381,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D92109C03D3600E4CFCA /* ShellScript */ = {
@@ -18879,7 +19395,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D92309C03D3A00E4CFCA /* ShellScript */ = {
@@ -18893,7 +19409,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D92509C03D3D00E4CFCA /* ShellScript */ = {
@@ -18907,7 +19423,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D92709C03D4000E4CFCA /* ShellScript */ = {
@@ -18921,7 +19437,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D92909C03D4400E4CFCA /* ShellScript */ = {
@@ -18935,7 +19451,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D92B09C03D4700E4CFCA /* ShellScript */ = {
@@ -18949,7 +19465,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D92D09C03D4A00E4CFCA /* ShellScript */ = {
@@ -18963,7 +19479,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D92F09C03D4E00E4CFCA /* ShellScript */ = {
@@ -18977,7 +19493,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D93109C03D5100E4CFCA /* ShellScript */ = {
@@ -18991,7 +19507,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D93309C03D5400E4CFCA /* ShellScript */ = {
@@ -19005,7 +19521,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D93509C03D5700E4CFCA /* ShellScript */ = {
@@ -19019,7 +19535,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D93709C03D5B00E4CFCA /* ShellScript */ = {
@@ -19033,7 +19549,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D93909C03D5E00E4CFCA /* ShellScript */ = {
@@ -19047,7 +19563,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D93B09C03D6200E4CFCA /* ShellScript */ = {
@@ -19061,7 +19577,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D93D09C03D6C00E4CFCA /* ShellScript */ = {
@@ -19075,7 +19591,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D93F09C03D6F00E4CFCA /* ShellScript */ = {
@@ -19089,7 +19605,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D94109C03D7200E4CFCA /* ShellScript */ = {
@@ -19103,7 +19619,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D94309C03D7600E4CFCA /* ShellScript */ = {
@@ -19117,7 +19633,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D94509C03D7A00E4CFCA /* ShellScript */ = {
@@ -19131,7 +19647,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D94709C03D7E00E4CFCA /* ShellScript */ = {
@@ -19145,7 +19661,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D94909C03D8100E4CFCA /* ShellScript */ = {
@@ -19159,7 +19675,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D94B09C03D8500E4CFCA /* ShellScript */ = {
@@ -19173,7 +19689,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D94D09C03D8D00E4CFCA /* ShellScript */ = {
@@ -19187,7 +19703,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D94F09C03D9100E4CFCA /* ShellScript */ = {
@@ -19201,7 +19717,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D95109C03D9400E4CFCA /* ShellScript */ = {
@@ -19215,7 +19731,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D95309C03D9800E4CFCA /* ShellScript */ = {
@@ -19229,7 +19745,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D95509C03D9C00E4CFCA /* ShellScript */ = {
@@ -19243,7 +19759,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D95709C03DA100E4CFCA /* ShellScript */ = {
@@ -19257,7 +19773,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D95909C03DA400E4CFCA /* ShellScript */ = {
@@ -19271,7 +19787,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D95B09C03DA800E4CFCA /* ShellScript */ = {
@@ -19285,7 +19801,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D95D09C03DAB00E4CFCA /* ShellScript */ = {
@@ -19299,7 +19815,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D95F09C03DAE00E4CFCA /* ShellScript */ = {
@@ -19313,7 +19829,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D96109C03DB100E4CFCA /* ShellScript */ = {
@@ -19327,7 +19843,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D96309C03DB500E4CFCA /* ShellScript */ = {
@@ -19341,7 +19857,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D96509C03DB900E4CFCA /* ShellScript */ = {
@@ -19355,7 +19871,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D96709C03DBC00E4CFCA /* ShellScript */ = {
@@ -19369,7 +19885,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D96909C03DBF00E4CFCA /* ShellScript */ = {
@@ -19383,7 +19899,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D96B09C03DC600E4CFCA /* ShellScript */ = {
@@ -19397,7 +19913,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D96D09C03DCA00E4CFCA /* ShellScript */ = {
@@ -19411,7 +19927,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D96F09C03DCD00E4CFCA /* ShellScript */ = {
@@ -19425,7 +19941,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D97109C03DD000E4CFCA /* ShellScript */ = {
@@ -19439,7 +19955,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D97309C03DD300E4CFCA /* ShellScript */ = {
@@ -19453,7 +19969,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D97509C03DD700E4CFCA /* ShellScript */ = {
@@ -19467,7 +19983,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D97709C03DDA00E4CFCA /* ShellScript */ = {
@@ -19481,7 +19997,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D97909C03DDD00E4CFCA /* ShellScript */ = {
@@ -19495,7 +20011,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D97B09C03DE000E4CFCA /* ShellScript */ = {
@@ -19509,7 +20025,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D97D09C03DE400E4CFCA /* ShellScript */ = {
@@ -19523,7 +20039,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D97F09C03DE700E4CFCA /* ShellScript */ = {
@@ -19537,7 +20053,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D98109C03DEA00E4CFCA /* ShellScript */ = {
@@ -19551,7 +20067,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D98309C03DEE00E4CFCA /* ShellScript */ = {
@@ -19565,7 +20081,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D98509C03DF100E4CFCA /* ShellScript */ = {
@@ -19579,7 +20095,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D98709C03DF400E4CFCA /* ShellScript */ = {
@@ -19593,7 +20109,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D98909C03DF700E4CFCA /* ShellScript */ = {
@@ -19607,7 +20123,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D98B09C03DFC00E4CFCA /* ShellScript */ = {
@@ -19621,7 +20137,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D98D09C03E0500E4CFCA /* ShellScript */ = {
@@ -19635,7 +20151,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D98F09C03E0F00E4CFCA /* ShellScript */ = {
@@ -19649,7 +20165,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D99109C03E1200E4CFCA /* ShellScript */ = {
@@ -19663,7 +20179,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D99309C03E1600E4CFCA /* ShellScript */ = {
@@ -19677,7 +20193,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D99509C03E1900E4CFCA /* ShellScript */ = {
@@ -19691,7 +20207,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D99709C03E1C00E4CFCA /* ShellScript */ = {
@@ -19705,7 +20221,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D99909C03E2000E4CFCA /* ShellScript */ = {
@@ -19719,7 +20235,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D99B09C03E2300E4CFCA /* ShellScript */ = {
@@ -19733,7 +20249,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D99D09C03E2600E4CFCA /* ShellScript */ = {
@@ -19747,7 +20263,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D99F09C03E2900E4CFCA /* ShellScript */ = {
@@ -19761,7 +20277,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9A109C03E2E00E4CFCA /* ShellScript */ = {
@@ -19775,7 +20291,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9A309C03E3200E4CFCA /* ShellScript */ = {
@@ -19789,7 +20305,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9A509C03E3600E4CFCA /* ShellScript */ = {
@@ -19803,7 +20319,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9A709C03E3A00E4CFCA /* ShellScript */ = {
@@ -19817,7 +20333,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9A909C03E3D00E4CFCA /* ShellScript */ = {
@@ -19831,7 +20347,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9AB09C03E4200E4CFCA /* ShellScript */ = {
@@ -19845,7 +20361,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9AD09C03E4600E4CFCA /* ShellScript */ = {
@@ -19859,7 +20375,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9AF09C03E4B00E4CFCA /* ShellScript */ = {
@@ -19873,7 +20389,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9B109C03E4E00E4CFCA /* ShellScript */ = {
@@ -19887,7 +20403,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9B309C03E5100E4CFCA /* ShellScript */ = {
@@ -19901,7 +20417,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9B509C03E5700E4CFCA /* ShellScript */ = {
@@ -19915,7 +20431,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9B709C03E5B00E4CFCA /* ShellScript */ = {
@@ -19929,7 +20445,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9B909C03E5E00E4CFCA /* ShellScript */ = {
@@ -19943,7 +20459,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9BB09C03E6200E4CFCA /* ShellScript */ = {
@@ -19957,7 +20473,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9BD09C03E6500E4CFCA /* ShellScript */ = {
@@ -19971,7 +20487,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9BF09C03E6900E4CFCA /* ShellScript */ = {
@@ -19985,7 +20501,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9C109C03E6E00E4CFCA /* ShellScript */ = {
@@ -19999,7 +20515,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9C309C03E7100E4CFCA /* ShellScript */ = {
@@ -20013,7 +20529,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9C509C03E7400E4CFCA /* ShellScript */ = {
@@ -20027,7 +20543,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9C709C03E7800E4CFCA /* ShellScript */ = {
@@ -20041,7 +20557,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9C909C03E7C00E4CFCA /* ShellScript */ = {
@@ -20055,7 +20571,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9CB09C03E7F00E4CFCA /* ShellScript */ = {
@@ -20069,7 +20585,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9CD09C03E8400E4CFCA /* ShellScript */ = {
@@ -20083,7 +20599,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9CF09C03E8700E4CFCA /* ShellScript */ = {
@@ -20097,7 +20613,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9D109C03E8B00E4CFCA /* ShellScript */ = {
@@ -20111,7 +20627,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9D309C03E8F00E4CFCA /* ShellScript */ = {
@@ -20125,7 +20641,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3D9D509C03E9300E4CFCA /* ShellScript */ = {
@@ -20139,7 +20655,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFA3DBA209C0424C00E4CFCA /* ShellScript */ = {
@@ -20153,7 +20669,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFCCCBB509C033DF00353F4D /* ShellScript */ = {
@@ -20167,7 +20683,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFCCCBC709C03AAF00353F4D /* ShellScript */ = {
@@ -20181,7 +20697,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFCCCBCB09C03AEE00353F4D /* ShellScript */ = {
@@ -20195,7 +20711,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFCCCBCD09C03AF400353F4D /* ShellScript */ = {
@@ -20209,7 +20725,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFCCCBCF09C03AF800353F4D /* ShellScript */ = {
@@ -20223,7 +20739,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFCCCBD109C03AFC00353F4D /* ShellScript */ = {
@@ -20237,7 +20753,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFCCCBD309C03B0000353F4D /* ShellScript */ = {
@@ -20251,7 +20767,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFCCCBD509C03B0500353F4D /* ShellScript */ = {
@@ -20265,7 +20781,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFD51B2C0F063B4A00471C02 /* ShellScript */ = {
@@ -20279,7 +20795,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFE2A4660E2E904600ADB298 /* ShellScript */ = {
@@ -20293,7 +20809,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFE30BF80E52B14700CCF4A5 /* ShellScript */ = {
@@ -20307,7 +20823,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFE6A1930CDD7B2E002805BF /* ShellScript */ = {
@@ -20321,7 +20837,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFE6A4290CDD7FAA002805BF /* ShellScript */ = {
@@ -20335,7 +20851,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFF463430C4403E400EE6509 /* ShellScript */ = {
@@ -20349,7 +20865,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 		AFF463680C440AEF00EE6509 /* ShellScript */ = {
@@ -20363,7 +20879,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/OSX/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -20421,6 +20937,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AF2D4D8513E902F5002AA818 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF2D4D8613E902F5002AA818 /* SaverRunner.m in Sources */,
+				AF2D4D8713E902F5002AA818 /* main.m in Sources */,
+				AF78D18C142DD96E002AAF77 /* hilbert.c in Sources */,
+				AF3581DB1431D5FC00E09C51 /* companion_disc.c in Sources */,
+				AF3581DE1431D5FC00E09C51 /* companion_heart.c in Sources */,
+				AF3581E11431D5FC00E09C51 /* companion_quad.c in Sources */,
+				AF3581E41431D5FC00E09C51 /* companion.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF2D4F7413E91093002AA818 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF2D4F7513E91093002AA818 /* SaverRunner.m in Sources */,
+				AF2D4F7613E91093002AA818 /* main.m in Sources */,
+				AF78D18B142DD96E002AAF77 /* hilbert.c in Sources */,
+				AF3581DA1431D5FC00E09C51 /* companion_disc.c in Sources */,
+				AF3581DD1431D5FC00E09C51 /* companion_heart.c in Sources */,
+				AF3581E01431D5FC00E09C51 /* companion_quad.c in Sources */,
+				AF3581E31431D5FC00E09C51 /* companion.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF32D9E50F3AD0B40080F535 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -20430,14 +20974,44 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AF3581C51431D47B00E09C51 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF3581C61431D47B00E09C51 /* XScreenSaverSubclass.m in Sources */,
+				AF3581C71431D47B00E09C51 /* voronoi.c in Sources */,
+				AF3581C81431D47B00E09C51 /* hilbert.c in Sources */,
+				AF3581DC1431D5FC00E09C51 /* companion_disc.c in Sources */,
+				AF3581DF1431D5FC00E09C51 /* companion_heart.c in Sources */,
+				AF3581E21431D5FC00E09C51 /* companion_quad.c in Sources */,
+				AF3581E51431D5FC00E09C51 /* companion.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AF358202143330F900E09C51 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF358203143330F900E09C51 /* XScreenSaverSubclass.m in Sources */,
+				AF358204143330F900E09C51 /* voronoi.c in Sources */,
+				AF358205143330F900E09C51 /* hilbert.c in Sources */,
+				AF358206143330F900E09C51 /* companion_disc.c in Sources */,
+				AF358207143330F900E09C51 /* companion_heart.c in Sources */,
+				AF358208143330F900E09C51 /* companion_quad.c in Sources */,
+				AF358209143330F900E09C51 /* companion.c in Sources */,
+				AF35821C1433314C00E09C51 /* tronbit_idle1.c in Sources */,
+				AF35821D1433314C00E09C51 /* tronbit_idle2.c in Sources */,
+				AF35821E1433314C00E09C51 /* tronbit_no.c in Sources */,
+				AF35821F1433314C00E09C51 /* tronbit_yes.c in Sources */,
+				AF3582201433314C00E09C51 /* tronbit.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF35E88F0E63823600691F2F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				AF35E8900E63823600691F2F /* XScreenSaverSubclass.m in Sources */,
-				AF35E8910E63823600691F2F /* sonar-icmp.c in Sources */,
-				AF35E8920E63823600691F2F /* sonar-sim.c in Sources */,
-				AF35E8930E63823600691F2F /* sonar.c in Sources */,
 				AF35EB260E6382BA00691F2F /* jigsaw.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -21227,6 +21801,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AF78D17A142DD8F3002AAF77 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF78D17B142DD8F3002AAF77 /* XScreenSaverSubclass.m in Sources */,
+				AF78D17C142DD8F3002AAF77 /* voronoi.c in Sources */,
+				AF78D18D142DD96E002AAF77 /* hilbert.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF794F69099748450059A8B0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -21411,7 +21995,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AF9771DF0989DC88001F8B92 /* SaverTester.m in Sources */,
+				AF9771DF0989DC88001F8B92 /* SaverRunner.m in Sources */,
 				AF9772C80989DCD5001F8B92 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -22578,6 +23162,36 @@
 			target = AF1A17610D6D6EE3008AF328 /* LCDscrub */;
 			targetProxy = AF1A17830D6D6FA7008AF328 /* PBXContainerItemProxy */;
 		};
+		AF2D4D8013E902F5002AA818 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF4808C0098C3B6C00FB32B8 /* jwxyz */;
+			targetProxy = AF2D4D8113E902F5002AA818 /* PBXContainerItemProxy */;
+		};
+		AF2D4D9E13E90347002AA818 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF7776E409B63ABF00EA3033 /* Phosphor */;
+			targetProxy = AF2D4D9D13E90347002AA818 /* PBXContainerItemProxy */;
+		};
+		AF2D4F6B13E91093002AA818 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF4808C0098C3B6C00FB32B8 /* jwxyz */;
+			targetProxy = AF2D4F6C13E91093002AA818 /* PBXContainerItemProxy */;
+		};
+		AF2D4F8B13E91108002AA818 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF2D4F6A13E91093002AA818 /* Apple2App */;
+			targetProxy = AF2D4F8A13E91108002AA818 /* PBXContainerItemProxy */;
+		};
+		AF2D4F8D13E9111D002AA818 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF2D4D7F13E902F5002AA818 /* PhosphorApp */;
+			targetProxy = AF2D4F8C13E9111D002AA818 /* PBXContainerItemProxy */;
+		};
+		AF2D4F8F13E91127002AA818 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF9D4DEC09B5BB19006E59CF /* Apple2 */;
+			targetProxy = AF2D4F8E13E91127002AA818 /* PBXContainerItemProxy */;
+		};
 		AF32D9E10F3AD0B40080F535 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AF4808C0098C3B6C00FB32B8 /* jwxyz */;
@@ -22587,6 +23201,16 @@
 			isa = PBXTargetDependency;
 			target = AF32D9E00F3AD0B40080F535 /* RubikBlocks */;
 			targetProxy = AF32D9F80F3AD0D90080F535 /* PBXContainerItemProxy */;
+		};
+		AF3581C01431D47B00E09C51 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF4808C0098C3B6C00FB32B8 /* jwxyz */;
+			targetProxy = AF3581C11431D47B00E09C51 /* PBXContainerItemProxy */;
+		};
+		AF3581FC143330F900E09C51 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF4808C0098C3B6C00FB32B8 /* jwxyz */;
+			targetProxy = AF3581FD143330F900E09C51 /* PBXContainerItemProxy */;
 		};
 		AF35E88B0E63823600691F2F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -23958,6 +24582,11 @@
 			target = AFA5604A09936E2100F3E977 /* AntInspect */;
 			targetProxy = AF777A6409B660B700EA3033 /* PBXContainerItemProxy */;
 		};
+		AF78D176142DD8F3002AAF77 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF4808C0098C3B6C00FB32B8 /* jwxyz */;
+			targetProxy = AF78D177142DD8F3002AAF77 /* PBXContainerItemProxy */;
+		};
 		AF794F65099748450059A8B0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AF4808C0098C3B6C00FB32B8 /* jwxyz */;
@@ -24679,12 +25308,12 @@
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
 		};
-		AF9772E10989DFC6001F8B92 /* SaverTester.nib */ = {
+		AF9772E10989DFC6001F8B92 /* SaverRunner.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
 				AF9772E20989DFC6001F8B92 /* English */,
 			);
-			name = SaverTester.nib;
+			name = SaverRunner.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -24765,9 +25394,6 @@
 		AF137D420F075C9C004DE3B2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = Obsolete;
 			};
 			name = Debug;
@@ -24775,11 +25401,8 @@
 		AF137D430F075C9C004DE3B2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PRODUCT_NAME = Obsolete;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -24792,6 +25415,74 @@
 		AF1A17720D6D6EE3008AF328 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+			};
+			name = Release;
+		};
+		AF2D4D8D13E902F5002AA818 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_OBJC_GC = required;
+				INFOPLIST_FILE = OSX/SaverRunner.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PRODUCT_NAME = Phosphor;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		AF2D4D8E13E902F5002AA818 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_OBJC_GC = required;
+				INFOPLIST_FILE = OSX/SaverRunner.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PRODUCT_NAME = Phosphor;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		AF2D4F7C13E91093002AA818 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_OBJC_GC = required;
+				INFOPLIST_FILE = OSX/SaverRunner.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PRODUCT_NAME = Apple2;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		AF2D4F7D13E91093002AA818 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_OBJC_GC = required;
+				INFOPLIST_FILE = OSX/SaverRunner.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PRODUCT_NAME = Apple2;
+				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
 		};
@@ -24812,6 +25503,50 @@
 					"USE_GL=1",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
 				);
+			};
+			name = Release;
+		};
+		AF3581D31431D47B00E09C51 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"USE_GL=1",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
+				);
+				PRODUCT_NAME = CompanionCube;
+			};
+			name = Debug;
+		};
+		AF3581D41431D47B00E09C51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"USE_GL=1",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
+				);
+				PRODUCT_NAME = CompanionCube;
+			};
+			name = Release;
+		};
+		AF358214143330F900E09C51 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"USE_GL=1",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
+				);
+				PRODUCT_NAME = "TronBit";
+			};
+			name = Debug;
+		};
+		AF358215143330F900E09C51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"USE_GL=1",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
+				);
+				PRODUCT_NAME = "TronBit";
 			};
 			name = Release;
 		};
@@ -25448,22 +26183,15 @@
 		AF480ABB098C66E300FB32B8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "All Savers";
+				PRODUCT_NAME = "All Savers (XScreenSaver)";
 			};
 			name = Debug;
 		};
 		AF480ABC098C66E300FB32B8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				PRODUCT_NAME = "All Savers";
-				ZERO_LINK = NO;
+				PRODUCT_NAME = "All Savers (XScreenSaver)";
 			};
 			name = Release;
 		};
@@ -25482,10 +26210,6 @@
 		AF480D65098EED6E00FB32B8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "All Savers (XLockmore)";
 			};
 			name = Debug;
@@ -25493,21 +26217,14 @@
 		AF480D66098EED6E00FB32B8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "All Savers (XLockmore)";
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		AF480D68098EED6E00FB32B8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "All Savers (OpenGL)";
 			};
 			name = Debug;
@@ -25515,21 +26232,14 @@
 		AF480D69098EED6E00FB32B8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "All Savers (OpenGL)";
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		AF480D6B098EED6E00FB32B8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "All Savers";
 			};
 			name = Debug;
@@ -25537,11 +26247,8 @@
 		AF480D6C098EED6E00FB32B8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "All Savers";
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -25680,10 +26387,6 @@
 		AF4FF4950D52CA0800666F98 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = m6502.h;
 			};
 			name = Debug;
@@ -25691,11 +26394,8 @@
 		AF4FF4960D52CA0800666F98 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = m6502.h;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -26063,6 +26763,28 @@
 			};
 			name = Release;
 		};
+		AF78D187142DD8F3002AAF77 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"USE_GL=1",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
+				);
+				PRODUCT_NAME = Hilbert;
+			};
+			name = Debug;
+		};
+		AF78D188142DD8F3002AAF77 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"USE_GL=1",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
+				);
+				PRODUCT_NAME = Hilbert;
+			};
+			name = Release;
+		};
 		AF794F72099748450059A8B0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -26307,7 +27029,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_OBJC_GC = required;
-				INFOPLIST_FILE = OSX/SaverTester.plist;
+				INFOPLIST_FILE = OSX/SaverRunner.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -26323,7 +27045,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_OBJC_GC = required;
-				INFOPLIST_FILE = OSX/SaverTester.plist;
+				INFOPLIST_FILE = OSX/SaverRunner.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -26538,50 +27260,34 @@
 		AFA33BCC0B058754002B0E7D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INSTALL_PATH = "$(HOME)/bin";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Cocoa,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = "webcollage-helper";
-				ZERO_LINK = YES;
 			};
 			name = Debug;
 		};
 		AFA33BCD0B058754002B0E7D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INSTALL_PATH = "$(HOME)/bin";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Cocoa,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = "webcollage-helper";
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		AFA33C080B058E67002B0E7D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = webcollage;
 			};
 			name = Debug;
@@ -26589,11 +27295,8 @@
 		AFA33C090B058E67002B0E7D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = webcollage;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -27400,10 +28103,6 @@
 		AFA5611B099378EA00F3E977 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = molecules.h;
 			};
 			name = Debug;
@@ -27411,11 +28110,8 @@
 		AFA5611C099378EA00F3E977 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = molecules.h;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -28210,10 +28906,9 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_ENABLE_OBJC_GC = supported;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = OSX/xscreensaver_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -28232,7 +28927,6 @@
 					"CLASS=XScreenSaver${EXECUTABLE_NAME}View",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
 				);
-				"GCC_VERSION[sdk=macosx10.4][arch=*]" = 4.0;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -28258,14 +28952,13 @@
 					"$(LIBRARY_SEARCH_PATHS)",
 					"$(SRCROOT)/OSX/build/Debug",
 				);
-				PREBINDING = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.4;
-				"SDKROOT[arch=x86_64]" = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = OSX/build;
 				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR) $(USER_HEADER_SEARCH_PATHS)";
 				WARNING_CFLAGS = "-Wimplicit";
 				WRAPPER_EXTENSION = saver;
-				ZERO_LINK = YES;
 			};
 			name = Debug;
 		};
@@ -28273,8 +28966,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = NO;
 				GCC_ENABLE_OBJC_GC = supported;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = OSX/xscreensaver_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -28293,7 +28986,6 @@
 					"CLASS=XScreenSaver${EXECUTABLE_NAME}View",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
 				);
-				"GCC_VERSION[sdk=macosx10.4][arch=*]" = 4.0;
 				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -28319,10 +29011,10 @@
 					"$(LIBRARY_SEARCH_PATHS)",
 					"$(SRCROOT)/OSX/build/Debug",
 				);
-				PREBINDING = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.4;
-				"SDKROOT[arch=x86_64]" = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = OSX/build;
 				USER_HEADER_SEARCH_PATHS = "$(PROJECT_DIR) $(USER_HEADER_SEARCH_PATHS)";
 				WARNING_CFLAGS = "-Wimplicit";
 				WRAPPER_EXTENSION = saver;
@@ -28386,11 +29078,47 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		AF2D4D8C13E902F5002AA818 /* Build configuration list for PBXNativeTarget "PhosphorApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AF2D4D8D13E902F5002AA818 /* Debug */,
+				AF2D4D8E13E902F5002AA818 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AF2D4F7B13E91093002AA818 /* Build configuration list for PBXNativeTarget "Apple2App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AF2D4F7C13E91093002AA818 /* Debug */,
+				AF2D4F7D13E91093002AA818 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AF32D9F10F3AD0B40080F535 /* Build configuration list for PBXNativeTarget "RubikBlocks" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AF32D9F20F3AD0B40080F535 /* Debug */,
 				AF32D9F30F3AD0B40080F535 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AF3581D21431D47B00E09C51 /* Build configuration list for PBXNativeTarget "CompanionCube" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AF3581D31431D47B00E09C51 /* Debug */,
+				AF3581D41431D47B00E09C51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AF358213143330F900E09C51 /* Build configuration list for PBXNativeTarget "TronBit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AF358214143330F900E09C51 /* Debug */,
+				AF358215143330F900E09C51 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -29174,6 +29902,15 @@
 			buildConfigurations = (
 				AF7778B309B659C800EA3033 /* Debug */,
 				AF7778B409B659C800EA3033 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AF78D186142DD8F3002AAF77 /* Build configuration list for PBXNativeTarget "Hilbert" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AF78D187142DD8F3002AAF77 /* Debug */,
+				AF78D188142DD8F3002AAF77 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

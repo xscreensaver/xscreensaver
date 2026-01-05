@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1993-2008 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright (c) 1993-2011 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -112,6 +112,8 @@ struct saver_preferences {
   int pointer_hysteresis;	/* mouse motions less than N/sec are ignored */
 
   Bool dpms_enabled_p;		/* Whether to power down the monitor */
+  Bool dpms_quickoff_p;		/* Whether to power down monitor immediately
+				   in "Blank Only" mode */
   Time dpms_standby;		/* how long until monitor goes black */
   Time dpms_suspend;		/* how long until monitor power-saves */
   Time dpms_off;		/* how long until monitor powers down */
@@ -131,6 +133,7 @@ struct saver_preferences {
   Bool use_mit_saver_extension;
   Bool use_sgi_saver_extension;
   Bool use_proc_interrupts;
+  Bool use_xinput_extension;
 
   Bool getviewport_full_of_lies_p; /* XFree86 bug #421 */
 
@@ -188,8 +191,20 @@ struct saver_info {
 # ifdef HAVE_RANDR
   int randr_event_number;
   int randr_error_number;
+  Bool using_randr_extension;
 # endif
 
+  Bool using_xinput_extension;     /* Note that `p->use_*' is the *request*, */
+                                   /* and `si->using_*' is the *reality*.    */
+#ifdef HAVE_XINPUT
+  int xinput_ext_event_number;     /* may not be used */
+  int xinput_ext_error_number;
+  int xinput_DeviceButtonPress;    /* Extension device event codes.          */
+  int xinput_DeviceButtonRelease;  /* Assigned by server at runtime          */
+  int xinput_DeviceMotionNotify;
+  struct xinput_dev_info *xinput_devices;
+  int num_xinput_devices;
+# endif
 
   /* =======================================================================
      blanking

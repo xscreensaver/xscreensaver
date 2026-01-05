@@ -290,7 +290,6 @@ gen_blade_arcs (lockward_context *ctx)
 	there = M_PI * 2.0 / g_blades;
 	step = there / SUBDIV;
 	here -= SUBDIV * step / 2.0;
-	there -= SUBDIV * step / 2.0;
 
 	/*
 	 * Build outer blade arcs.
@@ -805,9 +804,6 @@ init_lockward (ModeInfo *mi)
 
 	glShadeModel (GL_FLAT);
 	glFrontFace (GL_CW);
-
-
-	glClearColor (0.0, 0.0, 0.0, 1.0);
 
 	ctx->blades_outer	= glGenLists (NRADII);
 	ctx->blades_inner	= glGenLists (NRADII);

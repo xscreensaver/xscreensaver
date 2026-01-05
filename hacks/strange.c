@@ -487,6 +487,7 @@ draw_strange(ModeInfo * mi)
 		A->Count = 0;
 	}
 	A->Col++;
+    mi->recursion_depth = A->Count;
 }
 
 
@@ -607,7 +608,7 @@ init_strange(ModeInfo * mi)
 	#define A Attractor
 	if (useAccumulator) {
 		XWindowAttributes xgwa;
-		int i,j,got_color;
+		int i,j;
 		XGetWindowAttributes (display, window, &xgwa);
 		/* cmap = xgwa.colormap; */
 		/* cmap = XCreateColormap(display, window, MI_VISUAL(mi), AllocAll); */
@@ -638,7 +639,7 @@ init_strange(ModeInfo * mi)
 				cols[i].green = 65536*(li-FULLBLUE)/(256-FULLBLUE);
 				cols[i].blue = 65535;
 			}
-			got_color = XAllocColor (display, xgwa.colormap, &cols[i]);
+			XAllocColor (display, xgwa.colormap, &cols[i]);
 			/*
 			if (!XAllocColor(MI_DISPLAY(mi), cmap, &cols[i])) {
 			if (!XAllocColor(display, cmap, &cols[i])) {

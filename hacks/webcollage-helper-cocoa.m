@@ -214,6 +214,7 @@ bevel_image (NSImage *img, int bevel_pct,
                 fraction: 1.0];
   [img unlockFocus];
 
+  [rep release];
   [bevel_img release];
 
   if (verbose_p)
@@ -374,12 +375,18 @@ main (int argc, char **argv)
   s = argv[i++]; if (1 != sscanf (s, " %d %c", &to_x, &dummy)) usage();
   s = argv[i++]; if (1 != sscanf (s, " %d %c", &to_y, &dummy)) usage();
   s = argv[i++]; if (1 != sscanf (s, " %d %c", &w, &dummy)) usage();
-  s = argv[i++]; if (1 != sscanf (s, " %d %c", &h, &dummy)) usage();
+  s = argv[i];   if (1 != sscanf (s, " %d %c", &h, &dummy)) usage();
 
   bevel_pct = 10; /* #### */
 
   if (w < 0) usage();
   if (h < 0) usage();
+
+  if (w == 0 || h == 0 || 
+      w > 10240 || h > 10240) {
+    fprintf (stderr, "%s: absurd size: %d x %d\n", progname, w, h);
+    exit (1);
+  }
 
 
   // Much of Cocoa needs one of these to be available.

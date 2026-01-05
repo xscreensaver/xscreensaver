@@ -1,5 +1,5 @@
 /* glblur --- radial blur using GL textures
- * Copyright (c) 2002-2008 Jamie Zawinski <jwz@jwz.org>
+ * Copyright (c) 2002-2011 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -278,7 +278,7 @@ overlay_blur_texture (ModeInfo *mi)
   GLfloat inc = 0.02 * (25.0 / times);
 
   GLfloat spost = 0;		    /* starting texture coordinate offset */
-  GLfloat alpha_inc = 0.9 / times;  /* transparency fade factor */
+  GLfloat alpha_inc;		    /* transparency fade factor */
   GLfloat alpha = 0.2;		    /* initial transparency */
 
   glDisable (GL_TEXTURE_GEN_S);
@@ -402,6 +402,7 @@ init_glblur (ModeInfo *mi)
   bp->glx_context = init_GL(mi);
 
   reshape_glblur (mi, MI_WIDTH(mi), MI_HEIGHT(mi));
+  clear_gl_error(); /* WTF? sometimes "invalid op" from glViewport! */
 
   if (!wire)
     {

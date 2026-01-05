@@ -1,4 +1,4 @@
-/* sonar, Copyright (c) 1998-2008 Jamie Zawinski and Stephen Martin
+/* sonar, Copyright (c) 1998-2011 Jamie Zawinski and Stephen Martin
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -559,9 +559,11 @@ static void
 copy_and_insert_bogie (sonar_sensor_data *ssd, sonar_bogie *b,
                        sonar_bogie **to_list)
 {
-  sonar_bogie *ob, *prev;
+  sonar_bogie *ob, *next;
   if (!b) abort();
-  for (prev = 0, ob = *to_list; ob; prev = ob, ob = ob->next)
+  for (ob = *to_list, next = ob ? ob->next : 0; 
+       ob; 
+       ob = next, next = ob ? ob->next : 0)
     {
       if (ob == b) abort();   /* this will end badly */
       if (!strcmp (ob->name, b->name))  /* match! */
@@ -824,6 +826,7 @@ init_sonar (ModeInfo *mi)
   sp->glx_context = init_GL(mi);
 
   reshape_sonar (mi, MI_WIDTH(mi), MI_HEIGHT(mi));
+  clear_gl_error(); /* WTF? sometimes "invalid op" from glViewport! */
 
   if (!wire)
     {
