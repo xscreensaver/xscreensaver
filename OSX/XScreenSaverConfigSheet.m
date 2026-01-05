@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 2006-2022 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2006-2023 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -28,6 +28,7 @@
 
 #import "jwxyz.h"
 #import "InvertedSlider.h"
+#import "nslog.h"
 
 #ifdef HAVE_IPHONE
 # define NSView      UIView
@@ -1579,6 +1580,9 @@ hreffify (NSText *nstext)
                                    inverted: [cvt isEqualToString:@"invert"]
                                    ratio:    [cvt isEqualToString:@"ratio"]
                                    integers: !float_p];
+    // Fortunately 'doubleValue' does not use locale-specific number parsing
+    // the way that sscanf %f does.  doubleValue always expects "1.0", but
+    // sscanf expects "1,0" if LC_NUMERIC is e.g. "de_DE".
     [slider setMaxValue:[high doubleValue]];
     [slider setMinValue:[low  doubleValue]];
     if (step_by)
@@ -2839,14 +2843,14 @@ find_text_field_of_button (NSButton *button)
     [x]  Check for Updates  [ Monthly ]
 
   <hgroup>
-   <boolean id="automaticallyChecksForUpdates"
+   <boolean id="SUAutomaticallyUpdate"
             _label="Automatically check for updates"
-            arg-unset="-no-automaticallyChecksForUpdates" />
-   <select id="updateCheckInterval">
-    <option="hourly"  _label="Hourly" arg-set="-updateCheckInterval 3600"/>
-    <option="daily"   _label="Daily"  arg-set="-updateCheckInterval 86400"/>
-    <option="weekly"  _label="Weekly" arg-set="-updateCheckInterval 604800"/>
-    <option="monthly" _label="Monthly" arg-set="-updateCheckInterval 2629800"/>
+            arg-unset="-no-SUAutomaticallyUpdate" />
+   <select id="SUScheduledCheckInterval">
+    <option="hourly" _label="Hourly" arg-set="-SUScheduledCheckInterval 3600"/>
+    <option="daily"  _label="Daily"  arg-set="-SUScheduledCheckInterval 86400"/>
+    <option="weekly" _label="Weekly" arg-set="-SUScheduledCheckInterval 604800"/>
+    <option="monthly" _label="Monthly" arg-set="-SUScheduledCheckInterval 2629800"/>
    </select>
   </hgroup>
    */

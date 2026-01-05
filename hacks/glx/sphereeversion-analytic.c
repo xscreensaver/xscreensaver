@@ -955,7 +955,7 @@ static void setup_surface_colors(ModeInfo *mi, float phi_min, float phi_max,
     }
   }
 #ifdef VERTEXATTRIBARRAY_WORKAROUND
-  else /* se->colors[0] == COLORS_TWOSIDED || se->colors[0] == COLORS_EARTH*/
+  else /* se->colors[0] == COLORS_TWOSIDED || se->colors[0] == COLORS_EARTH */
   {
     /* For some strange reason, the color buffer must be initialized
        and used on macOS. Otherwise two-sided lighting will not
@@ -1374,9 +1374,7 @@ static int bednorz_sphere_eversion_ff(ModeInfo *mi, float phi_min,
   {
     glColor4f(1.0f,1.0f,1.0f,1.0f);
     glLineWidth(2.0f);
-# ifndef GL_LINE_SMOOTH_BROKEN
     glEnable(GL_LINE_SMOOTH);
-# endif
     glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_LIGHTING);
     glDisable(GL_LIGHT0);
@@ -1426,9 +1424,7 @@ static int bednorz_sphere_eversion_ff(ModeInfo *mi, float phi_min,
     }
     glLineWidth(1.0f);
     glPolygonOffset(0.0f,0.0f);
-# ifndef GL_LINE_SMOOTH_BROKEN
     glDisable(GL_LINE_SMOOTH);
-# endif
     glBlendFunc(GL_SRC_ALPHA,GL_ONE);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);

@@ -1,4 +1,4 @@
-/* xscreensaver-systemd, Copyright (c) 2019-2022
+/* xscreensaver-systemd, Copyright (c) 2019-2023
  * Martin Lucina <martin@lucina.net> and Jamie Zawinski <jwz@jwz.org>
  *
  * ISC License
@@ -240,6 +240,12 @@
  *
  *     Apparently makes no attempt to inhibit the screen saver.
  *
+ *     Update, Sep 2023: rumor has it that this works with some versions.
+ *     I have not verified this:
+ *
+ *       ~/.mplayer/config:
+ *       heartbeat-cmd="xscreensaver-command -deactivate >&- 2>&- &"
+ *
  *
  *****************************************************************************
  *
@@ -257,6 +263,25 @@
  *     Inhibits, then uninhibits and immediately reinhibits every 30 seconds
  *     forever.  Sometimes it identifies as "Steam", sometimes as "My SDL
  *     application", AKA "Baby's First Hello World".  Perfect, no notes.
+ *
+ *
+ *****************************************************************************
+ *
+ * XFCE Power Manager Presentation Mode:
+ *
+ *     This setting prevents the screen from blanking, and has a long history
+ *     of becoming turned on accidentally. Tries org.freedesktop.ScreenSaver
+ *     and others before falling back to "xscreensaver-command -deactivate"
+ *     as a heartbeat.
+ *
+ *
+ *****************************************************************************
+ *
+ * Kodi / XMBC:
+ *
+ *     Apparently makes no attempt to inhibit the screen saver.
+ *     There are some third party extensions that fix that, e.g.
+ *     "kodi-prevent-xscreensaver".
  *
  *
  *****************************************************************************
@@ -613,6 +638,10 @@ xscreensaver_unlock_cb (sd_bus_message *m, void *arg, sd_bus_error *ret_error)
 /* Is this "reason" string one that means we should inhibit blanking?
    If the string is e.g. "audio-playing", (Firefox) the answer is no.
    If the string is "Download in progress", (Chromium) the answer is no.
+   Likewise, GEdit sends "There are unsaved documents", which is apparently
+   an attempt for it to inhibit *logout*, which is reasonable, rather than
+   an attempt to inhibit *blanking*, which is not.  I don't know how to tell
+   them apart.
  */
 static Bool
 good_reason_p (const char *s)
@@ -621,6 +650,7 @@ good_reason_p (const char *s)
   if (strcasestr (s, "video")) return True;
   if (strcasestr (s, "audio")) return False;
   if (strcasestr (s, "download")) return False;
+  if (strcasestr (s, "unsaved")) return False;
   return True;
 }
 

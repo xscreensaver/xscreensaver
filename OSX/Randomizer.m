@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 2020-2022 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2020-2023 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -14,8 +14,14 @@
  */
 
 #import "Randomizer.h"
+#import "XScreenSaverView.h"
 #import "yarandom.h"
 #include <sys/sysctl.h>
+#import "nslog.h"
+
+#define VENTURA_KLUDGE
+#define SONOMA_KLUDGE
+#undef  CATCH_SIGNALS
 
 # undef ya_rand_init
 # undef abort
@@ -62,7 +68,8 @@ screen_id (NSScreen *screen)
     // This returns the EDID as a 256-bytes binary blob that contains, among
     // other things, the manufacturer, product ID, and unique serial number.
     //
-    edid = [d2 objectForKey:[NSString stringWithUTF8String:kIODisplayEDIDKey]];
+    edid = [[d2 objectForKey:[NSString stringWithUTF8String:kIODisplayEDIDKey]]
+             retain];
 
     // Now get the human-readable name of the screen.
     // The dict has an entry like: "DisplayProductName": { "en_US": "iMac" };
@@ -96,7 +103,7 @@ screen_id (NSScreen *screen)
     bin[1] = CGDisplayModelNumber  (id);
     bin[2] = CGDisplaySerialNumber (id);
     if (bin[0] || bin[1] || bin[2])
-      edid = [NSData dataWithBytes:bin length:sizeof(bin)];
+      edid = [[NSData dataWithBytes:bin length:sizeof(bin)] retain];
   }
 
   if (!name || !name.length) {
@@ -116,13 +123,14 @@ screen_id (NSScreen *screen)
     // If we weren't able to find the EDID at all, use the display name, size
     // and position, and hope that is invariant across boots.  Good luck!
     //
-    edid = [[NSString stringWithFormat:@"%dx%d @ %d+%d, %@",
-                      (int) screen.frame.size.width,
-                      (int) screen.frame.size.height,
-                      (int) screen.frame.origin.x, 
-                      (int) screen.frame.origin.y,
-                      name]
-             dataUsingEncoding: NSUTF8StringEncoding];
+    edid = [[[NSString stringWithFormat:@"%dx%d @ %d+%d, %@",
+                       (int) screen.frame.size.width,
+                       (int) screen.frame.size.height,
+                       (int) screen.frame.origin.x, 
+                       (int) screen.frame.origin.y,
+                       name]
+              dataUsingEncoding: NSUTF8StringEncoding]
+             retain];
   }
 
   //
@@ -135,8 +143,9 @@ screen_id (NSScreen *screen)
     const char *bytes = [edid bytes];
     unsigned char out[CC_SHA256_DIGEST_LENGTH + 1];
     CC_SHA256 (bytes, edid.length, out);
-    edid = [NSData dataWithBytes: out
-                          length: CC_SHA256_DIGEST_LENGTH];
+    edid = [[NSData dataWithBytes: out
+                           length: CC_SHA256_DIGEST_LENGTH]
+             retain];
   }
 
   NSString *b64 = [edid base64EncodedStringWithOptions:0];
@@ -217,12 +226,23 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
   NSArray *bundle_paths_enabled;
   BOOL first_time_p;
   int fade_duration;
+  Bool animating_p;
+  Bool preview_p;
   NSTextField *crash_label;
   enum { JUMPCUT, FADE, CROSSFADE } crossfade_mode;
 }
 
+#ifdef VENTURA_KLUDGE   // Duplicated in XScreenSaverView.m
+static NSMutableArray *all_saver_views = NULL;
+#endif
+
+
 - (id)initWithFrame:(NSRect)frame isPreview:(BOOL)p
 {
+  NSLog (@"%@: initWithFrame %gx%g+%g+%g, %d", [self blurb],
+         frame.size.width, frame.size.height, frame.origin.x, frame.origin.y,
+         p);
+
   // On macOS 10.15, isPreview is always YES, so if the window is big,
   // assume it should be NO.  Fixed in macOS 11.0.
   if (p && frame.size.width >= 640)
@@ -236,11 +256,10 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
 
   ya_rand_init (0);
 
-  first_time_p = TRUE;
-
+  preview_p      = p;
+  first_time_p   = TRUE;
   crossfade_mode = CROSSFADE;  // Maybe make this a preference?
-
-  fade_duration = 5;
+  fade_duration  = 5;
 
   NSBundle *nsb = [NSBundle bundleForClass:[self class]];
   NSAssert1 (nsb, @"no bundle for class %@", [self class]);
@@ -257,7 +276,9 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
     // entries rather than setting them to 0. Oh well. Bummer.
     @"saver_albumartwork_disabled":    [NSNumber numberWithBool:TRUE],
     @"saver_floatingmessage_disabled": [NSNumber numberWithBool:TRUE],
+    @"saver_hello_disabled":           [NSNumber numberWithBool:TRUE],
     @"saver_itunesartwork_disabled":   [NSNumber numberWithBool:TRUE],
+    @"saver_monterey_disabled":        [NSNumber numberWithBool:TRUE],
     @"saver_wordoftheday_disabled":    [NSNumber numberWithBool:TRUE],
   };
   NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:100];
@@ -296,9 +317,10 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
   crash_label.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
   [crash_label retain];
 
+#if 0
 # ifndef __OPTIMIZE__
   // Dump the entire resource database.
-  NSLog(@"defaults for %@", name);
+  NSLog (@"%@: defaults for %@", [self blurb], name);
   NSDictionary *d = [[prefs defaults] dictionaryRepresentation];
   for (NSObject *key in [[d allKeys]
                           sortedArrayUsingSelector:@selector(compare:)]) {
@@ -307,6 +329,86 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
   }
     NSLog (@"---");
 # endif
+#endif
+
+#ifdef VENTURA_KLUDGE
+  if (! p) {  // isPreview
+    if (!all_saver_views) {
+      all_saver_views = [[NSMutableArray arrayWithCapacity:20] retain];
+      [NSTimer scheduledTimerWithTimeInterval: 1  // must be > 0
+                                       target: self
+                                     selector: @selector(venturaLaunchKludge:)
+                                     userInfo: nil
+                                      repeats: NO];
+    }
+    if (! [all_saver_views containsObject:self])
+      [all_saver_views addObject:self];
+  }
+#endif  // VENTURA_KLUDGE
+
+# ifdef SONOMA_KLUDGE   // Duplicated in XScreenSaverView.m
+
+  /* Oct 2023, macOS 14.0: we get startAnimation on each screen, but
+     stopAnimation is never called, and our process (legacyScreenSaver)
+     never exits.  This means that the screen saver just keeps running
+     forever in the background on an invisible window, burning CPU!
+
+     That invisible window is both 'visible' and 'onActiveSpace', and has
+     no parentWindow, so its invisibility is not detectable.
+
+     However, there is a "com.apple.screensaver.willstop" notification and
+     from that we can intuit that we should send ourselves stopAnimation.
+
+     Except, stopAnimation() isn't great for a couple of reasons:
+
+     First: after a few days, the legacyScreenSaver module might have all
+     250+ screen saver bundles loaded.  Aside from their memory usage and
+     static code, there is also an open file handle for each bundle, and
+     each resource in each bundle.
+
+     Second: somehow, legacyScreenSaver is managing to send animateOneFrame
+     messages to savers that have already been stopped upon previous runs.
+     Maybe it is holding on to old, expired copies of Randomizer and
+     re-running those?  So, screw it, let's just exit() instead.
+
+   */
+  if (!p) {
+    [[NSDistributedNotificationCenter defaultCenter]
+        addObserverForName: @"com.apple.screensaver.willstop"
+                    object: nil
+                     queue: nil
+                usingBlock:^(NSNotification *n) {
+        if ([self isAnimating]) {
+          NSLog (@"%@: received %@", [self blurb], [n name]);
+          [self stopAnimation];
+        } else {
+          NSLog (@"%@: received %@ but already stopped",
+                 [self blurb], [n name]);
+        }
+        NSLog (@"%@: exiting", [self blurb]);
+        [[NSApplication sharedApplication] terminate:self];
+      }];
+
+    // Do it before sleeping as well.  This is redundant, I think.
+    // On macOS 14.0 we *do* receive stopAnimation before suspend, but even
+    // if we didn't, it would just mean that savers would keep running for
+    // a fraction of a second between un-suspend and un-blank.
+    //
+    [[[NSWorkspace sharedWorkspace] notificationCenter]
+        addObserverForName: NSWorkspaceWillSleepNotification
+                    object: nil
+                     queue: nil
+                usingBlock:^(NSNotification *n) {
+        if ([self isAnimating]) {
+          NSLog (@"%@: received %@", [self blurb], [n name]);
+          [self stopAnimation];
+        } else {
+          NSLog (@"%@: received %@ but already stopped",
+                 [self blurb], [n name]);
+        }
+      }];
+  }
+# endif // SONOMA_KLUDGE
 
   return self;
 }
@@ -351,7 +453,7 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
       // only take the first one seen.  $HOME overrides System.
       NSString *o = [seen objectForKey:[name lowercaseString]];
       if (o) {
-        // NSLog(@"omitting %@ for %@", p, o);
+        // NSLog(@"%@: omitting %@ for %@", [self blurb], p, o);
         continue;
       }
 
@@ -360,7 +462,7 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
       NSString *res = resource_key_for_name (name, FALSE, NULL);
       BOOL disabled = get_boolean (res, prefs);
       if (disabled) {
-        // NSLog(@"disabled: %@", name);
+        // NSLog(@"%@: disabled: %@", [self blurb], name);
       } else {
         [paths_enabled addObject: p];
       }
@@ -369,7 +471,7 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
     }
 
     if (count)
-      NSLog(@"found %d in %@", count, dir);
+      NSLog(@"%@: found %d in %@", [self blurb], count, dir);
   }
 
   [seen release];
@@ -389,9 +491,23 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
   BOOL enabled_p = !get_boolean (key, prefs);
   if (!enabled_p && verbose) {
     NSString *desc = [aa objectAtIndex:1];
-    NSLog (@"savers disabled on screen %@ (%@)", key, desc);
+    NSLog (@"%@: savers disabled on %@", [self blurb], desc);
   }
   return enabled_p;
+}
+
+
+- (NSString *) blurb { return [self blurb: self.window]; }
+
+- (NSString *) blurb: (NSWindow *)w
+{
+  NSString *s = @"Randomizer";
+  if (@available (macOS 10.15, *)) {
+    NSString *n = (w && w.screen ? [w.screen localizedName] : nil);
+    if (n && n.length)
+      s = [NSString stringWithFormat: @"%@: %@", s, n];
+  }
+  return s;
 }
 
 
@@ -406,11 +522,11 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
     return nil;
 
   if ([self isPreview]) {
-    NSLog(@"loading built-in saver");
+    NSLog(@"%@: loading built-in saver", [self blurb]);
     sclass = [RandomizerAttractMode class];
   } else {
     if (! [bundle_paths_enabled count]) {
-      // NSLog(@"no savers available");
+      // NSLog(@"@: no savers available", [self blurb]);
       [[NSException exceptionWithName: NSInternalInconsistencyException
                                reason: @"no savers available"
                              userInfo: nil]
@@ -418,7 +534,7 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
     } else {
       path = [bundle_paths_enabled objectAtIndex:
                (random() % [bundle_paths_enabled count])];
-      NSLog(@"loading saver %@", path);
+      NSLog(@"%@: loading saver %@", [self blurb], path);
       NSBundle *bundle = [NSBundle bundleWithPath:path];
       if (bundle)
         sclass = [bundle principalClass];
@@ -426,7 +542,7 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
   }
 
   if (! sclass) {
-    //NSLog(@"no class in bundle: %@", path);
+    //NSLog(@"%@: no class in bundle: %@", [self blurb], path);
     [[NSException exceptionWithName: NSInternalInconsistencyException
                              reason: [NSString stringWithFormat: 
                                            @"no class in bundle: %@", path]
@@ -438,22 +554,34 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
     
     frame.origin.x = frame.origin.y = 0;  // frame -> bounds
 
-   if ([saver2 respondsToSelector:
-                 @selector(initWithFrame:isPreview:saverBundlePaths:)]) {
-     saver2 = [(RandomizerAttractMode *) saver2
-                     initWithFrame: frame
-                         isPreview: [self isPreview]
-                  saverBundlePaths: bundle_paths_all];
-   } else if ([saver2 respondsToSelector: @selector(initWithFrame:isPreview:)])
-       saver2 = [(ScreenSaverView *) saver2
-                    initWithFrame: frame
-                        isPreview: [self isPreview]];
-    else
+    if ([saver2 respondsToSelector:
+                  @selector(initWithFrame:isPreview:saverBundlePaths:)]) {
+      saver2 = [(RandomizerAttractMode *) saver2
+                   initWithFrame: frame
+                       isPreview: [self isPreview]
+                saverBundlePaths: bundle_paths_all];
+# ifdef VENTURA_KLUDGE
+    } else if ([saver2 respondsToSelector:
+                         @selector(initWithFrame:isPreview:randomizer:)]) {
+      // Inform XScreenSaverView that it has been invoked by Randomizer,
+      // so that it does not try to process VENTURA_KLUDGE a second time.
+      saver2 = [(XScreenSaverView *) saver2
+                   initWithFrame: frame
+                       isPreview: [self isPreview]
+                      randomizer: TRUE];
+# endif // VENTURA_KLUDGE
+    } else if ([saver2 respondsToSelector:
+                         @selector(initWithFrame:isPreview:)]) {
+      saver2 = [(ScreenSaverView *) saver2
+                   initWithFrame: frame
+                       isPreview: [self isPreview]];
+    } else {
       saver2 = 0;
+    }
   }
 
   if (! saver2) {
-    //NSLog(@"unable to instantiate: %@", path);
+    //NSLog(@"%@: unable to instantiate: %@", [self blurb], path);
     [[NSException exceptionWithName: NSInternalInconsistencyException
                              reason: [NSString stringWithFormat: 
                                            @"unable to instantiate: %@", path]
@@ -466,9 +594,11 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
   [saver2 retain];
   [saver2 setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 
+# ifdef CATCH_SIGNALS
   // XScreenSaverView catches signals in initWithFrame (to log a backtrace)
   // so we have to catch our signals after that.
   [self initSignalHandlers];
+# endif
 
   return saver2;
 }
@@ -477,7 +607,8 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
 - (void) handleException: (NSException *)e in:(NSObject *)o
 {
   // This will catch calls to abort and exit (via jwxyz_abort) but not SEGV.
-  NSLog (@"Caught exception %@: %@",
+  NSLog (@"%@: Caught exception %@: %@",
+         [self blurb],
          (o ? [o className] : @"<null>"),
          [e reason]);
   [crash_label setStringValue:
@@ -493,46 +624,58 @@ resource_key_for_name (NSString *s, BOOL screen_p, NSDictionary *screen_ids)
 }
 
 
-// Throwing an exception from a signal handler is a terrible idea, but my
-// thinking was, "it might work, and what's the worst that can happen?
-// We crash anyway?"  Well, it turns out, the exception is caught, the
-// error text shows up on the screen, and after that we're hung and you
-// can't unlock the screen.  So... that's worse.
-//
-// But let's try re-invoking the current process on signal, and just 
-// restarting legacyScreenSaver or whatever from scratch.  Maybe that
-// will work?  Nope.  The re-exec works under SaverTester, but when
-// legacyScreenSaver is re-exec'd with the same args, the savers do
-// not re-launch.
-//
-#if 1
+#ifdef CATCH_SIGNALS
 
 static int saved_argc = 0;
 static char **saved_argv, *saved_execpath;
-
 
 static void
 sighandler (int sig)
 {
   signal (sig, SIG_DFL);
 
-  const char *s = "randomizer caught signal\n";
-  write (fileno (stderr), s, strlen(s));  // no fprintf in signal handler
+  char s[100];	// no fprintf in signal handler
+  strcpy (s, "Randomizer: signal ");
+  strcat (s, sys_signame[sig]);
+  strcat (s, "\n");
+  write (fileno (stderr), s, strlen(s));
 
 # if 0
+  // Throwing an exception from a signal handler is a terrible idea, but my
+  // thinking was, "it might work, and what's the worst that can happen?
+  // We crash anyway?"  Well, it turns out, the exception is caught, the
+  // error text shows up on the screen, and after that we're hung and you
+  // can't unlock the screen.  So... that's worse.
+  //
+  // macOS 14.0 update: throwing the exception no longer hangs, but nor
+  // does it make the error message show up.
+  //
   [[NSException exceptionWithName: NSInternalInconsistencyException
                            reason: [NSString stringWithFormat: @"Signal %s",
                                              sys_signame[sig]]
                          userInfo: nil]
     raise];
-# else
+# elif 0
+  // Ok, let's try re-invoking the current process on signal, and just
+  // restarting legacyScreenSaver or whatever from scratch.  Maybe that
+  // will work?  Nope.  The re-exec works under SaverTester, but when
+  // legacyScreenSaver is re-exec'd with the same args, the savers do
+  // not re-launch.
+  //
   if (saved_argc) {
-    NSLog (@"randomizer: signal: re-executing %s", saved_execpath);
+    NSLog (@"randomizer: signal %s: re-executing %s",
+           sys_signame[sig], saved_execpath);
     execvp (saved_execpath, saved_argv);
     // Somehow after the exec, SIGTERM stops working. So that's great.
-#  undef exit
+#   undef exit
     exit (1);
   }
+# elif 0
+  // Nope, this doesn't work either.
+  system ("open -a ScreenSaverEngine");
+# else
+  // Even this doesn't work.
+  NSLog (@"%s", s);
 # endif
 }
 
@@ -544,9 +687,10 @@ catch_signal (int sig, void (*handler) (int))
   sigemptyset (&a.sa_mask);
   a.sa_flags = SA_NODEFER;
 
-# if 0				// This isn't working
+# if 0
+  // This should allow us to handle a signal on the main stack instead of
+  // the signal stack, but it doesn't work.
   a.sa_handler = SIG_IGN;
-
   dispatch_source_t src = 
     dispatch_source_create (DISPATCH_SOURCE_TYPE_SIGNAL, sig, 0,
                             dispatch_get_global_queue (0, 0));
@@ -603,17 +747,15 @@ catch_signal (int sig, void (*handler) (int))
 //catch_signal (SIGKILL, sighandler);  // -9 untrappable
   catch_signal (SIGXCPU, sighandler);
   catch_signal (SIGXFSZ, sighandler);
-  NSLog (@"randomizer: installed signal handlers for %s", saved_execpath);
+  NSLog (@"%@: installed signal handlers for %s", [self blurb], saved_execpath);
   return;
 
  ERR:
   saved_argc = 0;
-  NSLog (@"randomizer: error getting argv");
+  NSLog (@"%@: error getting argv", [self blurb]);
 }
 
-#else
-- (void) initSignalHandlers {}
-#endif
+#endif // CATCH_SIGNALS
 
 
 - (void)unloadSaver:(BOOL)firstp
@@ -622,7 +764,7 @@ catch_signal (int sig, void (*handler) (int))
   cycle_timer = 0;
   ScreenSaverView *ss = (firstp ? saver1 : saver2);
   if (!ss) return;
-  NSLog(@"unloading saver %@", [ss className]);
+  NSLog(@"%@: unloading saver %@", [self blurb], [ss className]);
 
   @try { if ([ss isAnimating]) [ss stopAnimation]; }
   @catch (NSException *e) { [self handleException:e in:ss]; }
@@ -657,12 +799,18 @@ catch_signal (int sig, void (*handler) (int))
     @catch (NSException *e) { [self handleException:e in:nil]; }
 
     if (saver1) {
-      [self addSubview: saver1];
-      saver1.alphaValue = 1;
-      [self.window makeFirstResponder: saver1];
+      @try {
+        [self addSubview: saver1];    // Sometimes gets "invalid GL context"
+        saver1.alphaValue = 1;
+        [self.window makeFirstResponder: saver1];
+      }
+      @catch (NSException *e) {
+        [self handleException:e in:saver1];
+        [self unloadSaver: TRUE];
+      }
     }
-    [self launchCycleTimer];
 
+    [self launchCycleTimer];
 
     break;
 
@@ -695,11 +843,20 @@ catch_signal (int sig, void (*handler) (int))
     }
 
     if (saver1)
-      NSLog(@"crossfade %@ to %@", [saver1 className], [saver2 className]);
+      NSLog(@"%@: crossfade %@ to %@", [self blurb],
+            [saver1 className], [saver2 className]);
     else
-      NSLog(@"fade in %@", [saver2 className]);
+      NSLog(@"%@: fade in %@", [self blurb], [saver2 className]);
 
-    [self addSubview: saver2];
+    @try {
+      [self addSubview: saver2];    // Sometimes gets "invalid GL context"
+    }
+    @catch (NSException *e) {
+      [self handleException:e in:saver2];
+      [self unloadSaver: FALSE];
+      return;
+    }
+    
     saver2.alphaValue = 0;
 
     @try { [saver2 startAnimation]; }
@@ -769,6 +926,14 @@ catch_signal (int sig, void (*handler) (int))
 
 - (void)launchCycleTimer
 {
+  if (cycle_timer) [cycle_timer invalidate];
+  cycle_timer = 0;
+
+  if (! [self isAnimating]) {
+    NSLog (@"%@: not animating, not launching cycle timer", [self blurb]);
+    return;
+  }
+
   // Parse the cycle time out of whatever garbage is in preferences.
   //
   NSObject *o = [[prefs defaults] objectForKey: @CYCLE_TIME];
@@ -807,14 +972,13 @@ catch_signal (int sig, void (*handler) (int))
     if (t2 > max) t2 = max;
     double off = (enabled_screens ? t2 * which_enabled / enabled_screens : 0);
     interval += off;
-    if (off) NSLog(@"screen %d cycle offset: %d sec", which_screen, (int) off);
+    if (off)
+      NSLog (@"%@: screen %d cycle offset: %d sec",
+             [self blurb], which_screen, (int) off);
   }
 
-  if (cycle_timer) [cycle_timer invalidate];
-  cycle_timer = 0;
-
   if (! [self isPreview]) {
-    NSLog(@"cycle_timer %.1f", interval);
+    NSLog (@"%@: cycle_timer %.1f", [self blurb], interval);
     cycle_timer =
       [NSTimer scheduledTimerWithTimeInterval: interval
                                        target: self
@@ -827,11 +991,18 @@ catch_signal (int sig, void (*handler) (int))
 
 - (void)cycleSaver
 {
-  NSLog(@"cycle timer");
   if (cycle_timer) [cycle_timer invalidate];
   cycle_timer = 0;
+
   [crash_label removeFromSuperview];
   [crash_label setStringValue:@""];
+
+  if (! [self isAnimating]) {
+    NSLog (@"%@: not animating, not cycling", [self blurb]);
+    return;
+  }
+
+  NSLog(@"%@: cycle timer", [self blurb]);
   [self fadeSaverOut];
 }
 
@@ -855,6 +1026,16 @@ catch_signal (int sig, void (*handler) (int))
 
 - (void)startAnimation
 {
+  if ([self isAnimating]) {
+    NSLog (@"%@: startAnimation called while animating", [self blurb]);
+    return;
+    // [self stopAnimation];
+  } else {
+    NSLog (@"%@: startAnimation", [self blurb]);
+  }
+
+  animating_p = TRUE;
+
   // Do the initial load of the saver here rather than in initWithFrame
   // so that we have self.window and check whether this screen is disabled.
   //
@@ -883,6 +1064,13 @@ catch_signal (int sig, void (*handler) (int))
 
 - (void)stopAnimation
 {
+  if ([self isAnimating])
+    NSLog (@"%@: stopAnimation", [self blurb]);
+  else
+    NSLog (@"%@: stopAnimation but already stopped", [self blurb]);
+
+  animating_p = FALSE;
+
   if (cycle_timer) [cycle_timer invalidate];
   cycle_timer = 0;
 
@@ -906,29 +1094,21 @@ catch_signal (int sig, void (*handler) (int))
 }
 
 
-- (BOOL)isAnimating
-{
-  BOOL a = FALSE;
-  if      (saver1) a = [saver1 isAnimating];
-  else if (saver2) a = [saver2 isAnimating];
-  return a;
-}
-
-
-- (BOOL)isPreview
-{
-  BOOL p = [super isPreview];
-  if      (saver1) p = [saver1 isPreview];
-  else if (saver2) p = [saver2 isPreview];
-  return p;
-}
+// Originally this just returned whether either saver1 or saver2 was
+// animating, but since, as of macOS 14.0, legacyScreenSaver never exits,
+// we need to track whether we *should* be animating instead, or there
+// can be a race with crossfades that results in savers running when they
+// should be dead.
+//
+- (BOOL) isAnimating { return animating_p; }
+- (BOOL) isPreview   { return preview_p;   }
 
 
 - (void)animateOneFrame
 {
 #if 0
   if (! (random() % 2000)) {
-    NSLog(@"randomizer: BOOM ####");
+    NSLog(@"%@: BOOM ####", [self blurb]);
     // int x = 123; char segv = * ((char *)x);
     #undef abort
     abort();
@@ -961,18 +1141,150 @@ catch_signal (int sig, void (*handler) (int))
    Dec 2020, noticed that this also happens on 10.14.6 when *not* in random
    mode.  Both System Preferences and ScreenSaverEngine fail to call
    StartAnimation.
+
+   June 2023, macOS 13.4: On a system with 3 screens, initWithFrame is called
+   on every screen, but viewDidMoveToWindow is called only on screen 3 -- but
+   that screen's view has the frame of screen 1!  So we get only one saver
+   running, and it is the wrong size.  We detect and correct this insanity
+   with the VENTURA_KLUDGE stuff.
  */
 - (void) viewDidMoveToWindow
 {
-  if (self.window)
+  NSLog (@"%@: viewDidMoveToWindow", [self blurb]);
+  if (self.window &&
+      self.window.frame.size.width  > 0 &&
+      self.window.frame.size.height > 0)
     [self startAnimation];
 }
 
 - (void) viewWillMoveToWindow:(NSWindow *)window
 {
+  NSLog (@"%@: viewWillMoveToWindow", [self blurb: window]);
   if (window == nil)
     [self stopAnimation];
 }
+
+
+#ifdef VENTURA_KLUDGE
+/* Correct the insane shit that LegacyScreenSaver is throwing at us now.
+   We keep track of each ScreenSaverView that was created; and then a little
+   while after startup, we check to see which of those views have not been
+   attached to windows, or have the wrong geometry.
+   Duplicated in XScreenSaverView.m.
+ */
+- (void) venturaLaunchKludge: (NSTimer *) timer
+{
+  NSArray<NSWindow *> *windows = [NSApplication sharedApplication].windows;
+
+  const char *tag = "Ventura kludge";
+
+  // First log what was wrong.
+  //
+  int i = 0;
+  for (NSWindow *w in windows) {
+    NSView *v = NULL;
+    i++;
+
+    // Find the XScreenSaverView on this window.
+    for (NSView *v1 in all_saver_views) {
+      if (w.contentView == v1.superview) {
+        v = v1;
+        break;
+      }
+    }
+
+    if (!v) {
+      NSLog (@"%@: %s: screen %d %gx%g+%g+%g had no saver view",
+             [self blurb], tag, i,
+             w.frame.size.width, w.frame.size.height,
+             w.frame.origin.x,   w.frame.origin.y);
+    } else {
+      NSRect target = w.frame;
+      target.origin.x = 0;
+      target.origin.y = 0;
+      if (v.frame.size.width  == target.size.width  &&
+          v.frame.size.height == target.size.height &&
+          v.frame.origin.x    == target.origin.x    &&
+          v.frame.origin.y    == target.origin.y) {
+        NSLog (@"%@: %s: screen %d %gx%g+%g+%g had correct view frame"
+               " %gx%g+%g+%g",
+               [self blurb], tag, i,
+               w.frame.size.width, w.frame.size.height,
+               w.frame.origin.x,   w.frame.origin.y,
+               target.size.width,  target.size.height,
+               target.origin.x,    target.origin.y);
+      } else {
+        NSLog (@"%@: %s: screen %d %gx%g+%g+%g had view frame"
+               " %gx%g+%g+%g instead of %gx%g+%g+%g",
+               [self blurb], tag, i,
+               w.frame.size.width, w.frame.size.height,
+               w.frame.origin.x,   w.frame.origin.y,
+               v.frame.size.width, v.frame.size.height,
+               v.frame.origin.x,   v.frame.origin.y,
+               target.size.width,  target.size.height,
+               target.origin.x,    target.origin.y);
+      }
+    }
+  }
+
+  // Now repair it.
+  //
+  i = 0;
+  for (NSWindow *w in windows) {
+    NSView *v = NULL;
+    i++;
+
+    // Find the XScreenSaverView on this window.
+    for (NSView *v1 in all_saver_views) {
+      if (w.contentView == v1.superview) {
+        v = v1;
+        break;
+      }
+    }
+
+    BOOL attached_p = FALSE;
+    if (!v) {
+      // This window has no ScreenSaverView.  Pick any unattached one.
+      for (NSView *v1 in all_saver_views) {
+        if (!v1.window) {
+          v = v1;
+          NSLog (@"%@: %s: screen %d %gx%g+%g+%g: attaching saver view",
+                 [self blurb], tag, i,
+                 w.frame.size.width, w.frame.size.height,
+                 w.frame.origin.x,   w.frame.origin.y);
+          attached_p = TRUE;
+          [w.contentView addSubview: v];
+          break;
+        }
+      }
+    }
+
+    if (v) {
+      // A view is attached to this window, but the frame might have the
+      // wrong size or origin.
+      NSRect target = w.frame;
+      target.origin.x = 0;
+      target.origin.y = 0;
+      if (v.frame.size.width  != target.size.width  ||
+          v.frame.size.height != target.size.height ||
+          v.frame.origin.x    != target.origin.x    ||
+          v.frame.origin.y    != target.origin.y) {
+        if (!attached_p)
+          NSLog (@"%@: %s: screen %d %gx%g+%g+%g: correcting frame: "
+                 "%gx%g+%g+%g => %gx%g+%g+%g",
+                 [self blurb], tag, i,
+                 w.frame.size.width, w.frame.size.height,
+                 w.frame.origin.x,   w.frame.origin.y,
+                 v.frame.size.width, v.frame.size.height,
+                 v.frame.origin.x,   v.frame.origin.y,
+                 target.size.width,  target.size.height,
+                 target.origin.x,    target.origin.y);
+        [v setFrame: target];
+      }
+    }
+  }
+}
+#endif // VENTURA_KLUDGE
 
 
 - (BOOL)hasConfigureSheet
@@ -998,6 +1310,7 @@ catch_signal (int sig, void (*handler) (int))
 
 - (void) dealloc
 {
+  NSLog (@"%@: dealloc", [self blurb]);
   [self unloadSaver: TRUE];
   [self unloadSaver: FALSE];
   [crash_label release];

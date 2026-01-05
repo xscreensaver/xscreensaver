@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 2006-2022 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2006-2023 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -29,6 +29,7 @@
 #import "jwxyzI.h"
 #import "jwxyz-cocoa.h"
 #import "jwxyz-timers.h"
+#import "nslog.h"
 
 #ifdef HAVE_IPHONE
 // XScreenSaverView.m speaks OpenGL ES just fine, but enableBackbuffer does
@@ -37,6 +38,12 @@
 #else
 # import <OpenGL/glu.h>
 #endif
+
+#ifndef HAVE_IPHONE
+# define VENTURA_KLUDGE
+# define SONOMA_KLUDGE
+#endif
+#undef CATCH_SIGNALS
 
 #undef countof
 #define countof(x) (sizeof((x))/sizeof((*x)))
@@ -53,7 +60,6 @@ extern struct xscreensaver_function_table *xscreensaver_function_table;
 const char *progname;
 const char *progclass;
 int mono_p = 0;
-
 
 # ifdef HAVE_IPHONE
 
@@ -392,6 +398,11 @@ add_default_options (const XrmOptionDescRec *opts,
 }
 
 
+#ifdef CATCH_SIGNALS
+//
+// This doesn't work.  We display backtraces for exceptions, but not for
+// signals, including for abort() unless it was wrapped with jwxyz_abort().
+//
 static void sighandler (int sig)
 {
   const char *s = strsignal(sig);
@@ -456,16 +467,25 @@ static void catch_signals (void)
   NSLog (@"installed signal handlers");
 }
 
+#endif // CATCH_SIGNALS
+
+#ifdef VENTURA_KLUDGE   // Duplicated in Randomizer.m
+static NSMutableArray *all_saver_views = NULL;
+#endif
+
 
 - (id) initWithFrame:(NSRect)frame
                title:(NSString *)_title
-           isPreview:(BOOL)isPreview
+           isPreview:(BOOL)p
+          randomizer:(BOOL)randomizer_p
 {
-  if (! (self = [super initWithFrame:frame isPreview:isPreview]))
+  if (! (self = [super initWithFrame:frame isPreview:p]))
     return 0;
   
   saver_title = [_title retain];
+# ifdef CATCH_SIGNALS
   catch_signals();
+# endif
   xsft = [self findFunctionTable: saver_title];
   if (! xsft) {
     [self release];
@@ -505,7 +525,7 @@ static void catch_signals (void)
   // When the view fills the screen and double buffering is enabled, OS X will
   // use page flipping for a minor CPU/FPS boost. In windowed mode, double
   // buffering reduces the frame rate to 1/2 the screen's refresh rate.
-  double_buffered_p = !isPreview;
+  double_buffered_p = !p;  // isPreview
 # endif
 
 # ifdef HAVE_IPHONE
@@ -524,6 +544,66 @@ static void catch_signals (void)
   colorspace = CGColorSpaceCreateDeviceRGB ();
 # endif
 
+#ifdef VENTURA_KLUDGE
+  if (randomizer_p && !p) {
+    NSLog(@"skipping Ventura kludge: handled by Randomizer");
+  } else if (!p) {  // isPreview
+    if (!all_saver_views) {
+      all_saver_views = [[NSMutableArray arrayWithCapacity:20] retain];
+      [NSTimer scheduledTimerWithTimeInterval: 1  // must be > 0
+                                       target: self
+                                     selector: @selector(venturaLaunchKludge:)
+                                     userInfo: nil
+                                      repeats: NO];
+    }
+    if (! [all_saver_views containsObject:self])
+      [all_saver_views addObject:self];
+  }
+#endif  // VENTURA_KLUDGE
+
+# ifdef SONOMA_KLUDGE   // Duplicated in Randomizer.m
+
+  /* Oct 2023, macOS 14.0: we get startAnimation on each screen, but
+     stopAnimation is never called, and our process (legacyScreenSaver)
+     never exits.  This means that the screen saver just keeps running
+     forever in the background on an invisible window, burning CPU!
+
+     That invisible window is both 'visible' and 'onActiveSpace', and has
+     no parentWindow, so its invisibility is not detectable.
+
+     However, there is a "com.apple.screensaver.willstop" notification and
+     from that we can intuit that we should send ourselves stopAnimation.
+
+     Except, stopAnimation() isn't great, because it seems that sometimes
+     legacyScreenSaver holds on to old copies of this bundle and begins
+     animating them again -- so we have multiple invisible copies of the
+     same saver running, which burns CPU uselessly and kills our frame rate.
+     So let's just exit() instead.
+   */
+  if (!p && !randomizer_p) {
+    [[NSDistributedNotificationCenter defaultCenter]
+        addObserverForName: @"com.apple.screensaver.willstop"
+                    object: nil
+                     queue: nil
+                usingBlock:^(NSNotification *n) {
+        NSLog (@"received %@", [n name]);
+        [self stopAnimation];
+        NSLog (@"exiting");
+        [[NSApplication sharedApplication] terminate:self];
+      }];
+
+    /* Do it before sleeping as well, I guess? */
+    [[[NSWorkspace sharedWorkspace] notificationCenter]
+        addObserverForName: NSWorkspaceWillSleepNotification
+                    object: nil
+                     queue: nil
+                usingBlock:^(NSNotification *n) {
+        NSLog (@"received %@", [n name]);
+        [self stopAnimation];
+      }];
+  }
+# endif // SONOMA_KLUDGE
+
   return self;
 }
 
@@ -538,10 +618,18 @@ static void catch_signals (void)
    Dec 2020, noticed that this also happens on 10.14.6 when *not* in random
    mode.  Both System Preferences and ScreenSaverEngine fail to call
    StartAnimation.
+
+   June 2023, macOS 13.4: On a system with 3 screens, initWithFrame is called
+   on every screen, but viewDidMoveToWindow is called only on screen 3 -- but
+   that screen's view has the frame of screen 1!  So we get only one saver
+   running, and it is the wrong size.  We detect and correct this insanity
+   with the VENTURA_KLUDGE stuff.
  */
 - (void) viewDidMoveToWindow
 {
-  if (self.window)
+  if (self.window &&
+      self.window.frame.size.width  > 0 &&
+      self.window.frame.size.height > 0)
     [self startAnimation];
 }
 
@@ -552,6 +640,127 @@ static void catch_signals (void)
 }
 #endif  // HAVE_IPHONE
 
+#ifdef VENTURA_KLUDGE
+/* Correct the insane shit that LegacyScreenSaver is throwing at us now.
+   We keep track of each ScreenSaverView that was created; and then a little
+   while after startup, we check to see which of those views have not been
+   attached to windows, or have the wrong geometry.
+   Duplicated in XScreenSaverView.m.
+ */
+- (void) venturaLaunchKludge: (NSTimer *) timer
+{
+  NSArray<NSWindow *> *windows = [NSApplication sharedApplication].windows;
+
+  const char *tag = "Ventura kludge";
+
+  // First log what was wrong.
+  //
+  int i = 0;
+  for (NSWindow *w in windows) {
+    NSView *v = NULL;
+    i++;
+
+    // Find the XScreenSaverView on this window.
+    for (NSView *v1 in all_saver_views) {
+      if (w.contentView == v1.superview) {
+        v = v1;
+        break;
+      }
+    }
+
+    if (!v) {
+      NSLog (@"%s: screen %d %gx%g+%g+%g had no saver view",
+             tag, i,
+             w.frame.size.width, w.frame.size.height,
+             w.frame.origin.x,   w.frame.origin.y);
+    } else {
+      NSRect target = w.frame;
+      target.origin.x = 0;
+      target.origin.y = 0;
+      if (v.frame.size.width  == target.size.width  &&
+          v.frame.size.height == target.size.height &&
+          v.frame.origin.x    == target.origin.x    &&
+          v.frame.origin.y    == target.origin.y) {
+        NSLog (@"%s: screen %d %gx%g+%g+%g had correct view frame"
+               " %gx%g+%g+%g",
+               tag, i,
+               w.frame.size.width, w.frame.size.height,
+               w.frame.origin.x,   w.frame.origin.y,
+               target.size.width,  target.size.height,
+               target.origin.x,    target.origin.y);
+      } else {
+        NSLog (@"%s: screen %d %gx%g+%g+%g had view frame"
+               " %gx%g+%g+%g instead of %gx%g+%g+%g",
+               tag, i,
+               w.frame.size.width, w.frame.size.height,
+               w.frame.origin.x,   w.frame.origin.y,
+               v.frame.size.width, v.frame.size.height,
+               v.frame.origin.x,   v.frame.origin.y,
+               target.size.width,  target.size.height,
+               target.origin.x,    target.origin.y);
+      }
+    }
+  }
+
+  // Now repair it.
+  //
+  i = 0;
+  for (NSWindow *w in windows) {
+    NSView *v = NULL;
+    i++;
+
+    // Find the XScreenSaverView on this window.
+    for (NSView *v1 in all_saver_views) {
+      if (w.contentView == v1.superview) {
+        v = v1;
+        break;
+      }
+    }
+
+    BOOL attached_p = FALSE;
+    if (!v) {
+      // This window has no ScreenSaverView.  Pick any unattached one.
+      for (NSView *v1 in all_saver_views) {
+        if (!v1.window) {
+          v = v1;
+          NSLog (@"%s: screen %d %gx%g+%g+%g: attaching saver view",
+                 tag, i,
+                 w.frame.size.width, w.frame.size.height,
+                 w.frame.origin.x,   w.frame.origin.y);
+          attached_p = TRUE;
+          [w.contentView addSubview: v];
+          break;
+        }
+      }
+    }
+
+    if (v) {
+      // A view is attached to this window, but the frame might have the
+      // wrong size or origin.
+      NSRect target = w.frame;
+      target.origin.x = 0;
+      target.origin.y = 0;
+      if (v.frame.size.width  != target.size.width  ||
+          v.frame.size.height != target.size.height ||
+          v.frame.origin.x    != target.origin.x    ||
+          v.frame.origin.y    != target.origin.y) {
+        if (!attached_p)
+          NSLog (@"%s: screen %d %gx%g+%g+%g: correcting frame: "
+                 "%gx%g+%g+%g => %gx%g+%g+%g",
+                 tag, i,
+                 w.frame.size.width, w.frame.size.height,
+                 w.frame.origin.x,   w.frame.origin.y,
+                 v.frame.size.width, v.frame.size.height,
+                 v.frame.origin.x,   v.frame.origin.y,
+                 target.size.width,  target.size.height,
+                 target.origin.x,    target.origin.y);
+        [v setFrame: target];
+      }
+    }
+  }
+}
+#endif // VENTURA_KLUDGE
+
 
 #ifdef HAVE_IPHONE
 + (Class) layerClass
@@ -561,9 +770,19 @@ static void catch_signals (void)
 #endif
 
 
-- (id) initWithFrame:(NSRect)frame isPreview:(BOOL)p
+- (id) initWithFrame:(NSRect)f isPreview:(BOOL)p
 {
-  return [self initWithFrame:frame title:0 isPreview:p];
+  return [self initWithFrame:f title:0 isPreview:p randomizer:FALSE];
+}
+
+- (id) initWithFrame:(NSRect)f title:(NSString*)t isPreview:(BOOL)p
+{
+  return [self initWithFrame:f title:t isPreview:p randomizer:FALSE];
+}
+
+- (id) initWithFrame:(NSRect)f isPreview:(BOOL)p randomizer:(BOOL)r
+{
+  return [self initWithFrame:f title:0 isPreview:p randomizer:r];
 }
 
 
@@ -997,7 +1216,7 @@ screenhack_do_fps (Display *dpy, Window w, fps_state *fpst, void *closure)
   CGFloat s = self.window.backingScaleFactor;
 # endif
 
-  /* This notion of "scale fonts differently than the viewport seemed
+  /* This notion of "scale fonts differently than the viewport" seemed
      like it made sense for BSOD but it makes -fps text be stupidly
      large for all other hacks. So instead let's just make BSOD not
      be lowrez. There are no other lowrez hacks that make heavy use
@@ -1134,6 +1353,11 @@ gl_check_ver (const struct gl_version *caps,
 
   {
     const char *version_str = (const char *)glGetString (GL_VERSION);
+
+    if (! version_str) {
+      NSLog (@"no GL_VERSION?");
+      version_str = "";
+    }
 
     /* iPhone is always OpenGL ES 1.1. */
     if (sscanf ((const char *)version_str, "%u.%u",
@@ -1298,8 +1522,7 @@ gl_check_ver (const struct gl_version *caps,
   GLsizei olen = backbuffer_len;
 
 # if !defined __OPTIMIZE__ || TARGET_IPHONE_SIMULATOR
-  NSLog(@"backbuffer %.0fx%.0f",
-        new_size.width, new_size.height);
+  NSLog(@"backbuffer %.0fx%.0f", new_size.width, new_size.height);
 # endif
 
   /* OS X uses APPLE_client_storage and APPLE_texture_range, as described in
@@ -1776,7 +1999,13 @@ gl_check_ver (const struct gl_version *caps,
       resized_p = YES;
 # endif
 
-    [self checkForUpdates];
+# ifndef HAVE_IPHONE
+    [NSTimer scheduledTimerWithTimeInterval: 10 + frand(10)
+                                     target: self
+                                   selector: @selector(checkForUpdates)
+                                   userInfo: nil
+                                    repeats: NO];
+# endif // !HAVE_IPHONE
 
 # ifdef HAVE_IPHONE
     BOOL cyclep = get_boolean_resource (xdpy, "globalCycle", "GlobalCycle");
@@ -1914,7 +2143,6 @@ gl_check_ver (const struct gl_version *caps,
     static int frame = 0;
     if (++frame == 100) {
       fprintf(stderr,"BOOM\n");
-      int y = 0;
       //    int aa = *((int*)y);
       int x = 30/y;
     }
@@ -3120,6 +3348,48 @@ gl_check_ver (const struct gl_version *caps,
 
 # ifndef HAVE_IPHONE
 
+/* Hooooooboy, is checking for updates a mess!
+
+   The various screen savers, via XScreenSaverConfigSheet, normally store
+   their preferences into NSUserDefaultsController and ScreenSaverDefaults,
+   which (when running under legacyScreenSaver, which is sandboxed) writes
+   those preferences into:
+
+     Library/Containers/com.apple.ScreenSaver.Engine.legacyScreenSaver/Data/\
+     Library/Preferences/ByHost/org.jwz.xscreensaver.$NAME.$UUID.plist
+
+   The exception to this is the two global preferences controlling whether
+   and how often we should check for updates.  Those two preferences,
+   "SUAutomaticallyUpdate" and "SUScheduledCheckInterval", are instead
+   written into NSUserDefaultsController / GlobalDefaults, which means
+   those end up in:
+
+     Library/Containers/com.apple.ScreenSaver.Engine.legacyScreenSaver/Data/\
+     Library/Preferences/org.jwz.xscreensaver.XScreenSaverUpdater.plist
+
+   However, XScreenSaverUpdater.app, which is not sandboxed, expects to
+   read those preferences from:
+
+     Library/Preferences/org.jwz.xscreensaver.XScreenSaverUpdater.plist
+
+   which cannot be written by a sandboxed .saver bundle.
+
+   Also a sandboxed app cannot pass command-line args to a launched
+   application.
+
+   How we resolve this is by moving the "when to check" logic into
+   XScreenSaverView.  We examine the sandboxed versions of the Sparkle
+   preferences and use those to decide when and whether to launch
+   XScreenSaverUpdater.app.  And we arrange for XScreenSaverUpdater.app
+   to always check if it has been launched, by having these settings as
+   its defaults:
+
+       SUAutomaticallyUpdate: yes
+       SUScheduledCheckInterval: daily
+ */
+
+
+
 // Returns the full pathname to the Sparkle updater app.
 //
 - (NSString *) updaterPath
@@ -3156,26 +3426,72 @@ gl_check_ver (const struct gl_version *caps,
 
   return app_path;
 }
-# endif // !HAVE_IPHONE
+
+
+// Upon successful launch of the updater, record the date.
+//
+- (void) updaterLaunched
+{
+  NSUserDefaultsController *def = [prefsReader globalDefaultsController];
+  NSAssert (def, @"no globalDefaultsController");
+
+  // SULastCheckTime = "2023-10-09 17:01:59 +0000";
+
+  NSDateFormatter *f = [[NSDateFormatter alloc] init];
+  [f setDateFormat:@"yyyy-MM-dd HH:mm:ss +0000"];
+  [f setTimeZone: [NSTimeZone timeZoneForSecondsFromGMT: 0]];
+  NSString *date = [f stringFromDate: [NSDate date]];
+
+  NSString *old = [[def defaults] objectForKey: @SULastCheckTimeKey];
+  NSLog (@"%@: \"%@\" => \"%@\"", @SULastCheckTimeKey, old, date);
+
+  [[def defaults] setObject: date forKey: @SULastCheckTimeKey];
+  [def commitEditing];
+  [def save: self];
+}
 
 
 - (void) checkForUpdates
 {
-# ifndef HAVE_IPHONE
-  // We only check once at startup, even if there are multiple screens,
-  // and even if this saver is running for many days.
-  // (Uh, except this doesn't work because this static isn't shared,
-  // even if we make it an exported global. Not sure why. Oh well.)
-  static BOOL checked_p = NO;
-  if (checked_p) return;
-  checked_p = YES;
-
-  // If it's off, don't bother running the updater.  Otherwise, the
-  // updater will decide if it's time to hit the network.
   if (! get_boolean_resource (xdpy,
                               SUSUEnableAutomaticChecksKey,
-                              SUSUEnableAutomaticChecksKey))
+                              SUSUEnableAutomaticChecksKey)) {
+    NSLog (@"update checks disbled");
     return;
+  }
+
+  int interval = get_integer_resource (xdpy,
+                                       SUScheduledCheckIntervalKey,
+                                       SUScheduledCheckIntervalKey);
+  if (interval <= 0)
+    interval = 60 * 60 * 24;
+
+  const char *last_check = get_string_resource (xdpy,
+                                                SULastCheckTimeKey,
+                                                SULastCheckTimeKey);
+  if (!last_check || !*last_check) {
+    NSLog (@"never checked for updates (interval %d days)",
+           (int) (interval / (60 * 60 * 24)));
+  } else {
+    NSDateFormatter *f = [[NSDateFormatter alloc] init];
+    [f setDateFormat:@"yyyy-MM-dd HH:mm:ss ZZZZZ"];
+    [f setTimeZone: [NSTimeZone timeZoneForSecondsFromGMT: 0]];
+    NSDate *last_check2 =
+      [f dateFromString: [NSString stringWithCString: last_check
+                                            encoding: NSUTF8StringEncoding]];
+    NSTimeInterval elapsed = -[last_check2 timeIntervalSinceNow];
+    if (elapsed < interval) {
+      NSLog (@"last checked for updates %d days ago, skipping check"
+             " (interval %d days)",
+             (int) (elapsed / (60 * 60 * 24)),
+             (int) (interval / (60 * 60 * 24)));
+      return;
+    } else {
+      NSLog (@"last checked for updates %d days ago (interval %d days)",
+             (int) (elapsed / (60 * 60 * 24)),
+             (int) (interval / (60 * 60 * 24)));
+    }
+  }
 
   NSString *app_path = [self updaterPath];
 
@@ -3185,18 +3501,44 @@ gl_check_ver (const struct gl_version *caps,
   }
 
   NSWorkspace *workspace = [NSWorkspace sharedWorkspace];
+
+#  if 1  // Deprecated as of macOS 11.0:
   NSError *err = nil;
-  if (! [workspace launchApplicationAtURL:[NSURL fileURLWithPath:app_path]
-                   options:(NSWorkspaceLaunchWithoutAddingToRecents |
-                            NSWorkspaceLaunchWithoutActivation |
-                            NSWorkspaceLaunchAndHide)
-                   configuration:[NSMutableDictionary dictionary]
-                   error:&err]) {
-    NSLog(@"Unable to launch %@: %@", app_path, err);
+  if ([workspace launchApplicationAtURL: [NSURL fileURLWithPath:app_path]
+                           options: (NSWorkspaceLaunchWithoutAddingToRecents |
+                                     NSWorkspaceLaunchWithoutActivation |
+                                     NSWorkspaceLaunchAndHide)
+                          configuration: [NSMutableDictionary dictionary]
+                                  error: &err]) {
+    NSLog (@"Launched %@", app_path);
+    [self updaterLaunched];
+  } else {
+    NSLog (@"Unable to launch %@: %@", app_path, err);
   }
+#  else  // Available in macOS 10.15 or newer:
+  NSWorkspaceOpenConfiguration *conf =
+    [NSWorkspaceOpenConfiguration configuration];
+  conf.activates = NO;
+  conf.addsToRecentItems = NO;
+  conf.allowsRunningApplicationSubstitution = YES;
+  conf.createsNewApplicationInstance = NO;
+  conf.hides = NO;
+  conf.hidesOthers = NO;
+  conf.promptsUserIfNeeded = YES;
+  [workspace openApplicationAtURL: [NSURL fileURLWithPath:app_path]
+                    configuration: conf
+                completionHandler: ^(NSRunningApplication *app, NSError *err) {
+      if (err) {
+        NSLog(@"Unable to launch %@: %@", app, err);
+      }  else {
+        NSLog(@"Launched %@", app);
+        [self updaterLaunched];
+      }
+    } ];
+#  endif
+}
 
 # endif // !HAVE_IPHONE
-}
 
 
 @end
