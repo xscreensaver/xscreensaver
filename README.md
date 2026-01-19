@@ -1,5 +1,16 @@
 # Novell Netware SMP console screensaver for X11, Gnome, KDE Plasma, and Wayland Desktops
 
+## RPM and DEB Package Downloads
+### **RPM Based Packages (RedHat, CentOS, Fedora, SuSe, Alma, Rocky)**
+- [xscreensaver-6.14-0.src.rpm](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.14-0/xscreensaver-6.14-0.src.rpm) RPM Source 
+- [xscreensaver-6.14-0.x86_64.rpm](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.14-0/xscreensaver-6.14-0.x86_64.rpm) RPM Binary
+- [xscreensaver-debuginfo-6.14-0.x86_64.rpm](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.14-0/xscreensaver-debuginfo-6.14-0.x86_64.rpm) RPM Debug Info
+- [xscreensaver-debugsource-6.14-0.x86_64.rpm](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.14-0/xscreensaver-debugsource-6.14-0.x86_64.rpm) RPM Debug Source
+
+### **Debian Based Packages (Debian, Ubuntu)**
+- [xscreensaver-6.14-0.sdeb](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.14-0/xscreensaver-6.14-0.sdeb) Debian Source
+- [xscreensaver_6.14-0_amd64.deb](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.14-0/xscreensaver_6.14-0_amd64.deb) Debian Binary
+
 ## Table of Contents <!-- omit in toc -->
 - [Description](#description)
 - [Quick Start Guide](#quick-start-guide)
