@@ -1,4 +1,4 @@
-# Novell Netware SMP console screensaver for X11, Gnome, and KDE Desktops
+# Novell Netware SMP console screensaver for X11, Gnome, KDE Plasma, and Wayland Desktops
 
 ## Table of Contents <!-- omit in toc -->
 - [Description](#description)
