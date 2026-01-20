@@ -385,7 +385,7 @@ Now run autoreconf to re-create the Makefiles and Configuration scripts:
 You should see the followning output if autoreconf completed successfully:
 
 ```sh
-autoreconf: Entering directory `.
+autoreconf: Entering directory .
 autoreconf: configure.ac: not using Gettext
 autoreconf: running: aclocal --force 
 autoreconf: configure.ac: tracing
@@ -394,7 +394,7 @@ autoreconf: configure.ac: not using Libtool
 autoreconf: running: /usr/bin/autoconf --force
 autoreconf: running: /usr/bin/autoheader --force
 autoreconf: configure.ac: not using Automake
-autoreconf: Leaving directory `.
+autoreconf: Leaving directory .
 [root@localhost xscreensaver]# 
 ```
 Now type 'configure' and then type 'make' to build the  xscreensaver-6.14 package.  If the make process succeeds, then perform 'make install' to install the xscreensaver package to your system:
