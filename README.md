@@ -1,6 +1,6 @@
 # Novell Netware SMP console screensaver for X11, Gnome, KDE Plasma, and Wayland Desktops
 
-## RPM and DEB Package Downloads
+## Downloads
 
 ### Source Code Downloads
 - [xscreensaver-6.14.tar.gz](https://github.com/xscreensaver/xscreensaver/archive/refs/tags/v6.14.tar.gz) 
