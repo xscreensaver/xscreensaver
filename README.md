@@ -14,7 +14,7 @@
 ## Table of Contents <!-- omit in toc -->
 - [Description](#description)
 - [Quick Start Guide](#quick-start-guide)
-- [Help! "dnf update -y" overwrites and downgrades my xscreensaver version](#Help-dnf-update-overwrites-and-downgrades-my-xscreensaver-version)
+- [Help! "dnf update -y" overwrites and downgrades my xscreensaver version](#dnf-update-overwrites-and-downgrades-my-xscreensaver-version)
 - [Configuring XScreensaver and Obtaining Older Versions](#configuring-xscreensaver-and-obtaining-older-versions)
 - [Netware SMP Screensaver Options](#netwaresmp-options)
 - [Command Line Options](#command-line-options)
