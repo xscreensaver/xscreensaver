@@ -137,7 +137,7 @@ For building or rebuilding RPMS or DEB Packages after you have installed the ass
 - [Building the Screensaver as an RPM Package (Redhat/CentOS/SuSe)](#building-as-an-rpm-package)
 - [Building the Screensaver as a Debian Package (Debian/Ubuntu)](#building-as-a-debian-package)
 
-## **Help dnf update overwrites and downgrades my xscreensaver version**
+## **dnf update overwrites and downgrades my xscreensaver version**
 
 Red Hat uses an epoch designator (num:package version) in the rpm filename for it's versions of 
 xscreensaver, i.e. "xscreensaver-1:5.45" where "1:" is an override epoch number which will override
