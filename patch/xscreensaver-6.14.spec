@@ -11,7 +11,7 @@ URL:		https://www.jwz.org/xscreensaver/
 Source0:	https://www.jwz.org/xscreensaver/xscreensaver-%{version}.tar.gz
 Vendor:		Jamie Zawinski <jwz@jwz.org>
 Buildroot:	%{_tmppath}/%{name}-root
-Patch1:         netwaresmp-xscreensaver-6.13.patch
+Patch1:         netwaresmp-xscreensaver-6.14.patch
 
 # Red Hat uses an epoch number to make RPM believe that their old RPM with
 # number "1:5.45" is newer than your "6.00".  The technical term for this
