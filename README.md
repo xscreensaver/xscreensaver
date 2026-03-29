@@ -201,13 +201,14 @@ The MPV Media Player provided with Fedora and Red Hat Enterprise Linux 10 does i
 that supports the Wayland Compositor ext-notify-idle protocols by calling the Wayland idle inhibit functions, 
 however, due to differences in implementation of various Wayland Compositors, it does not always work properly 
 with MPV.  The VLC Media Player has been tested and works with xscreensaver on Wayland, but some platforms using MPV 
-do not work properly on Plasma with RHEL 10.  This incorrect behavior allows the xscreensaver program to activate 
-while MPV is playing a media fle or CDROM, which it should not do.  
+and Wayland do not work properly on Plasma with RHEL 10.  This incorrect behavior allows the xscreensaver program 
+to activate while MPV is playing a media file or CDROM, which it should not do.  
 
-The worksround to this problem is to configure the MPV Media Player to call a LUA script when the MPV player 
+The workaround to this problem is to configure the MPV Media Player to call a LUA script when the MPV player 
 is actively playing a media file which will signal and suppress xscreensaver from activating because the system is 
-not idle.  Both the VLC Player and the Totem player work correctly with xscreensaver, but the MPV Player in some 
-configurations does not work correctly with xscreensaver.   
+not idle.  Both the VLC Player and the Totem player work correctly with xscreensaver under Wayland, but the MPV 
+Player in some configurations does not work correctly with xscreensaver because it is not properly telling 
+the Wayland Compositor that the system is not idle.   
 
 To get around this issue with xscreensaver activating improperly, create an LUA script in the specified users home 
 directory:
@@ -225,6 +226,9 @@ mp.add_periodic_timer(30, function()
 utils.subprocess({args={"xscreensaver-command", "-deactivate"}})
 end)
 ``` 
+This will allow the MPV Media Player to signal xscreensaver that it should not activate if MPV is playing 
+a media file or Video CDROM.
+
 ## **Configuring XScreensaver and Obtaining Older Versions**
 
 For detailed instructions on how to install and configure the XScreensaver base program, please refer to the online 
