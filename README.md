@@ -202,7 +202,7 @@ that supports the Wayland Compositor ext-notify-idle protocols by calling the Wa
 however, due to differences in implementation of various Wayland Compositors, it does not always work properly 
 with MPV.  The VLC Media Player has been tested and works with xscreensaver on Wayland, but some platforms using MPV 
 and Wayland do not work properly on Plasma with RHEL 10.  This incorrect behavior allows the xscreensaver program 
-to activate while MPV is playing a media file or CDROM, which it should not do.  
+to activate while MPV is playing a media file or DVD, which it should not do.  
 
 The workaround to this problem is to configure the MPV Media Player to call a LUA script when the MPV player 
 is actively playing a media file which will signal and suppress xscreensaver from activating because the system is 
@@ -227,7 +227,7 @@ utils.subprocess({args={"xscreensaver-command", "-deactivate"}})
 end)
 ``` 
 This will allow the MPV Media Player to signal xscreensaver that it should not activate if MPV is playing 
-a media file or Video CDROM.
+a media file or DVD.
 
 ## **Configuring XScreensaver and Obtaining Older Versions**
 
