@@ -82,7 +82,7 @@ permanently disabled.  If that happens, killing and restarting
 .BR sd-bus (3),
 .BR elogind (8)
 .SH COPYRIGHT
-Copyright \(co 2019-2022 by Martin Lucina and Jamie Zawinski.
+Copyright \(co 2019-2026 by Martin Lucina and Jamie Zawinski.
 Permission to use, copy, modify, and/or distribute this software
 for any purpose with or without fee is hereby granted, provided
 that the above copyright notice and this permission notice appear
