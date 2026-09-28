@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 1992-2019 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 1992-2026 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -39,57 +39,65 @@ ios_load_random_image (void (*callback) (void *uiimage, const char *fn,
     return;
   }
 
-  // The rest of this is synchronous.
-
-  PHFetchOptions *opt = [[PHFetchOptions new] autorelease];
-  opt.includeAssetSourceTypes = (PHAssetSourceTypeUserLibrary |
-                                 PHAssetSourceTypeCloudShared |
-                                 PHAssetSourceTypeiTunesSynced);
+  PHFetchOptions *fopt = [[PHFetchOptions new] autorelease];
+  fopt.includeAssetSourceTypes = (PHAssetSourceTypeUserLibrary |
+                                  PHAssetSourceTypeCloudShared |
+                                  PHAssetSourceTypeiTunesSynced);
   PHFetchResult *r = [PHAsset
                        fetchAssetsWithMediaType: PHAssetMediaTypeImage
-                       options: opt];
+                       options: fopt];
   NSUInteger n = [r count];
   PHAsset *asset = n ? [r objectAtIndex: random() % n] : NULL;
 
-  __block UIImage *img = 0;
-  __block const char *fn = 0;
-
-  if (asset) {
-    PHImageRequestOptions *opt = [[PHImageRequestOptions alloc] init];
-    opt.synchronous = YES;
-
-    // Get the image bits.
-    //
-    int size = width > height ? width : height;
-    [[PHImageManager defaultManager]
-      requestImageForAsset: asset
-      targetSize: CGSizeMake (size, size)
-      contentMode: PHImageContentModeDefault
-      options: opt
-      resultHandler:^void (UIImage *image, NSDictionary *info) {
-        img = [image retain];
-    }];
-
-    // Get the image name.
-    //
-    [[PHImageManager defaultManager]
-      requestImageDataForAsset: asset
-      options: opt
-      resultHandler:^(NSData *imageData, NSString *dataUTI,
-                      UIImageOrientation orientation, 
-                      NSDictionary *info) {
-        // Looks like UIImage is pre-rotated to compensate for 'orientation'.
-        NSString *path = [info objectForKey:@"PHImageFileURLKey"];
-        if (path)
-          fn = [[[path lastPathComponent] stringByDeletingPathExtension]
-                 cStringUsingEncoding:NSUTF8StringEncoding];
-    }];
+  if (!asset) {
+    // No images; complete immediately.
+    callback (0, 0, 0, 0, closure);
+    return;
   }
 
-  if (img)
-    callback (img, fn, [img size].width, [img size].height, closure);
-  else
-    callback (0, 0, 0, 0, closure);
+  // Get the image bits, asynchronously.
+  //
+  PHImageRequestOptions *ropt = [[PHImageRequestOptions new] autorelease];
+  ropt.networkAccessAllowed = YES;
+  ropt.synchronous  = NO;
+  ropt.resizeMode   = PHImageRequestOptionsResizeModeNone;
+  ropt.deliveryMode = PHImageRequestOptionsDeliveryModeHighQualityFormat;
+
+  [[PHImageManager defaultManager]
+    requestImageForAsset: asset
+    targetSize: CGSizeMake (width, height)
+    contentMode: PHImageContentModeAspectFit
+    options: ropt
+    resultHandler:^void (UIImage *img, NSDictionary *info1) {
+
+      if (!img) {
+        // Image load failed; maybe it couldn't download from iCloud?
+        callback (0, 0, 0, 0, closure);
+        return;
+      }
+
+      img = [img retain];  // Released in callback below.
+
+      // Get the image name, also asynchronously.
+      //
+      [asset requestContentEditingInputWithOptions:
+               [PHContentEditingInputRequestOptions new]
+             completionHandler:^(PHContentEditingInput *ei,
+                                 NSDictionary *info2) {
+          NSURL *url = ei.fullSizeImageURL;
+          const char *fn = 0;
+          if (url)
+            fn = [[[url lastPathComponent] stringByDeletingPathExtension]
+                   cStringUsingEncoding:NSUTF8StringEncoding];
+
+          // Finally, after two trips back to the event loop, we can run
+          // the callback.
+          //
+          callback (img, fn, [img size].width, [img size].height, closure);
+          [img release];
+     }];
+
+  }];
 }
 
 #endif  // HAVE_IPHONE - whole file

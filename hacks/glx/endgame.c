@@ -1166,6 +1166,7 @@ static void manage_labels(ModeInfo *mi) {
             int move_num = (cs->stage == DO_MOVE) ? cs->mc : cs->mc - 1;
             texture_font_data *f;
             int san_index;
+            GLfloat color[4] = {0.8, 0.8, 0.0, 1.0};
 
             if (cs->stage != FADE_IN) {
                 for (san_index = 0; san_index < SAN_STR_LEN; san_index++) {
@@ -1182,9 +1183,8 @@ static void manage_labels(ModeInfo *mi) {
                 f = cs->font2_data;
             else
                 f = cs->font3_data;
-            glColor3f(0.8, 0.8, 0);
             print_texture_label(mi->dpy, f, mi->xgwa.width, mi->xgwa.height, 1,
-                                cs->game_desc);
+                                cs->game_desc, color);
         }
     }
 }

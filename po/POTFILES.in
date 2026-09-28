@@ -1,4 +1,4 @@
-# Auto-generated: Mon Mar 30 17:51:52 PDT 2026
+# Auto-generated: Thu Sep  3 15:49:18 PDT 2026
 driver/demo-Gtk-conf.c
 driver/demo-Gtk.c
 driver/demo.ui
@@ -9,6 +9,7 @@ driver/xscreensaver-settings.desktop.in
 driver/xscreensaver.desktop.in
 hacks/config/abstractile.xml
 hacks/config/alienbeacon.xml
+hacks/config/amigajuggler.xml
 hacks/config/anemone.xml
 hacks/config/anemotaxis.xml
 hacks/config/ant.xml
@@ -102,6 +103,7 @@ hacks/config/flame.xml
 hacks/config/flipflop.xml
 hacks/config/flipscreen3d.xml
 hacks/config/fliptext.xml
+hacks/config/floppy.xml
 hacks/config/flow.xml
 hacks/config/fluidballs.xml
 hacks/config/flurry.xml
@@ -132,6 +134,7 @@ hacks/config/glsnake.xml
 hacks/config/gltext.xml
 hacks/config/goldenapollian.xml
 hacks/config/goop.xml
+hacks/config/graphstat.xml
 hacks/config/grav.xml
 hacks/config/gravitywell.xml
 hacks/config/greynetic.xml
@@ -218,6 +221,7 @@ hacks/config/piecewise.xml
 hacks/config/pinion.xml
 hacks/config/pipes.xml
 hacks/config/platonicfolding.xml
+hacks/config/polarnight.xml
 hacks/config/polyhedra.xml
 hacks/config/polyominoes.xml
 hacks/config/polytopes.xml

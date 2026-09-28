@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright (c) 2012 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2012-2026 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -511,6 +511,7 @@
 #define glTranslatef			jwzgles_glTranslatef
 #define glVertexPointer			jwzgles_glVertexPointer
 #define glViewport			jwzgles_glViewport
+#define glUseProgram			jwzgles_glUseProgram
 #define glEnableClientState		jwzgles_glEnableClientState
 #define glDisableClientState		jwzgles_glDisableClientState
 #define glClipPlane			jwzgles_glClipPlane

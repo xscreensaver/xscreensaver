@@ -14,7 +14,7 @@
             convert="invert"/>
     <number id="cycles" type="slider" arg="--cycles %"
             _label="Boat Speed" _low-label="Very slow" _high-label="Very fast"
-            low="0" high="1000" default="5"/>
+            low="1" high="10" default="5"/>
     <number id="count" type="slider" arg="--count %"
             _label="Number of doors" _low-label="4" _high-label="40"
             low="4" high="40" default="24"/>

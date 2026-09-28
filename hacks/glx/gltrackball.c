@@ -227,19 +227,19 @@ void
 gltrackball_rotate (trackball_state *ts)
 {
   double m[16];
+  GLfloat m2[16];
+  int i;
 
   gltrackball_inertia (ts);
   quat_to_rotmatrix (ts->q, m);
 
-# ifndef HAVE_ANDROID
-  /* This crashes in the Android emulator, presumably because of the hellscape
-     that is OpenGLES 3.0. But since Android has no way to interact with hacks
-     as either screen savers or live wallpapers, the trackball code is all a
-     no-op anyway. */
-  GLfloat m2[16];
-  int i;
   for (i = 0; i < 16; i++)	/* Unlikely but GLfloat might not be double */
     m2[i] = m[i];
+
+# ifndef HAVE_ANDROID
+  /* This crashes in the Android emulator when GLSL is in use.  But since
+     Android has no way to interact with hacks as either screen savers or
+     live wallpapers, the trackball code is all a no-op anyway. */
   glMultMatrixf (m2);
 # endif
 }

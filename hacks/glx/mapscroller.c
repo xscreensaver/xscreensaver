@@ -1172,7 +1172,7 @@ randomize_position (ModeInfo *mi)
         {
           if (i == 0)  /* Random city center */
             pos = cities[random() % (countof(cities) - NONCITIES_COUNT)].pos;
-          /* Offset by a few miles, but not into the ocean */
+          /* Offset by a few miles. */
           bp->pos.lat = pos.lat + frand(0.05) - 0.025;
           bp->pos.lon = pos.lon + frand(0.05) - 0.025;
         }
@@ -1184,6 +1184,12 @@ randomize_position (ModeInfo *mi)
           bp->pos.lon = frand (360) - 180;
         }
       constrain_mercator (&bp->pos);
+
+      /* Pick a new position at least 1000 km away from the last one */
+      if (lat_lon_distance (bp->pos, pos) < 1000 * 1000)
+        continue;
+
+      /* Stay out of the ocean. */
       bp->ocean_p = mostly_ocean_p (mi);
       if (! bp->ocean_p)
         break;
@@ -1255,7 +1261,7 @@ init_map (ModeInfo *mi)
 
   bp->duration = duration_arg;
   if (bp->duration < 5) bp->duration = 5;
-  bp->duration += frand(10);  /* Keep multiple instances out of sync */
+  bp->duration *= 1 + frand(0.33);  /* Keep multiple instances out of sync */
 
   bp->oceans = image_data_to_ximage (MI_DISPLAY (mi), MI_VISUAL (mi),
                                      oceantiles_12_png,
@@ -1591,9 +1597,8 @@ draw_map (ModeInfo *mi)
       if (bp->nearest_city && *bp->nearest_city)
         sprintf (buf + strlen(buf), "\n%.200s", bp->nearest_city);
 
-      glColor4fv (text_color);
       print_texture_label (mi->dpy, bp->font_data,
-                           MI_WIDTH(mi), MI_HEIGHT(mi), 1, buf);
+                           MI_WIDTH(mi), MI_HEIGHT(mi), 1, buf, text_color);
     }
 
   if (bp->dead_p ||
@@ -1620,17 +1625,13 @@ draw_map (ModeInfo *mi)
                 " Is Perl broken? Maybe try:\n\n"
                 "sudo cpan LWP::Simple LWP::Protocol::https Mozilla::CA");
 
-      glColor4fv (text_color);
       print_texture_label (mi->dpy, bp->font_data,
-                           MI_WIDTH(mi), MI_HEIGHT(mi), 0, buf);
+                           MI_WIDTH(mi), MI_HEIGHT(mi), 0, buf, text_color);
     }
 
 
   if (mi->fps_p && !bp->dead_p)
-    {
-      glColor4fv (text_color);
-      do_fps (mi);
-    }
+      do_fps_color (mi, text_color);
   glFinish();
 
   glXSwapBuffers(dpy, window);

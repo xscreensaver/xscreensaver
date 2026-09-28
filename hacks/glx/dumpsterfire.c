@@ -775,6 +775,7 @@ draw_dumpster (ModeInfo *mi)
   Display *dpy = MI_DISPLAY(mi);
   Window window = MI_WINDOW(mi);
   GLfloat s;
+  static const float fps_color[4] = {1, 1, 0, 1};
 
   if (!bp->glx_context)
     return;
@@ -814,8 +815,7 @@ draw_dumpster (ModeInfo *mi)
 
   glPopMatrix ();
 
-  glColor3f (1, 1, 0);
-  if (mi->fps_p) do_fps (mi);
+  if (mi->fps_p) do_fps_color (mi, fps_color);
   glFinish();
 
   tick_dumpster (mi);

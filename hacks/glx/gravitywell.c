@@ -740,7 +740,6 @@ draw_gw (ModeInfo *mi)
   if (! bp->button_down_p)
     move_stars (mi);
 
-  glColor3f (1, 1, 1);
   if (mi->fps_p) do_fps (mi);
   glFinish();
 

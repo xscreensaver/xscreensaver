@@ -530,9 +530,9 @@ void quat_to_angles(float q[4], float *alpha, float *beta, float *delta)
   r12 = 2.0f*(q[2]*q[3]-q[0]*q[1]);
   r22 = q[0]*q[0]-q[1]*q[1]-q[2]*q[2]+q[3]*q[3];
 
-  *alpha = atan2f(-r12,r22);
-  *beta = atan2f(r02,sqrtf(r00*r00+r01*r01));
-  *delta = atan2f(-r01,r00);
+  *alpha = atan2f(-r12,r22)*180.0f/M_PI_F;
+  *beta = atan2f(r02,sqrtf(r00*r00+r01*r01))*180.0f/M_PI_F;
+  *delta = atan2f(-r01,r00)*180.0f/M_PI_F;
 }
 
 

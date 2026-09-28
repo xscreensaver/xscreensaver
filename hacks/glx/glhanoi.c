@@ -1985,10 +1985,8 @@ ENTRYPOINT void draw_glhanoi(ModeInfo * mi)
 		(void)drawTrails(glhanoi);
 	}
 	
-	if(mi->fps_p) {
-        glColor3f (1, 1, 1);
+	if(mi->fps_p)
 		do_fps(mi);
-	}
 	glFinish();
 
 	glXSwapBuffers(dpy, window);

@@ -233,9 +233,14 @@ Replace the contents of the file that lets you edit with this:
 .fi
 Then log out and back in \fIagain\fP.
 .SS LAUNCHING XSCREENSAVER FROM LXDE
-Add the line \fI@xscreensaver\fP to
+Add the line \fIxscreensaver\fP to
 \fI/etc/xdg/lxsession/LXDE/autostart\fP or
-\fI/etc/xdg/lxsession/LXDE-pi/autostart\fP.
+\fI/etc/xdg/lxsession/LXDE-pi/autostart\fP or
+\fI/etc/xdg/lxsession/rpd-x/autostart\fP.
+
+If you are using \fIlabwc\fP (the Wayland variant of LXDE) then add
+the line \fIxscreensaver &\fP to
+\fI/etc/xdg/labwc/autostart\fP.
 .SS LAUNCHING XSCREENSAVER FROM SYSTEMD
 If you are not using GNOME, KDE or LXDE, the way to launch XScreenSaver
 at login is probably
@@ -317,7 +322,7 @@ There might be a way to accomplish this with other display managers.
 It's a mystery!
 .SH THE WAYLAND PROBLEM
 Wayland is a completely different window system that is intended to replace
-X11.  After 16+ years of trying, some Linux distros have finally begun
+X11.  After 18+ years of trying, some Linux distros have finally begun
 enabling it by default.  Most deployments of it also include XWayland, which
 is a compatibility layer that allows \fIsome\fP X11 programs to continue to
 work within a Wayland environment.
@@ -353,6 +358,9 @@ manipulate a desktop screenshot, depend on the program
 being installed to grab screenshots for us.  And
 .BR grim (1)
 doesn't work under the GNOME or KDE compositors.
+(And even when it does work,
+.BR grim (1)
+is \fIquite\fP slow.)
 .RE
 
 For XScreenSaver to be able to lock, you will need to switch off
@@ -368,8 +376,9 @@ Alternately, edit \fI/etc/X11/gdm/gdm.conf\fP or maybe
 	WaylandEnable=false
 .fi
 .SS TO DISABLE WAYLAND UNDER KDE
-The login screen should have a menu that lets you change the session type to
-"Plasma (X11)".
+The login screen should have a menu that lets you change the session
+type to \fI"Plasma (X11)"\fP.  If that isn't there, you might need to
+install \fI"plasma-session-x11"\fP or some similarly-named package first.
 
 Alternately, edit \fI/etc/sddm.conf\fP and change the \fISessionDir\fP line
 under the \fI[Wayland]\fP section to say:

@@ -452,14 +452,14 @@ ENTRYPOINT void draw_pulsar(ModeInfo * mi)
   pulsarstruct *gp = &Pulsar[MI_SCREEN(mi)];
   Display    *display = MI_DISPLAY(mi);
   Window      window = MI_WINDOW(mi);
+  static const float fps_color[4] = {1, 1, 0, 1};
 
   if (!gp->glx_context)
 	return;
 
   glXMakeCurrent(display, window, *gp->glx_context);
   drawScene(mi);
-  glColor3f(1,1,0);
-  if (mi->fps_p) do_fps (mi);
+  if (mi->fps_p) do_fps_color (mi, fps_color);
   glXSwapBuffers(display, window);
 }
 

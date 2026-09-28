@@ -9,7 +9,7 @@ SHELL		= /bin/sh
 SUBDIRS 	= utils jwxyz hacks/images hacks hacks/glx hacks/fonts \
 		  driver po
 SUBDIRS2	= $(SUBDIRS) OSX android
-TARFILES	= README README.hacking INSTALL \
+TARFILES	= README README.hacking INSTALL AGENTS.md \
 		  configure configure.ac Makefile.in config.h.in \
 		  install-sh config.guess config.rpath aclocal.m4 \
 		  ax_pthread.m4 config.sub \
@@ -268,7 +268,7 @@ update_spec_version::
 	for F in "$$S1" "$$S2" ; do					    \
 	  /bin/echo -n "Updating $$F to \"$$VERS\"... " ;		    \
 	  sed -e "s/^\(%define.version[^0-9]*\)\(.*\)/\1$$VERS/"	    \
-	      -e "s/([-0-9.a-z]*)/($$VERS-1)/"				    \
+	      -e "s/ ([-0-9.a-z]*)/ ($$VERS-1)/"			    \
 	    < "$$F" > "$$T" ;						    \
 	  if cmp -s "$$F" "$$T" ; then					    \
 	    echo "unchanged." ;						    \

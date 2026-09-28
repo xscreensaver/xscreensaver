@@ -17,6 +17,7 @@ hypertorus \- Draws a hypertorus that rotates in 4d
 [\-\-solid]
 [\-\-bands]
 [\-\-spirals-{1,2,4,8,16}]
+[\-\-torus-knots-{3-2,4-3,5-2,5-3,5-4}]
 [\-\-onesided]
 [\-\-twosided]
 [\-\-colorwheel]
@@ -43,20 +44,21 @@ projected to the screen either perspectively or orthographically.
 .PP
 There are three display modes for the torus: mesh (wireframe), solid,
 or transparent.  Furthermore, the appearance of the torus can be as a
-solid object or as a set of see-through bands or see-through spirals.
-Finally, the colors with with the torus is drawn can be set to
-one-sided, two-sided, or to a color wheel.  The colors can be static
-or changing dynamically.  In one-sided color mode, the torus is drawn
-with the same color on the inside and the outside.  In two-sided color
-mode, the torus is drawn with red on the outside and green on the
-inside if static colors are used.  If changing colors are used,
-dynamically varying complementary colors are used for the two sides.
-This mode enables you to see that the 3d projection of the torus turns
-inside-out as it rotates in 4d.  The color wheel mode draws the torus
-with a fully saturated color wheel.  If changing colors are used, the
-colors of the color wheel are varying dynamically.  The color wheel
-mode gives a very nice effect when combined with the see-through bands
-or see-through spirals mode.
+solid object or as a set of see-through bands, see-through spirals, or
+see-through torus knots.  Finally, the colors with with the torus is
+drawn can be set to one-sided, two-sided, or to a color wheel.  The
+colors can be static or changing dynamically.  In one-sided color
+mode, the torus is drawn with the same color on the inside and the
+outside.  In two-sided color mode, the torus is drawn with red on the
+outside and green on the inside if static colors are used.  If
+changing colors are used, dynamically varying complementary colors are
+used for the two sides.  This mode enables you to see that the 3d
+projection of the torus turns inside-out as it rotates in 4d.  The
+color wheel mode draws the torus with a fully saturated color wheel.
+If changing colors are used, the colors of the color wheel are varying
+dynamically.  The color wheel mode gives a very nice effect when
+combined with the see-through bands, see-through spirals, or
+see-through torus knot modes.
 .PP
 Finally, the rotation speed for each of the six planes around which
 the torus rotates can be chosen.
@@ -112,6 +114,10 @@ Display the torus as see-through bands (default).
 .B \-\-spirals-1, \-\-spirals-2, \-\-spirals-4, \-\-spirals-8, \-\-spirals-16
 Display the torus as see-through spirals with the indicated number of
 spirals.
+.TP 8
+.B \-\-torus-knots-3-2, \-\-torus-knots-4-3, \-\-torus-knots-5-2, \-\-torus-knots-5-3, \-\-torus-knots-5-4
+Display the torus as see-through torus knots. The supported torus
+knots are (3,2), (4,3), (5,2), (5,3), and (5,4).
 .PP
 The following three options are mutually exclusive.  They determine
 how to color the torus.
@@ -209,7 +215,7 @@ The window ID to use with \fI\-\-root\fP.
 .BR X (1),
 .BR xscreensaver (1)
 .SH COPYRIGHT
-Copyright \(co 2003-2020 by Carsten Steger.  Permission to use, copy,
+Copyright \(co 2003-2026 by Carsten Steger.  Permission to use, copy,
 modify, distribute, and sell this software and its documentation for
 any purpose is hereby granted without fee, provided that the above
 copyright notice appear in all copies and that both that copyright
@@ -218,4 +224,4 @@ No representations are made about the suitability of this software for
 any purpose.  It is provided "as is" without express or implied
 warranty.
 .SH AUTHOR
-Carsten Steger <carsten@mirsanmir.org>, 11-jan-2020.
+Carsten Steger <carsten@mirsanmir.org>, 04-apr-2026.

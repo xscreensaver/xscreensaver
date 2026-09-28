@@ -255,6 +255,10 @@ When adding a new hack, edit android/Makefile, then "make clean" and "make".
       - sonar (hosts are hidden under the dome)
       - winduprobot (dome is not transparent)
 
+      Reports indicate that this problem doesn't exist on certain hardware,
+      possibly all hardware, but only in the simulator.  Good to know that
+      the simulator does not simulate actual devices.
+
   - Weird outliers:
 
     - kumppa and slip are special-cased to use jwxyz-gl instead of jwxyz-image
@@ -263,6 +267,9 @@ When adding a new hack, edit android/Makefile, then "make clean" and "make".
 
     - petri is similar, except with tons of XFillRectangle, which, at two
       triangles each, is a lot of geometry.
+
+    - splodesic has no interior color because GLES1 only implements
+      glMaterialfv GL_FRONT, not GL_BACK.
 
     - extrusion doesn't work because no libGLE.
     - glitchpeg is just too hard.

@@ -1,0 +1,12 @@
+diff -Naur xscreensaver-6.16-orig/hacks/glx/Makefile.in xscreensaver-6.16/hacks/glx/Makefile.in
+--- xscreensaver-6.16-orig/hacks/glx/Makefile.in	2026-09-03 15:49:17.772225153 -0700
++++ xscreensaver-6.16/hacks/glx/Makefile.in	2026-09-22 19:22:59.000000000 -0700
+@@ -1287,7 +1287,7 @@
+ 	$(CC_HACK) -o $@	$(FLOPPY) $(HACK_LIBS)
+ 
+ graphstat.h: graphstat.txt
+-	$(UTILS_SRC)/bin2c $< $@
++	$(UTILS_SRC)/bin2c $< $(<D)/$(notdir $@)
+ graphstat.o: graphstat.h
+ graphstat:	graphstat.o	$(HACK_OBJS)
+ 	$(CC_HACK) -o $@ $@.o	$(HACK_OBJS) $(HACK_LIBS)

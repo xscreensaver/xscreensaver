@@ -914,7 +914,6 @@ ENTRYPOINT void draw_cube21(ModeInfo * mi)
     MI_ABORT(mi);
     return;
   }
-  glColor3f (1, 1, 1);
   if (MI_IS_FPS(mi)) do_fps (mi);
   glFlush();
   glXSwapBuffers(display, window);

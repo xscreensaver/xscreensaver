@@ -1092,7 +1092,6 @@ draw_cube (ModeInfo *mi)
 
   paint_papercube(papercube);
 
-  glColor3f (1, 1, 1);
   if (mi->fps_p)
     do_fps (mi);
 

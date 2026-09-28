@@ -202,7 +202,6 @@ draw_glschool(ModeInfo *mi)
                             &mi->polygon_count);
 	glschool_computeAccelerations(sc->school);
 
-        glColor3f (1, 1, 1);
 	if (mi->fps_p)
 		do_fps(mi);
 

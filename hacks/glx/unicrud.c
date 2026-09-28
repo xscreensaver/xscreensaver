@@ -723,6 +723,7 @@ draw_unichar (ModeInfo *mi)
   char title[400];
   XCharStruct e;
   int w, h, i, j;
+  GLfloat color[4] = {1, 1, 0, 1};
   GLfloat s;
 
   i = utf8_encode (bp->unichar, text, sizeof(text) - 1);
@@ -752,11 +753,10 @@ draw_unichar (ModeInfo *mi)
   glColor4fv (bp->color);
   print_texture_string (bp->char_font, text);
 
-  glColor3f (1, 1, 0);
   if (do_titles)
     print_texture_label (mi->dpy, bp->title_font,
                          mi->xgwa.width, mi->xgwa.height,
-                         1, title);
+                         1, title, color);
 }
 
 
@@ -938,6 +938,7 @@ draw_unicrud (ModeInfo *mi)
   unicrud_configuration *bp = &bps[MI_SCREEN(mi)];
   Display *dpy = MI_DISPLAY(mi);
   Window window = MI_WINDOW(mi);
+  static const float fps_color[4] = {1, 1, 0, 1};
 
   if (!bp->glx_context)
     return;
@@ -1013,8 +1014,7 @@ draw_unicrud (ModeInfo *mi)
 
   glPopMatrix ();
 
-  glColor3f (1, 1, 0);
-  if (mi->fps_p) do_fps (mi);
+  if (mi->fps_p) do_fps_color (mi, fps_color);
   glFinish();
 
   glXSwapBuffers(dpy, window);

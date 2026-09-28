@@ -1,5 +1,5 @@
 /* Generated file, do not edit.
-   Created: Mon Mar  9 17:59:45 2026 by build-fntable.pl 1.15.
+   Created: Thu Sep  3 12:34:06 2026 by build-fntable.pl 1.15.
  */
 
 #import <Foundation/Foundation.h>
@@ -90,6 +90,7 @@ extern struct xscreensaver_function_table
  flipflop_xscreensaver_function_table,
  flipscreen3d_xscreensaver_function_table,
  fliptext_xscreensaver_function_table,
+ floppy_xscreensaver_function_table,
  flow_xscreensaver_function_table,
  fluidballs_xscreensaver_function_table,
  flyingtoasters_xscreensaver_function_table,
@@ -113,6 +114,7 @@ extern struct xscreensaver_function_table
  glsnake_xscreensaver_function_table,
  gltext_xscreensaver_function_table,
  goop_xscreensaver_function_table,
+ graphstat_xscreensaver_function_table,
  grav_xscreensaver_function_table,
  gravitywell_xscreensaver_function_table,
  greynetic_xscreensaver_function_table,
@@ -273,6 +275,7 @@ NSDictionary *make_function_table_dict(void) {
 #else
 	@"Abstractile":	[NSValue valueWithPointer:&abstractile_xscreensaver_function_table],
 	@"Alien Beacon":	[NSValue valueWithPointer:&xshadertoy_xscreensaver_function_table],
+	@"Amiga Juggler":	[NSValue valueWithPointer:&xshadertoy_xscreensaver_function_table],
 	@"Anemone":	[NSValue valueWithPointer:&anemone_xscreensaver_function_table],
 	@"Anemotaxis":	[NSValue valueWithPointer:&anemotaxis_xscreensaver_function_table],
 	@"Ant Inspect":	[NSValue valueWithPointer:&antinspect_xscreensaver_function_table],
@@ -361,6 +364,7 @@ NSDictionary *make_function_table_dict(void) {
 	@"Flip Flop":	[NSValue valueWithPointer:&flipflop_xscreensaver_function_table],
 	@"Flip Screen 3D":	[NSValue valueWithPointer:&flipscreen3d_xscreensaver_function_table],
 	@"Flip Text":	[NSValue valueWithPointer:&fliptext_xscreensaver_function_table],
+	@"Floppy":	[NSValue valueWithPointer:&floppy_xscreensaver_function_table],
 	@"Flow":	[NSValue valueWithPointer:&flow_xscreensaver_function_table],
 	@"Fluid Balls":	[NSValue valueWithPointer:&fluidballs_xscreensaver_function_table],
 	@"Flux Core":	[NSValue valueWithPointer:&xshadertoy_xscreensaver_function_table],
@@ -387,6 +391,7 @@ NSDictionary *make_function_table_dict(void) {
 	@"GL Text":	[NSValue valueWithPointer:&gltext_xscreensaver_function_table],
 	@"Golden Apollian":	[NSValue valueWithPointer:&xshadertoy_xscreensaver_function_table],
 	@"Goop":	[NSValue valueWithPointer:&goop_xscreensaver_function_table],
+	@"Graph Stat":	[NSValue valueWithPointer:&graphstat_xscreensaver_function_table],
 	@"Grav":	[NSValue valueWithPointer:&grav_xscreensaver_function_table],
 	@"Gravity Well":	[NSValue valueWithPointer:&gravitywell_xscreensaver_function_table],
 	@"Greynetic":	[NSValue valueWithPointer:&greynetic_xscreensaver_function_table],
@@ -461,6 +466,7 @@ NSDictionary *make_function_table_dict(void) {
 	@"Pinion":	[NSValue valueWithPointer:&pinion_xscreensaver_function_table],
 	@"Pipes":	[NSValue valueWithPointer:&pipes_xscreensaver_function_table],
 	@"Platonic Folding":	[NSValue valueWithPointer:&platonicfolding_xscreensaver_function_table],
+	@"Polar Night":	[NSValue valueWithPointer:&xshadertoy_xscreensaver_function_table],
 	@"Polyhedra":	[NSValue valueWithPointer:&polyhedra_xscreensaver_function_table],
 	@"Polyominoes":	[NSValue valueWithPointer:&polyominoes_xscreensaver_function_table],
 	@"Polytopes":	[NSValue valueWithPointer:&polytopes_xscreensaver_function_table],

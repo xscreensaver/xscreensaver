@@ -64,9 +64,11 @@ typedef struct ModeInfo ModeInfo;
    isn't seeing the prototypes for them in glx/fps-gl.c... */
 extern void do_fps (ModeInfo *);
 extern void xlockmore_gl_compute_fps (Display *, Window, fps_state *, void *);
-extern void xlockmore_gl_draw_fps (ModeInfo *);
+extern void xlockmore_gl_draw_fps (ModeInfo *mi);
+extern void xlockmore_gl_draw_fps_color (ModeInfo *, const float color[4]);
 extern void xlockmore_gl_free_fps (fps_state *);
 # define do_fps xlockmore_gl_draw_fps
+# define do_fps_color xlockmore_gl_draw_fps_color
 
 
 extern void xlockmore_setup (struct xscreensaver_function_table *, void *);

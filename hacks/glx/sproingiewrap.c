@@ -173,6 +173,7 @@ draw_sproingies (ModeInfo * mi)
 	sproingiesstruct *sp = &sproingies[MI_SCREEN(mi)];
 	Display    *display = MI_DISPLAY(mi);
 	Window      window = MI_WINDOW(mi);
+    static const float fps_color[4] = {1, 1, 0, 1};
 
 	if (!sp->glx_context)
 		return;
@@ -185,8 +186,7 @@ draw_sproingies (ModeInfo * mi)
 	NextSproingieDisplay(&sp->si);	/* It will swap. */
     glPopMatrix();
 
-    glColor3f (1, 1, 0);
-    if (mi->fps_p) do_fps (mi);
+    if (mi->fps_p) do_fps_color (mi, fps_color);
     glFinish();
     glXSwapBuffers(MI_DISPLAY(mi), MI_WINDOW(mi));
 }

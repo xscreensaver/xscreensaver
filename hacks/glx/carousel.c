@@ -232,6 +232,12 @@ load_image (ModeInfo *mi, image_frame *frame)
     {
       int w = (MI_WIDTH(mi)  / 2) - 1;
       int h = (MI_HEIGHT(mi) / 2) - 1;
+
+# ifdef HAVE_MOBILE  /* Retina displays */
+      w = MI_WIDTH(mi)  * 2;
+      h = MI_HEIGHT(mi) * 2;
+#endif
+
       if (w <= 10) w = 10;
       if (h <= 10) h = 10;
 

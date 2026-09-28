@@ -5,7 +5,7 @@ set -e
 case "$1" in
     configure)
 
-      killall -HUP xscreensaver 2>&-
+      killall -q -HUP xscreensaver || true
 
       # I think that without this, newly-installed icons don't show up in
       # desktop menus or in xscreensaver-settings.  Is there a better way?

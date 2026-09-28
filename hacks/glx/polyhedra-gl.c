@@ -168,11 +168,11 @@ startup_blurb (ModeInfo *mi)
   polyhedra_configuration *bp = &bps[MI_SCREEN(mi)];
   const char *s = "Computing polyhedra...";
   texture_font_data *f = bp->font1_data;
+  GLfloat color[4] = {0.8, 0.8, 00, 1.0};
 
-  glColor3f (0.8, 0.8, 0);
   print_texture_label (mi->dpy, f,
                        mi->xgwa.width, mi->xgwa.height,
-                       0, s);
+                       0, s, color);
   glFinish();
   glXSwapBuffers(MI_DISPLAY(mi), MI_WINDOW(mi));
 }
@@ -295,7 +295,7 @@ draw_label (ModeInfo *mi)
   glMaterialfv (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
   print_texture_label (mi->dpy, f,
                        mi->xgwa.width, mi->xgwa.height,
-                       1, label);
+                       1, label, color);
 }
 
 
@@ -654,7 +654,6 @@ draw_polyhedra (ModeInfo *mi)
 
   glPopMatrix ();
 
-  glColor3f (1, 1, 1);
   if (mi->fps_p) do_fps (mi);
   glFinish();
 

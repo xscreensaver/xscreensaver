@@ -75,6 +75,12 @@ Interested in writing a new screen saver?
 Version History
 ===============================================================================
 
+6.16	* New hacks, `floppy', `graphstat', `amigajuggler' and `polarnight'.
+        * iOS: image loading works even if the images in the photo roll need
+          to be downloaded from iCloud first.  Images can display file names.
+	* New display modes in `hypertorus'.
+	* X11: Updates for systemd inhibitors on KDE Plasma 6.5.
+
 6.15	* New hacks, `worldpieces', `bestill', `bubblecolors', `darktransit',
 	  `downfall', `driftclouds', `goldenapollian', `noxfire', `prococean',
 	  `rigrekt', `trainmandala', `trizm' and `universeball'.

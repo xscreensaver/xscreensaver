@@ -47,7 +47,8 @@ extern void print_texture_string (texture_font_data *, const char *);
  */
 void print_texture_label (Display *, texture_font_data *,
                           int window_width, int window_height,
-                          int position, const char *string);
+                          int position, const char *string,
+                          const GLfloat color[4]);
 
 /* Renders the given string into the prevailing texture.
    Returns the metrics of the text, and size of the texture.

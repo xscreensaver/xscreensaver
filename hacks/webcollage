@@ -47,7 +47,7 @@ use LWP::UserAgent;
 
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my ($version) = ('$Revision: 1.198 $' =~ m/\s(\d[.\d]+)\s/s);
+my ($version) = ('$Revision: 1.199 $' =~ m/\s(\d[.\d]+)\s/s);
 my $copyright = "WebCollage $version, Copyright © 1999-2024" .
     " Jamie Zawinski <jwz\@jwz.org>\n" .
     "                  https://www.jwz.org/webcollage/\n";
@@ -95,23 +95,13 @@ sub rm_atexit($) {
 
 
 my @search_methods = (
-                      # Google is rate-limiting us now, so this works ok from
-                      # a short-running screen saver, but not as a batch job.
-                      # I haven't found a workaround.
-                      #
-                        4, "googlephotos",  \&pick_from_google_image_photos,
-                        2, "googleimgs",    \&pick_from_google_images,
-                        2, "googlenums",    \&pick_from_google_image_numbers,
+                       14, "bingphotos",    \&pick_from_bing_image_photos,
+                       10, "bingimgs",      \&pick_from_bing_images,
+                        9, "bingnums",      \&pick_from_bing_image_numbers,
 
-                      # So let's try Bing instead. No rate limiting yet!
-                      #
-                       13, "bingphotos",    \&pick_from_bing_image_photos,
-                        9, "bingimgs",      \&pick_from_bing_images,
-                        8, "bingnums",      \&pick_from_bing_image_numbers,
-
-                       20, "flickr_recent", \&pick_from_flickr_recent,
-                       15, "flickr_random", \&pick_from_flickr_random,
-                       10, "flickr_commons",\&pick_from_flickr_commons,
+                       22, "flickr_recent", \&pick_from_flickr_recent,
+                       17, "flickr_random", \&pick_from_flickr_random,
+                       11, "flickr_commons",\&pick_from_flickr_commons,
 
                        11, "imgur",         \&pick_from_imgur,
                         2, "livejournal",   \&pick_from_livejournal_images,
@@ -119,30 +109,42 @@ my @search_methods = (
                      # Tumblr doesn't have an "or" search, so this isn't great.
                         2, "tumblr",        \&pick_from_tumblr,
 
-                     # I ran out of usable access tokens, May 2017
+                     # Images from random unsecured surveillance cameras,
+                     # via insecam.org.
+                        2, "securitycam",   \&pick_from_security_camera,
+
+
+                     # May 2017: I ran out of usable access tokens.
                      #  0, "instagram",     \&pick_from_instagram,
 
-                     # No longer exists, as of Apr 2014
+                     # Apr 2014: No longer exists.
                      #  0, "yahoorand",     \&pick_from_yahoo_random_link,
 
                      # Twitter destroyed their whole API in 2013.
                      #  0, "twitpic",       \&pick_from_twitpic_images,
                      #  0, "twitter",       \&pick_from_twitter_images,
 
-                     # Images from random unsecured surveillance cameras,
-                     # via insecam.org.
-                        2, "securitycam",   \&pick_from_security_camera,
-
-                     # Nonfunctional as of June 2011.
+                     # June 2011: nonfunctional.
                      #  0, "altavista",     \&pick_from_alta_vista_random_link,
 
-                     # In Apr 2002, Google asked me to stop searching them.
+                     # Apr 2002: Google asked me to stop searching them.
                      # I asked them to add a "random link" url.  They said
                      # "that would be easy, we'll think about it" and then
                      # never wrote back.  Booo Google!  Booooo!  So, screw
                      # those turkeys, I've turned Google searching back on.
                      # I'm sure they can take it.  (Jan 2005.)
 
+                     # 2013: Google is rate-limiting us now, so this works ok
+                     # from a short-running screen saver, but not as a batch
+                     # job.  I haven't found a workaround.
+                     #
+                     # 2026: Google image searches require JS now.
+                     # Fuck off forever I guess.
+                     #
+                     #  4, "googlephotos",  \&pick_from_google_image_photos,
+                     #  2, "googleimgs",    \&pick_from_google_images,
+                     #  2, "googlenums",    \&pick_from_google_image_numbers,
+ 
                      # Jan 2005: Yahoo fucked up their search form so that
                      # it's no longer possible to do "or" searches on news
                      # images, so we rarely get any hits there any more.
@@ -268,6 +270,7 @@ my %warningless_sites = (
   "images.quizfarm.com"     => 1,  # damn those LJ quizzes...
   "images.quizilla.com"     => 1,
   "images.quizdiva.net"     => 1,
+  "m.media-amazon.com"	    => 1,
 
   "local-directory"         => 1,  # builtin...
 );
@@ -416,6 +419,7 @@ sub get_document_1($$$) {
   $ua->proxy ('http', $http_proxy) if $http_proxy;
   $ua->default_header ('Referer' => $referer) if $referer;
   $ua->default_header ('Accept' => '*/*');
+  $ua->requests_redirectable([]);  # We handle redirects ourself
   $ua->timeout($timeout) if $timeout;
 
   if (0) {
@@ -517,12 +521,18 @@ sub get_document($$;$) {
 
     $http =~ s/[\r\n]+$//s;
 
-    if ( $http =~ m@^HTTP/[0-9.]+ 30[123]@ ) {
+    if ( $http =~ m@^(HTTP/[0-9.]+ )?30[123]@ ) {
       $_ = $head;
 
       my ( $location ) = m@^location:[ \t]*(.*)$@im;
       if ( $location ) {
         $location =~ s/[\r\n]$//;
+
+        if ($location =~ m@imgur.com/removed\.png@s) {
+          LOG (($verbose_net || $verbose_load), "fake 404 image $url");
+          $suppress_audit = 1;
+          return ();
+        }
 
         LOG ($verbose_net, "redirect from $url to $location");
         $referer = $url;
@@ -550,9 +560,9 @@ sub get_document($$;$) {
         return ();
       }
 
-    } elsif ( $http =~ m@^HTTP/[0-9.]+ ([4-9][0-9][0-9].*)$@ ) {
+    } elsif ( $http =~ m@^(HTTP/[0-9.]+ )?([4-9][0-9][0-9].*)$@ ) {
 
-      LOG (($verbose_net || $verbose_load), "failed: $1 ($url)");
+      LOG (($verbose_net || $verbose_load), "failed: $2 ($url)");
 
       # http errors -- return nothing.
       $body = undef;

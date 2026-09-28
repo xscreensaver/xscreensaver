@@ -4,8 +4,8 @@
 !            a screen saver and locker for the X window system
 !                            by Jamie Zawinski
 !
-!                              version 6.15
-!                              30-Mar-2026
+!                              version 6.16
+!                              03-Sep-2026
 !
 ! See "man xscreensaver" for more info.  The latest version is always
 ! available at https://www.jwz.org/xscreensaver/
@@ -567,6 +567,7 @@ XScreenSaver.bourneShell:		/bin/sh
 @GL_KLUDGE@ GL: 				handsy --root				    \n\
 @GL_KLUDGE@ GL: 				maze3d --root				    \n\
 @GL_KLUDGE@ GL: 				peepers --root				    \n\
+@GL_KLUDGE@ GL: 				polarnight --root			    \n\
 @GL_KLUDGE@ GL: 				razzledazzle --root			    \n\
 				vfeedback --root			    \n\
 @GL_KLUDGE@ GL: 				deepstars --root			    \n\
@@ -614,6 +615,9 @@ XScreenSaver.bourneShell:		/bin/sh
 @GL_KLUDGE@ GL: 				rigrekt --root				    \n\
 @GL_KLUDGE@ GL: 				trizm --root				    \n\
 @GL_KLUDGE@ GL: 				universeball --root			    \n\
+@GL_KLUDGE@ GL: 				amigajuggler --root			    \n\
+@GL_KLUDGE@ GL: 				floppy --root				    \n\
+@GL_KLUDGE@ GL: 				graphstat --root			    \n\
 @GL_KLUDGE@ GL: 				worldpieces --root			    \n
 
 
@@ -626,6 +630,7 @@ XScreenSaver.bourneShell:		/bin/sh
 !=============================================================================
 
 *hacks.alienbeacon.name:    Alien Beacon
+*hacks.amigajuggler.name:   Amiga Juggler
 *hacks.antinspect.name:     Ant Inspect
 *hacks.antmaze.name:        Ant Maze
 *hacks.antspotlight.name:   Ant Spotlight
@@ -695,6 +700,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.glsnake.name:        GL Snake
 *hacks.gltext.name:         GL Text
 *hacks.goldenapollian.name: Golden Apollian
+*hacks.graphstat.name:      Graph Stat
 *hacks.gravitywell.name:    Gravity Well
 *hacks.hexplasma.name:      Hex Plasma
 *hacks.hexstrut.name:       Hex Strut
@@ -728,6 +734,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.papercube.name:      Paper Cube
 *hacks.photopile.name:      Photo Pile
 *hacks.platonicfolding.name:Platonic Folding
+*hacks.polarnight.name:     Polar Night
 *hacks.popsquares.name:     Pop Squares
 *hacks.prococean.name:      Proc Ocean
 *hacks.projectiveplane.name:Projective Plane

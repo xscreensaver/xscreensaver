@@ -1677,6 +1677,7 @@ static void draw_title(
 #ifndef HAVE_GLUT
     struct glsnake_cfg * bp = &glc[MI_SCREEN(mi)];
 #endif
+    GLfloat color[4] = {1.0, 1.0, 1.0, 1.0};
 
     /* draw some text */
 
@@ -1698,7 +1699,7 @@ static void draw_title(
     glOrtho((GLdouble) 0., (GLdouble) mi->xgwa.width, (GLdouble) 0., (GLdouble) mi->xgwa.height, -1, 1);
 #endif
 
-    glColor4f(1.0, 1.0, 1.0, 1.0);
+    glColor4fv(color);
     {
 	char interactstr[] = "interactive";
 	const char * s;
@@ -1723,7 +1724,7 @@ static void draw_title(
 #else
 	print_texture_label (mi->dpy, bp->font_data,
                              mi->xgwa.width, mi->xgwa.height,
-                             1, s);
+                             1, s, color);
 #endif
     }
     glPopMatrix();

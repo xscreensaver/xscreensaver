@@ -295,10 +295,9 @@ get_atom_data (const char *atom_name)
 
 static void
 set_atom_color (ModeInfo *mi, const molecule_atom *a, 
-                Bool font_p, GLfloat alpha)
+                Bool font_p, GLfloat alpha, GLfloat gl_color[4])
 {
   const atom_data *d;
-  GLfloat gl_color[4];
 
   if (a)
     d = a->data;
@@ -546,6 +545,7 @@ build_molecule (ModeInfo *mi, Bool transparent_p)
   int i;
   GLfloat alpha = transparent_p ? shell_alpha : 1.0;
   int polys = 0;
+  GLfloat color[4];
 
   molecule *m = &mc->molecules[mc->which];
 
@@ -569,8 +569,8 @@ build_molecule (ModeInfo *mi, Bool transparent_p)
     }
 
   if (!wire)
-    set_atom_color (mi, 0, False, alpha);
-
+    set_atom_color (mi, 0, False, alpha, color);
+  
   if (do_bonds)
     for (i = 0; i < m->nbonds; i++)
       {
@@ -613,7 +613,7 @@ build_molecule (ModeInfo *mi, Bool transparent_p)
       {
         const molecule_atom *a = &m->atoms[i];
         GLfloat size = atom_size (a);
-        set_atom_color (mi, a, False, alpha);
+        set_atom_color (mi, a, False, alpha, color);
         polys += sphere (mc, a->x, a->y, a->z, size, wire);
       }
 
@@ -1235,15 +1235,14 @@ gl_init (ModeInfo *mi)
 static void
 startup_blurb (ModeInfo *mi)
 {
-#ifndef HAVE_ANDROID   /* Doesn't work -- causes whole scene to be black */
   molecule_configuration *mc = &mcs[MI_SCREEN(mi)];
   const char *s = "Constructing molecules...";
+  GLfloat color[4] = { 1, 1, 1, 1 };
   print_texture_label (mi->dpy, mc->title_font,
                        mi->xgwa.width, mi->xgwa.height,
-                       0, s);
+                       0, s, color);
   glFinish();
   glXSwapBuffers(MI_DISPLAY(mi), MI_WINDOW(mi));
-#endif
 }
 
 ENTRYPOINT Bool
@@ -1342,10 +1341,6 @@ init_molecule (ModeInfo *mi)
     mc->trackball = gltrackball_init (True);
   }
 
-#ifdef HAVE_ANDROID   /* Doesn't work -- not transparent */
-  do_shells = False;
-#endif
-
   orig_do_labels = do_labels;
   orig_do_atoms  = do_atoms;
   orig_do_bonds  = do_bonds;
@@ -1390,12 +1385,13 @@ draw_labels (ModeInfo *mi)
       molecule_atom *a = &m->atoms[i];
       GLfloat size = atom_size (a);
       GLfloat m[4][4];
+      GLfloat color[4];
 
       glPushMatrix();
 
       if (!wire)
-        set_atom_color (mi, a, True, 1);
-
+        set_atom_color (mi, a, True, 1, color);
+      
       /* First, we translate the origin to the center of the atom.
 
          Then we retrieve the prevailing modelview matrix, which
@@ -1557,7 +1553,6 @@ draw_molecule (ModeInfo *mi)
 {
   time_t now = time ((time_t *) 0);
   GLfloat speed = 4.0;  /* speed at which the zoom out/in happens */
-
   molecule_configuration *mc = &mcs[MI_SCREEN(mi)];
   Display *dpy = MI_DISPLAY(mi);
   Window window = MI_WINDOW(mi);
@@ -1649,10 +1644,11 @@ draw_molecule (ModeInfo *mi)
          wrongly when the window is resized. */
       if (do_titles && m->label && *m->label)
         {
-          set_atom_color (mi, 0, True, 1);
+          GLfloat color[4];
+          set_atom_color (mi, 0, True, 1, color);
           print_texture_label (mi->dpy, mc->title_font,
                                mi->xgwa.width, mi->xgwa.height,
-                               1, m->label);
+                               1, m->label, color);
         }
     }
   glPopMatrix();

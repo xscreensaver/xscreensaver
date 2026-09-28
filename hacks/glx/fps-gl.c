@@ -60,6 +60,17 @@ xlockmore_gl_compute_fps (Display *dpy, Window w, fps_state *fpst,
 void
 xlockmore_gl_draw_fps (ModeInfo *mi)
 {
+  GLfloat color[4] = { 1, 1, 1, 1 };
+
+  xlockmore_gl_draw_fps_color (mi, color);
+}
+
+
+/* Called directly from GL programs (as `do_fps_color') before swapping
+   buffers. */
+void
+xlockmore_gl_draw_fps_color (ModeInfo *mi, const float color[4])
+{
   fps_state *st = mi->fpst;
   if (st)   /* might be too early */
     {
@@ -69,7 +80,7 @@ xlockmore_gl_draw_fps (ModeInfo *mi)
       print_texture_label (st->dpy, data->texfont,
                            xgwa.width, xgwa.height,
                            (data->top_p ? 1 : 2),
-                           st->string);
+                           st->string, color);
     }
 }
 

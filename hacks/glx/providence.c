@@ -773,7 +773,6 @@ ENTRYPOINT void draw_providence(ModeInfo * mi)
   draw_providence_strip(mi);
   glPopMatrix();
   
-  glColor3f (1, 1, 1);
   if(MI_IS_FPS(mi)) do_fps (mi);
   glFlush();
   

@@ -1093,7 +1093,6 @@ draw_chompytower (ModeInfo *mi)
       bp->last_tick = now;
     }
 
-  glColor3f (1, 1, 1);
   if (mi->fps_p) do_fps (mi);
   glFinish();
 

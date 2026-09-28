@@ -464,10 +464,8 @@ draw_flipflop(ModeInfo *mi)
   else
     glClear(GL_COLOR_BUFFER_BIT);
   
-  if(mi->fps_p){
-    glColor3f (1, 1, 1);
+  if(mi->fps_p)
     do_fps(mi);
-  }
 
   glFinish();
   glXSwapBuffers(disp, w);

@@ -31,7 +31,7 @@ use diagnostics;
 use strict;
 
 my $progname = $0; $progname =~ s@.*/@@g;
-my ($version) = ('$Revision: 1.11 $' =~ m/\s(\d[.\d]+)\s/s);
+my ($version) = ('$Revision: 1.12 $' =~ m/\s(\d[.\d]+)\s/s);
 
 my $verbose = 1;
 
@@ -132,6 +132,18 @@ sub download_populations($) {
      }
      ORDER BY ASC(?stateLabel) LIMIT 100',
     );
+
+  #   Commonwealth of Kentucky
+  #   Commonwealth of Massachusetts
+  #   Commonwealth of Pennsylvania
+  #   Commonwealth of Puerto Rico / Estado Libre Asociado de Puerto Rico
+  #   Commonwealth of Virginia
+  #   Commonwealth of the Northern Mariana Islands
+  #   Mokuʻāina o Hawaiʻi
+  #
+  # "The commonwealth appellation is stylistic and carries no legal or
+  # political significance."
+
 
   my $i = 0;
   foreach my $query (@queries) {
@@ -384,6 +396,7 @@ sub download_endonyms($) {
         $nname =~ s@\{\{lang-uz[^\|]+\|@@si;
         $nname =~ s@\{\{lang-[^\|]+\|[^\|]+\|@@si;
         $nname =~ s@\|\{\{Nastaliq@@si;
+        $nname =~ s@\|\{\{nq@@si;
         error ("unparsable name 2: $code: < $nname >\n\n$opage")
           unless ($nname =~ m/ \{\{ (?: Native \s* name | langx? ) \s*
                                \|   (?: [^\|]+ ) \s*
@@ -419,6 +432,17 @@ sub download_endonyms($) {
     'UZ' => [ 'Ўзбекистон Республикаси', 'O‘zbekiston Respublikasi' ],
     'VA' => [ 'Status Civitatis Vaticanae', '' ],
     'WS' => [ 'Malo Saʻoloto Tutoʻatasi o Sāmoa', '' ],
+
+    # Could use wdt:P1705 ?nativeLabel to find official names, but there are
+    # only 6 of them... "The commonwealth appellation is stylistic and carries
+    # no legal or political significance."
+    #
+    'US-HI' => [ 'Mokuʻāina o Hawaiʻi', '' ],
+    'US-KY' => [ 'Commonwealth of Kentucky', '' ],
+    'US-MA' => [ 'Commonwealth of Massachusetts', '' ],
+    'US-PA' => [ 'Commonwealth of Pennsylvania', '' ],
+    'US-VA' => [ 'Commonwealth of Virginia', '' ],
+    'PR'    => [ 'Estado Libre Asociado de Puerto Rico', '' ],
     );
   foreach my $code (sort keys %t) {
     print STDERR "$progname: replacing: $code: \"" .

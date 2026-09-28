@@ -67,9 +67,10 @@
                    jwxyz_draw_NSImage_or_CGImage
                draw_colorbars
                ios_load_random_image
-                   ios_load_random_image_cb
-                       jwxyz_draw_NSImage_or_CGImage
-                       CB name, geom, closure
+       ...
+       ios_load_random_image_cb
+           jwxyz_draw_NSImage_or_CGImage
+           CB name, geom, closure
 
 
    Android execution path:
@@ -798,7 +799,7 @@ ios_load_random_image_cb (void *uiimage, const char *filename,
                                      True, uiimage, &geom,
                                      rot);
     }
-  else  /* Probably means no images in the gallery. */
+  else  /* No images in the gallery, or no loading permission granted. */
     {
       draw_colorbars (clo2->screen, xgwa.visual, clo2->drawable, xgwa.colormap,
                       0, 0, w, h, 0, 0); /* #### logo missing */
@@ -962,7 +963,7 @@ load_random_image_android (Screen *screen, Window window, Drawable drawable,
   gcv.foreground = BlackPixelOfScreen (screen);
   GC gc = XCreateGC (dpy, drawable, GCForeground, &gcv);
   XFillRectangle (dpy, drawable, gc, 0, 0, xgwa.width, xgwa.height);
-  char *name = jwxyz_draw_random_image (dpy, drawable, gc);
+  char *name = jwxyz_draw_random_image (dpy, drawable, gc, &geom);
   if (! name) {
     draw_colorbars (screen, xgwa.visual, drawable, xgwa.colormap, 0, 0,
                     xgwa.width, xgwa.height, 0, 0); /* #### logo missing */

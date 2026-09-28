@@ -37,6 +37,16 @@
               arg-set="--appearance spirals-8"/>
       <option id="bands" _label="16 Transparent spirals"
               arg-set="--appearance spirals-16"/>
+      <option id="bands" _label="5 Transparent torus knots (3,2)"
+              arg-set="--appearance torus-knots-3-2"/>
+      <option id="bands" _label="3 Transparent torus knots (4,3)"
+              arg-set="--appearance torus-knots-4-3"/>
+      <option id="bands" _label="3 Transparent torus knots (5,2)"
+              arg-set="--appearance torus-knots-5-2"/>
+      <option id="bands" _label="3 Transparent torus knots (5,3)"
+              arg-set="--appearance torus-knots-5-3"/>
+      <option id="bands" _label="3 Transparent torus knots (5,4)"
+              arg-set="--appearance torus-knots-5-4"/>
     </select>
 
     <select id="colors">

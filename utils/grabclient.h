@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 1992-2025 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 1992-2026 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -86,7 +86,8 @@ extern void ios_load_random_image (void (*callback) (void *uiimage,
 #endif /* HAVE_IPHONE */
 
 #ifdef HAVE_ANDROID
-char *jwxyz_draw_random_image (Display *dpy, Drawable drawable, GC gc);
+char *jwxyz_draw_random_image (Display *dpy, Drawable drawable, GC gc,
+                               XRectangle *geom_ret);
 #endif
 
 #endif /* __GRABCLIENT_H__ */

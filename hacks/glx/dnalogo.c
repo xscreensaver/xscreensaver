@@ -3607,12 +3607,12 @@ draw_logo (ModeInfo *mi)
 
 # ifdef DEBUG
   {
+    GLfloat color[4] = {1, 1, 1, 1};
     char s[1024];
     sprintf (s, "a/z, s/x; per = %0.2f pos = %0.2f",
              dc->persp_off, dc->pos_off);
-    glColor3f (1,1,1);
     print_texture_label (dpy, dc->label_font, MI_WIDTH(mi), MI_HEIGHT(mi),
-                         1, s);
+                         1, s, color);
   }
 # endif
 

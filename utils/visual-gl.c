@@ -744,7 +744,12 @@ GLXContext openGL_context_for_window (Screen *screen, Window window)
   vi_in.visualid = XVisualIDFromVisual (visual);
   vi_out = XGetVisualInfo (dpy, VisualScreenMask|VisualIDMask,
 			   &vi_in, &out_count);
-  if (! vi_out) abort ();
+
+  /* Have a report that *fading* works but *unfading* fails here with a NULL
+     vi_out, which... how is that even possible?  On a malfunctioning system,
+     this may cause all the GL hacks to simply draw nothing in a loop instead
+     of appropriately crashing. */
+  if (! vi_out) return 0;  /* abort(); */
 
 # ifdef HAVE_EGL
   {

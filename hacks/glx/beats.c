@@ -241,6 +241,8 @@ draw_beats (ModeInfo *mi)
 
   GLfloat bcolor[4] = {0.85, 0.75, 0.75, 1.0};
 
+  static const float fps_color[4] = {1, 1, 0, 1};
+
   if (!bp->glx_context)
     return;
   gettimeofday (&tvOrig, NULL);
@@ -415,7 +417,7 @@ draw_beats (ModeInfo *mi)
   }
   glPopMatrix();
   glColor3f(1,1,0);
-  if (mi->fps_p) do_fps (mi);
+  if (mi->fps_p) do_fps_color (mi, fps_color);
   glFinish();
   glXSwapBuffers(dpy, window);
 }

@@ -759,6 +759,7 @@ static void draw_shapes(ModeInfo * mi)
 
     if (do_labels)
       {
+        GLfloat color[4] = {0.8, 0.8, 0.0, 1.0};
         texture_font_data *f;
         if (MI_WIDTH(mi) >= 500 && MI_HEIGHT(mi) >= 375)
             f = tp->font1_data;
@@ -767,10 +768,9 @@ static void draw_shapes(ModeInfo * mi)
         else
             f = tp->font3_data;
 
-        glColor3f(0.8, 0.8, 0);
         print_texture_label (mi->dpy, f,
                              mi->xgwa.width, mi->xgwa.height,
-                             1, tp->pn);
+                             1, tp->pn, color);
       }
 }
 

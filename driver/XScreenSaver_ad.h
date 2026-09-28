@@ -419,6 +419,7 @@
   GL: 				handsy --root				    \\n\
   GL: 				maze3d --root				    \\n\
   GL: 				peepers --root				    \\n\
+  GL: 				polarnight --root			    \\n\
   GL: 				razzledazzle --root			    \\n\
 				vfeedback --root			    \\n\
   GL: 				deepstars --root			    \\n\
@@ -466,8 +467,12 @@
   GL: 				rigrekt --root				    \\n\
   GL: 				trizm --root				    \\n\
   GL: 				universeball --root			    \\n\
+  GL: 				amigajuggler --root			    \\n\
+  GL: 				floppy --root				    \\n\
+  GL: 				graphstat --root			    \\n\
   GL: 				worldpieces --root			    \\n",
 "*hacks.alienbeacon.name:    Alien Beacon",
+"*hacks.amigajuggler.name:   Amiga Juggler",
 "*hacks.antinspect.name:     Ant Inspect",
 "*hacks.antmaze.name:        Ant Maze",
 "*hacks.antspotlight.name:   Ant Spotlight",
@@ -537,6 +542,7 @@
 "*hacks.glsnake.name:        GL Snake",
 "*hacks.gltext.name:         GL Text",
 "*hacks.goldenapollian.name: Golden Apollian",
+"*hacks.graphstat.name:      Graph Stat",
 "*hacks.gravitywell.name:    Gravity Well",
 "*hacks.hexplasma.name:      Hex Plasma",
 "*hacks.hexstrut.name:       Hex Strut",
@@ -570,6 +576,7 @@
 "*hacks.papercube.name:      Paper Cube",
 "*hacks.photopile.name:      Photo Pile",
 "*hacks.platonicfolding.name:Platonic Folding",
+"*hacks.polarnight.name:     Polar Night",
 "*hacks.popsquares.name:     Pop Squares",
 "*hacks.prococean.name:      Proc Ocean",
 "*hacks.projectiveplane.name:Projective Plane",

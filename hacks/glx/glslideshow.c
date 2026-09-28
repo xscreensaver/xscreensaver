@@ -1474,11 +1474,12 @@ draw_sprites (ModeInfo *mi)
     {
       double secs = ss->now - ss->dawn_of_time;
       double opacity = secs / 6;
+      GLfloat color[4] = {1, 1, 0, 1};
       if (opacity > 1) opacity = 1;
-      glColor4f (1, 1, 0, opacity);
+      color[3] = opacity;
       print_texture_label (mi->dpy, ss->font_data,
                            mi->xgwa.width, mi->xgwa.height,
-                           0, "Loading...");
+                           0, "Loading...", color);
     }
 
   for (i = 0; i < ss->nsprites; i++)
@@ -1492,10 +1493,10 @@ draw_sprites (ModeInfo *mi)
       if (sp && sp->img && sp->img->loaded_p &&
           sp->img->title && *sp->img->title)
         {
-          glColor4f (1, 1, 1, ss->title_opacity);
+          GLfloat color[4] = {1, 1, 1, ss->title_opacity};
           print_texture_label (mi->dpy, ss->font_data,
                                mi->xgwa.width, mi->xgwa.height,
-                               1, sp->img->title);
+                               1, sp->img->title, color);
         }
     }
 

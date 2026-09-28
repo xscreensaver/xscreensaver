@@ -32,6 +32,7 @@ static const char sccsid[] = "@(#)hypertorus.c  1.2 05/09/28 xlockmore";
  * C. Steger - 20/12/06: Moved all GLSL support code into glsl-utils.[hc]
  * C. Steger - 20/12/30: Make the shader code work under iOS
  * C. Steger - 25/12/31: Make the code work in an OpenGL core profile
+ * C. Steger - 26/04/04: Add modes to display torus knots
  */
 
 /*
@@ -47,21 +48,22 @@ static const char sccsid[] = "@(#)hypertorus.c  1.2 05/09/28 xlockmore";
  *
  * There are three display modes for the torus: mesh (wireframe),
  * solid, or transparent.  Furthermore, the appearance of the torus
- * can be as a solid object or as a set of see-through bands or
- * see-through spirals.  Finally, the colors with with the torus is
- * drawn can be set to one-sided, two-sided, or to a color wheel.  The
- * colors can be static or changing dynamically.  In one-sided color
- * mode, the torus is drawn with the same color on the inside and the
- * outside.  In two-sided color mode, the torus is drawn with red on
- * the outside and green on the inside if static colors are used.  If
- * changing colors are used, dynamically varying complementary colors
- * are used for the two sides.  This mode enables you to see that the
- * 3d projection of the torus turns inside-out as it rotates in 4d.
- * The color wheel mode draws the torus with a fully saturated color
- * wheel.  If changing colors are used, the colors of the color wheel
- * are varying dynamically.  The color wheel mode gives a very nice
- * effect when combined with the see-through bands or see-through
- * spirals mode.
+ * can be as a solid object or as a set of see-through bands,
+ * see-through spirals, or see-through torus knots.  Finally, the
+ * colors with with the torus is drawn can be set to one-sided,
+ * two-sided, or to a color wheel.  The colors can be static or
+ * changing dynamically.  In one-sided color mode, the torus is drawn
+ * with the same color on the inside and the outside.  In two-sided
+ * color mode, the torus is drawn with red on the outside and green on
+ * the inside if static colors are used.  If changing colors are used,
+ * dynamically varying complementary colors are used for the two
+ * sides.  This mode enables you to see that the 3d projection of the
+ * torus turns inside-out as it rotates in 4d.  The color wheel mode
+ * draws the torus with a fully saturated color wheel.  If changing
+ * colors are used, the colors of the color wheel are varying
+ * dynamically.  The color wheel mode gives a very nice effect when
+ * combined with the see-through bands, see-through spirals, or
+ * see-through torus knot modes.
  *
  * Finally, the rotation speed for each of the six planes around which
  * the torus rotates can be chosen.
@@ -82,6 +84,7 @@ static const char sccsid[] = "@(#)hypertorus.c  1.2 05/09/28 xlockmore";
 #define APPEARANCE_SOLID           0
 #define APPEARANCE_BANDS           1
 #define APPEARANCE_SPIRALS         2
+#define APPEARANCE_TORUS_KNOTS     3
 
 #define COLORS_ONESIDED            0
 #define COLORS_TWOSIDED            1
@@ -148,6 +151,8 @@ static int display_mode;
 static char *appear;
 static int appearance;
 static int num_spirals;
+static int torus_knot_p;
+static int torus_knot_q;
 static char *color_mode;
 static int colors;
 static Bool change_colors;
@@ -180,6 +185,11 @@ static XrmOptionDescRec opts[] =
   {"-spirals-4",       ".appearance",   XrmoptionNoArg,  "spirals-4" },
   {"-spirals-8",       ".appearance",   XrmoptionNoArg,  "spirals-8" },
   {"-spirals-16",      ".appearance",   XrmoptionNoArg,  "spirals-16" },
+  {"-torus-knots-3-2", ".appearance",   XrmoptionNoArg,  "torus-knots-3-2" },
+  {"-torus-knots-4-3", ".appearance",   XrmoptionNoArg,  "torus-knots-4-3" },
+  {"-torus-knots-5-2", ".appearance",   XrmoptionNoArg,  "torus-knots-5-2" },
+  {"-torus-knots-5-3", ".appearance",   XrmoptionNoArg,  "torus-knots-5-3" },
+  {"-torus-knots-5-4", ".appearance",   XrmoptionNoArg,  "torus-knots-5-4" },
   {"-onesided",        ".colors",       XrmoptionNoArg,  "onesided" },
   {"-twosided",        ".colors",       XrmoptionNoArg,  "twosided" },
   {"-colorwheel",      ".colors",       XrmoptionNoArg,  "colorwheel" },
@@ -222,10 +232,6 @@ ENTRYPOINT ModeSpecOpt hypertorus_opts =
 #define DSIGMA  1.1
 #define DTAU    1.7
 
-/* Number of subdivisions of the surface */
-#define NUMU 64
-#define NUMV 64
-
 typedef struct {
   GLint      WindH, WindW;
   GLXContext *glx_context;
@@ -241,9 +247,9 @@ typedef struct {
   Bool button_pressed;
   float speed_scale;
 #ifdef HAVE_GLSL
-  GLfloat uv[(NUMU+1)*(NUMV+1)][2];
-  GLfloat col[(NUMU+1)*(NUMV+1)][4];
-  GLuint indices[4*NUMU*NUMV];
+  GLfloat *uv;
+  GLfloat *col;
+  GLuint *indices;
   Bool use_shaders, buffers_initialized, use_vao;
   GLuint shader_program;
   GLint vertex_uv_index, color_index;
@@ -737,13 +743,135 @@ static void color(double angle, float mat[3][3], float col[4])
 }
 
 
+/* Get the essential drawing parameters. */
+static void get_drawing_parameters(int *numu, int *numv, int *num_bands,
+                                   int *band_width, double *band_factor,
+                                   double *band_offset, double *skew)
+{
+  if (appearance == APPEARANCE_BANDS || appearance == APPEARANCE_SPIRALS)
+  {
+    if (display_mode == DISP_WIREFRAME)
+    {
+      *numu = 64;
+      *numv = 64;
+      *band_width = 4;
+    }
+    else
+    {
+      *numu = 256;
+      *numv = 256;
+      *band_width = 16;
+    }
+    *num_bands = (*numu)/(*band_width);
+    *band_factor = 1.0;
+    *band_offset = 0.0;
+    *skew = (double)num_spirals/16.0;
+  }
+  else if (appearance == APPEARANCE_TORUS_KNOTS)
+  {
+    if (torus_knot_p == 3)
+    {
+      if (display_mode == DISP_WIREFRAME)
+      {
+        *numu = 60;
+        *numv = 60;
+        *band_width = 4;
+      }
+      else
+      {
+        *numu = 240;
+        *numv = 240;
+        *band_width = 16;
+      }
+      *num_bands = 5;
+      *band_factor = 3.0;
+      *band_offset = 0.0;
+      *skew = (double)torus_knot_q/(double)torus_knot_p;
+    }
+    else if (torus_knot_p == 4)
+    {
+      if (display_mode == DISP_WIREFRAME)
+      {
+        *numu = 48;
+        *numv = 48;
+        *band_width = 4;
+      }
+      else
+      {
+        *numu = 240;
+        *numv = 240;
+        *band_width = 20;
+      }
+      *num_bands = 3;
+      *band_factor = 4.0;
+      *band_offset = 3.0;
+      *skew = (double)torus_knot_q/(double)torus_knot_p;
+    }
+    else if (torus_knot_p == 5)
+    {
+      if (display_mode == DISP_WIREFRAME)
+      {
+        *numu = 60;
+        *numv = 60;
+        *band_width = 4;
+      }
+      else
+      {
+        *numu = 240;
+        *numv = 240;
+        *band_width = 16;
+      }
+      *num_bands = 3;
+      *band_factor = 5.0;
+      *band_offset = 3.75;
+      *skew = (double)torus_knot_q/(double)torus_knot_p;
+    }
+    else
+    {
+      if (display_mode == DISP_WIREFRAME)
+      {
+        *numu = 64;
+        *numv = 64;
+        *band_width = 64;
+      }
+      else
+      {
+        *numu = 256;
+        *numv = 256;
+        *band_width = 256;
+      }
+      *num_bands = 1;
+      *band_factor = 1.0;
+      *band_offset = 0.0;
+      *skew = 0.0;
+    }
+  }
+  else /* appearance == APPEARANCE_SOLID */
+  {
+    if (display_mode == DISP_WIREFRAME)
+    {
+      *numu = 64;
+      *numv = 64;
+      *band_width = 64;
+    }
+    else
+    {
+      *numu = 256;
+      *numv = 256;
+      *band_width = 256;
+    }
+    *num_bands = 1;
+    *band_factor = 1.0;
+    *band_offset = 0.0;
+    *skew = 0.0;
+  }
+}
+
+
 /* Draw a hypertorus projected into 3D using OpenGL's fixed
-   functionality.  Note that the spirals appearance will only work
-   correctly if numu and numv are set to 64 or any higher power of 2.
-   Similarly, the banded appearance will only work correctly if numu
-   and numv are divisible by 4. */
+   functionality. */
 static int hypertorus_ff(ModeInfo *mi, double umin, double umax, double vmin,
-                         double vmax, int numu, int numv)
+                         double vmax)
 {
   static const GLfloat light_model_ambient[]    = { 0.2, 0.2, 0.2, 1.0 };
   static const GLfloat light_ambient[]          = { 0.0, 0.0, 0.0, 1.0 };
@@ -759,7 +887,9 @@ static int hypertorus_ff(ModeInfo *mi, double umin, double umax, double vmin,
   static const GLfloat mat_diff_trans_oneside[] = { 0.9, 0.4, 0.3, 0.7 };
   float mat_diff_dyn[4], mat_diff_dyn_compl[4];
   float p[3], pu[3], pv[3], n[3], mat[4][4], matc[3][3], col[4];
-  int i, j, k, l, m, b, skew;
+  int numu, numv;
+  int i, j, k, l, m, b, bw, nb;
+  double skew, bf, bo;
   double u, v, ur, vr;
   double cu, su, cv, sv;
   double xx[4], xxu[4], xxv[4], x[4], xu[4], xv[4];
@@ -767,6 +897,8 @@ static int hypertorus_ff(ModeInfo *mi, double umin, double umax, double vmin,
   float q1[4], q2[4], r1[4][4], r2[4][4];
   hypertorusstruct *hp = &hyper[MI_SCREEN(mi)];
   int polys;
+
+  get_drawing_parameters(&numu,&numv,&nb,&bw,&bf,&bo,&skew);
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -899,13 +1031,13 @@ static int hypertorus_ff(ModeInfo *mi, double umin, double umax, double vmin,
     }
   }
 
-  skew = num_spirals;
   ur = umax-umin;
   vr = vmax-vmin;
   for (i=0; i<numu; i++)
   {
     if ((appearance == APPEARANCE_BANDS ||
-         appearance == APPEARANCE_SPIRALS) && ((i & 3) >= 2))
+         appearance == APPEARANCE_SPIRALS ||
+         appearance == APPEARANCE_TORUS_KNOTS) && (i%bw >= bw/2))
       continue;
     if (display_mode == DISP_WIREFRAME)
       glBegin(GL_QUAD_STRIP);
@@ -921,9 +1053,15 @@ static int hypertorus_ff(ModeInfo *mi, double umin, double umax, double vmin,
         v = vr*m/numv+vmin;
         if (appearance == APPEARANCE_SPIRALS)
         {
-          u += 4.0*skew/numv*v;
-          b = ((i/4)&(skew-1))*(numu/(4*skew));
-          color(ur*4*b/numu+umin,matc,col);
+          u += skew*v;
+          b = ((i/bw)%((int)(nb*skew)))*(numu/(bw*(int)(nb*skew)));
+          color(ur*bw*(b*bf+bo)/numu+umin,matc,col);
+        }
+        else if (appearance == APPEARANCE_TORUS_KNOTS)
+        {
+          u += skew*v;
+          b = (i/bw)%nb;
+          color(ur*bw*(b*bf+bo)/numu+umin,matc,col);
         }
         else
         {
@@ -1010,12 +1148,9 @@ static int hypertorus_ff(ModeInfo *mi, double umin, double umax, double vmin,
 #ifdef HAVE_GLSL
 
 /* Draw a hypertorus projected into 3D using OpenGL's programmable
-   functionality.  Note that the spirals appearance will only work
-   correctly if numu and numv are set to 64 or any higher power of 2.
-   Similarly, the banded appearance will only work correctly if numu
-   and numv are divisible by 4. */
+   functionality. */
 static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
-                         double vmax, int numu, int numv)
+                         double vmax)
 {
   static const GLfloat light_model_ambient[]    = { 0.2, 0.2, 0.2, 1.0 };
   static const GLfloat light_ambient[]          = { 0.0, 0.0, 0.0, 1.0 };
@@ -1034,12 +1169,16 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
   GLfloat p_mat[16];
   float mat_diff_dyn[4], mat_diff_dyn_compl[4];
   float mat[4][4], matc[3][3];
-  int i, j, k, l, m, o, b, skew;
+  int numu, numv;
+  int i, j, k, l, m, o, b, bw, nb;
+  double skew, bf, bo;
   double u, v, ur, vr;
   float q1[4], q2[4], r1[4][4], r2[4][4];
   GLsizeiptr index_offset;
   hypertorusstruct *hp = &hyper[MI_SCREEN(mi)];
   int polys;
+
+  get_drawing_parameters(&numu,&numv,&nb,&bw,&bf,&bo,&skew);
 
   if (!hp->use_shaders)
     return 0;
@@ -1057,9 +1196,13 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
 
   if (!hp->buffers_initialized)
   {
+    /* Allocate the drawing buffers. */
+    hp->uv = malloc(2*(numu+1)*(numv+1)*sizeof(*hp->uv));
+    hp->col = malloc(4*(numu+1)*(numv+1)*sizeof(*hp->col));
+    hp->indices = malloc(4*numu*numv*sizeof(*hp->indices));
+
     /* The u and v values need to be computed once (or each time the value
        of appearance changes, once we support that). */
-    skew = num_spirals;
     ur = umax-umin;
     vr = vmax-vmin;
     for (i=0; i<=numu; i++)
@@ -1069,14 +1212,15 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
         u = ur*i/numu+umin;
         v = vr*j/numv+vmin;
         o = i*(numv+1)+j;
-        if (appearance == APPEARANCE_SPIRALS)
-          u += 4.0*skew/numv*v;
-        hp->uv[o][0] = u;
-        hp->uv[o][1] = v;
+        if (appearance == APPEARANCE_SPIRALS ||
+            appearance == APPEARANCE_TORUS_KNOTS)
+          u += skew*v;
+        hp->uv[2*o+0] = u;
+        hp->uv[2*o+1] = v;
       }
     }
     glBindBuffer(GL_ARRAY_BUFFER,hp->vertex_uv_buffer);
-    glBufferData(GL_ARRAY_BUFFER,2*(NUMU+1)*(NUMV+1)*sizeof(GLfloat),
+    glBufferData(GL_ARRAY_BUFFER,2*(numu+1)*(numv+1)*sizeof(GLfloat),
                  hp->uv,GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER,0);
 
@@ -1091,18 +1235,24 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
           o = i*(numv+1)+j;
           if (appearance == APPEARANCE_SPIRALS)
           {
-            u += 4.0*skew/numv*v;
-            b = ((i/4)&(skew-1))*(numu/(4*skew));
-            color(ur*4*b/numu+umin,matc,&hp->col[o][0]);
+            u += skew*v;
+            b = ((i/bw)%((int)(nb*skew)))*(numu/(bw*(int)(nb*skew)));
+            color(ur*bw*(b*bf+bo)/numu+umin,matc,&hp->col[4*o]);
+          }
+          else if (appearance == APPEARANCE_TORUS_KNOTS)
+          {
+            u += skew*v;
+            b = (i/bw)%nb;
+            color(ur*bw*(b*bf+bo)/numu+umin,matc,&hp->col[4*o]);
           }
           else
           {
-            color(u,matc,&hp->col[o][0]);
+            color(u,matc,&hp->col[4*o]);
           }
         }
       }
       glBindBuffer(GL_ARRAY_BUFFER,hp->color_buffer);
-      glBufferData(GL_ARRAY_BUFFER,4*(NUMU+1)*(NUMV+1)*sizeof(GLfloat),
+      glBufferData(GL_ARRAY_BUFFER,4*(numu+1)*(numv+1)*sizeof(GLfloat),
                    hp->col,GL_STATIC_DRAW);
       glBindBuffer(GL_ARRAY_BUFFER,0);
     }
@@ -1119,23 +1269,23 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
             if (colors == COLORS_ONESIDED)
             {
               for (k=0; k<4; k++)
-                hp->col[o][k] = mat_diff_oneside[k];
+                hp->col[4*o+k] = mat_diff_oneside[k];
             }
             else if (colors == COLORS_TWOSIDED)
             {
               for (k=0; k<4; k++)
-                hp->col[o][k] = mat_diff_red[k];
+                hp->col[4*o+k] = mat_diff_red[k];
             }
           }
           else
           {
             for (k=0; k<4; k++)
-              hp->col[o][k] = mat_diff_white[k];
+              hp->col[4*o+k] = mat_diff_white[k];
           }
         }
       }
       glBindBuffer(GL_ARRAY_BUFFER,hp->color_buffer);
-      glBufferData(GL_ARRAY_BUFFER,4*(NUMU+1)*(NUMV+1)*sizeof(GLfloat),
+      glBufferData(GL_ARRAY_BUFFER,4*(numu+1)*(numv+1)*sizeof(GLfloat),
                    hp->col,GL_STATIC_DRAW);
       glBindBuffer(GL_ARRAY_BUFFER,0);
     }
@@ -1151,7 +1301,8 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
       for (i=0; i<numu; i++)
       {
         if ((appearance == APPEARANCE_BANDS ||
-             appearance == APPEARANCE_SPIRALS) && ((i & 3) >= 2))
+             appearance == APPEARANCE_SPIRALS ||
+             appearance == APPEARANCE_TORUS_KNOTS) && (i%bw >= bw/2))
           continue;
         for (j=0; j<=numv; j++)
         {
@@ -1172,10 +1323,12 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
       for (i=0; i<numu; i++)
       {
         if ((appearance == APPEARANCE_BANDS ||
-             appearance == APPEARANCE_SPIRALS) && ((i & 3) > 2))
+             appearance == APPEARANCE_SPIRALS ||
+             appearance == APPEARANCE_TORUS_KNOTS) && (i%bw > bw/2))
           continue;
         if ((appearance == APPEARANCE_BANDS ||
-             appearance == APPEARANCE_SPIRALS) && ((i & 3) == 2))
+             appearance == APPEARANCE_SPIRALS ||
+             appearance == APPEARANCE_TORUS_KNOTS) && (i%bw == bw/2))
         {
           for (j=0; j<numv; j++)
           {
@@ -1203,7 +1356,6 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
 
   if (change_colors && colors == COLORS_COLORWHEEL)
   {
-    skew = num_spirals;
     ur = umax-umin;
     vr = vmax-vmin;
     for (i=0; i<=numu; i++)
@@ -1215,13 +1367,19 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
         o = i*(numv+1)+j;
         if (appearance == APPEARANCE_SPIRALS)
         {
-          u += 4.0*skew/numv*v;
-          b = ((i/4)&(skew-1))*(numu/(4*skew));
-          color(ur*4*b/numu+umin,matc,&hp->col[o][0]);
+          u += skew*v;
+          b = ((i/bw)%((int)(nb*skew)))*(numu/(bw*(int)(nb*skew)));
+          color(ur*bw*(b*bf+bo)/numu+umin,matc,&hp->col[4*o]);
+        }
+        else if (appearance == APPEARANCE_TORUS_KNOTS)
+        {
+          u += skew*v;
+          b = (i/bw)%nb;
+          color(ur*bw*(b*bf+bo)/numu+umin,matc,&hp->col[4*o]);
         }
         else
         {
-          color(u,matc,&hp->col[o][0]);
+          color(u,matc,&hp->col[4*o]);
         }
       }
     }
@@ -1238,7 +1396,7 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
         {
           o = i*(numv+1)+j;
           for (k=0; k<4; k++)
-            hp->col[o][k] = mat_diff_dyn[k];
+            hp->col[4*o+k] = mat_diff_dyn[k];
         }
       }
     }
@@ -1423,7 +1581,7 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
     glEnableVertexAttribArray(hp->color_index);
     glBindBuffer(GL_ARRAY_BUFFER,hp->color_buffer);
     if (change_colors)
-      glBufferData(GL_ARRAY_BUFFER,4*(NUMU+1)*(NUMV+1)*sizeof(GLfloat),
+      glBufferData(GL_ARRAY_BUFFER,4*(numu+1)*(numv+1)*sizeof(GLfloat),
                    hp->col,GL_STREAM_DRAW);
     glVertexAttribPointer(hp->color_index,4,GL_FLOAT,GL_FALSE,0,0);
   }
@@ -1433,7 +1591,7 @@ static int hypertorus_pf(ModeInfo *mi, double umin, double umax, double vmin,
     glEnableVertexAttribArray(hp->color_index);
     glBindBuffer(GL_ARRAY_BUFFER,hp->color_buffer);
     if (change_colors)
-      glBufferData(GL_ARRAY_BUFFER,4*(NUMU+1)*(NUMV+1)*sizeof(GLfloat),
+      glBufferData(GL_ARRAY_BUFFER,4*(numu+1)*(numv+1)*sizeof(GLfloat),
                    hp->col,GL_STREAM_DRAW);
     glVertexAttribPointer(hp->color_index,4,GL_FLOAT,GL_FALSE,0,0);
   }
@@ -1651,10 +1809,10 @@ static void display_hypertorus(ModeInfo *mi)
   gltrackball_rotate(hp->trackballs[hp->current_trackball]);
 #ifdef HAVE_GLSL
   if (hp->use_shaders)
-    mi->polygon_count = hypertorus_pf(mi,0.0,2.0*M_PI,0.0,2.0*M_PI,NUMU,NUMV);
+    mi->polygon_count = hypertorus_pf(mi,0.0,2.0*M_PI,0.0,2.0*M_PI);
   else
 #endif /* HAVE_GLSL */
-    mi->polygon_count = hypertorus_ff(mi,0.0,2.0*M_PI,0.0,2.0*M_PI,NUMU,NUMV);
+    mi->polygon_count = hypertorus_ff(mi,0.0,2.0*M_PI,0.0,2.0*M_PI);
 }
 
 
@@ -1757,15 +1915,15 @@ ENTRYPOINT void init_hypertorus(ModeInfo *mi)
   hp->button_pressed = False;
 
   /* Set the display mode. */
-  if (!strcasecmp(mode,"wireframe") || !strcasecmp(mode,"0"))
+  if (!strcasecmp(mode,"wireframe"))
   {
     display_mode = DISP_WIREFRAME;
   }
-  else if (!strcasecmp(mode,"surface") || !strcasecmp(mode,"1"))
+  else if (!strcasecmp(mode,"surface"))
   {
     display_mode = DISP_SURFACE;
   }
-  else if (!strcasecmp(mode,"transparent") || !strcasecmp(mode,"2"))
+  else if (!strcasecmp(mode,"transparent"))
   {
     display_mode = DISP_TRANSPARENT;
   }
@@ -1775,39 +1933,72 @@ ENTRYPOINT void init_hypertorus(ModeInfo *mi)
   }
 
   /* Set the appearance. */
-  if (!strcasecmp(appear,"solid") || !strcasecmp(appear,"0"))
+  num_spirals = 0;
+  torus_knot_p = 1;
+  torus_knot_q = 1;
+  if (!strcasecmp(appear,"solid"))
   {
     appearance = APPEARANCE_SOLID;
   }
-  else if (!strcasecmp(appear,"bands") || !strcasecmp(appear,"1"))
+  else if (!strcasecmp(appear,"bands"))
   {
     appearance = APPEARANCE_BANDS;
     num_spirals = 0;
   }
-  else if (!strcasecmp(appear,"spirals-1") || !strcasecmp(appear,"3"))
+  else if (!strcasecmp(appear,"spirals-1"))
   {
     appearance = APPEARANCE_SPIRALS;
     num_spirals = 1;
   }
-  else if (!strcasecmp(appear,"spirals-2") || !strcasecmp(appear,"4"))
+  else if (!strcasecmp(appear,"spirals-2"))
   {
     appearance = APPEARANCE_SPIRALS;
     num_spirals = 2;
   }
-  else if (!strcasecmp(appear,"spirals-4") || !strcasecmp(appear,"5"))
+  else if (!strcasecmp(appear,"spirals-4"))
   {
     appearance = APPEARANCE_SPIRALS;
     num_spirals = 4;
   }
-  else if (!strcasecmp(appear,"spirals-8") || !strcasecmp(appear,"6"))
+  else if (!strcasecmp(appear,"spirals-8"))
   {
     appearance = APPEARANCE_SPIRALS;
     num_spirals = 8;
   }
-  else if (!strcasecmp(appear,"spirals-16") || !strcasecmp(appear,"7"))
+  else if (!strcasecmp(appear,"spirals-16"))
   {
     appearance = APPEARANCE_SPIRALS;
     num_spirals = 16;
+  }
+  else if (!strcasecmp(appear,"torus-knots-3-2"))
+  {
+    appearance = APPEARANCE_TORUS_KNOTS;
+    torus_knot_p = 3;
+    torus_knot_q = 2;
+  }
+  else if (!strcasecmp(appear,"torus-knots-4-3"))
+  {
+    appearance = APPEARANCE_TORUS_KNOTS;
+    torus_knot_p = 4;
+    torus_knot_q = 3;
+  }
+  else if (!strcasecmp(appear,"torus-knots-5-2"))
+  {
+    appearance = APPEARANCE_TORUS_KNOTS;
+    torus_knot_p = 5;
+    torus_knot_q = 2;
+  }
+  else if (!strcasecmp(appear,"torus-knots-5-3"))
+  {
+    appearance = APPEARANCE_TORUS_KNOTS;
+    torus_knot_p = 5;
+    torus_knot_q = 3;
+  }
+  else if (!strcasecmp(appear,"torus-knots-5-4"))
+  {
+    appearance = APPEARANCE_TORUS_KNOTS;
+    torus_knot_p = 5;
+    torus_knot_q = 4;
   }
   else
   {
@@ -1945,6 +2136,9 @@ ENTRYPOINT void free_hypertorus(ModeInfo *mi)
       glUseProgram(0);
       glDeleteProgram(hp->shader_program);
     }
+    free(hp->uv);
+    free(hp->col);
+    free(hp->indices);
   }
 #endif /* HAVE_GLSL */
 }

@@ -186,6 +186,7 @@ draw_bubble3d(ModeInfo * mi)
 	struct context *c = &contexts[MI_SCREEN(mi)];
 	Display    *display = MI_DISPLAY(mi);
 	Window      window = MI_WINDOW(mi);
+        float fps_color[4] = {1, 1, 0, 1};
 
 	MI_IS_DRAWN(mi) = True;
 
@@ -211,8 +212,7 @@ draw_bubble3d(ModeInfo * mi)
         glPopMatrix();
         mi->polygon_count = glb_config.polygon_count;
 
-        glColor3f (1,1,0);
-        if (mi->fps_p) do_fps (mi);
+        if (mi->fps_p) do_fps_color (mi, fps_color);
 	glFinish();
 	glXSwapBuffers(display, window);
 }

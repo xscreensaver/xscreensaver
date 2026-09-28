@@ -839,6 +839,7 @@ draw_highvoltage (ModeInfo *mi)
   highvoltage_configuration *bp = &bps[MI_SCREEN(mi)];
   Display *dpy = MI_DISPLAY(mi);
   Window window = MI_WINDOW(mi);
+  static const float fps_color[4] = {0.5, 0.5, 0.5, 1.0};
 
   if (!bp->glx_context)
     return;
@@ -918,8 +919,7 @@ draw_highvoltage (ModeInfo *mi)
 
   glPopMatrix ();
 
-  glColor3f (0.5, 0.5, 0.5);
-  if (mi->fps_p) do_fps (mi);
+  if (mi->fps_p) do_fps_color (mi, fps_color);
   glFinish();
 
   glXSwapBuffers(dpy, window);

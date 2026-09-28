@@ -712,9 +712,7 @@ draw_image (ModeInfo *mi, int i, GLfloat t, GLfloat s, GLfloat z)
 
           if (!wire)
             {
-# ifndef HAVE_ANDROID   /* Doesn't work -- photo displays as static */
               print_texture_string (ss->texfont, line);
-# endif
             }
           else
             {
@@ -842,7 +840,6 @@ draw_photopile (ModeInfo *mi)
     glPopMatrix();
   }
 
-  glColor3f (1, 1, 1);
   if (mi->fps_p) do_fps (mi);
   glFinish();
   glXSwapBuffers (MI_DISPLAY (mi), MI_WINDOW(mi));

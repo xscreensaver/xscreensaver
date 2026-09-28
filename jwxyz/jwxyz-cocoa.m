@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 1991-2021 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 1991-2026 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -54,6 +54,7 @@ jwxyz_logv (Bool error, const char *fmt, va_list args)
 /* Instead of calling abort(), throw a real exception, so that
    XScreenSaverView can catch it and display a dialog.
  */
+// Also defined in jwzgles.c and jwxyz-android.c
 void
 jwxyz_abort (const char *fmt, ...)
 {

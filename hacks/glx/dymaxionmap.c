@@ -1170,9 +1170,8 @@ triangle (ModeInfo *mi, int which, Bool frontp,
 
       glDisable (GL_TEXTURE_2D);
       glDisable (GL_LIGHTING);
-# ifndef HAVE_ANDROID
       glLineWidth (2);
-# endif
+      check_gl_error ("glLineWidth"); /* Android */
       glColor4fv (c);
       glBegin (GL_LINES);
       if (edges & 1<<0)
@@ -1339,9 +1338,7 @@ draw_axis (ModeInfo *mi)
   s = 0.96;
   glScalef (s, s, s);   /* tighten up the enclosing sphere */
 
-# ifndef HAVE_ANDROID
   glLineWidth (1);
-# endif
   glColor3f (0.5, 0.5, 0);
 
   glRotatef (90,  1, 0, 0);    /* unit_sphere is off by 90 */

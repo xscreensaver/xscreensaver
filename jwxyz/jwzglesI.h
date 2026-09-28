@@ -232,6 +232,7 @@ extern void jwzgles_glStencilFunc (GLuint, GLuint, GLuint);
 extern void jwzgles_glStencilMask (GLuint);
 extern void jwzgles_glStencilOp (GLuint, GLuint, GLuint);
 extern void jwzgles_glViewport (GLuint, GLuint, GLuint, GLuint);
+extern void jwzgles_glUseProgram (GLuint);
 extern void jwzgles_glTranslatef (GLfloat, GLfloat, GLfloat);
 extern void jwzgles_glRotatef (GLfloat, GLfloat, GLfloat, GLfloat);
 extern void jwzgles_glRotated (GLdouble, GLdouble x, GLdouble y, GLdouble z);

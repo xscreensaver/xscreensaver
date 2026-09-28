@@ -1,5 +1,5 @@
 %define	name xscreensaver
-%define	version 6.15
+%define	version 6.16
 
 Summary:	X screen saver and locker
 Name:		%{name}
@@ -135,7 +135,7 @@ dd=%{_builddir}/%{name}-%{version}
   sed 's@^@/@'  |
   sort |
   sed -e 's@^\(.*/app-defaults/\)@%config \1@' \
-      -e 's@^\(.*/pam\.d/\)@%config(6.15-1) \1@' \
+      -e 's@^\(.*/pam\.d/\)@%config(missingok) \1@' \
       -e 's@^\(.*/xscreensaver-auth\)$@%attr(4755,root,root) \1@' \
       -e 's@^\(.*/sonar\)$@%attr(4755,root,root) \1@' \
       -e 's@\(.*/man/.*\)@\1\*@' \

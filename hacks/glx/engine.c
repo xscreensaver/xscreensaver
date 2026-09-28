@@ -975,6 +975,7 @@ ENTRYPOINT void draw_engine(ModeInfo *mi)
   Engine *e = &engine[MI_SCREEN(mi)];
   Window w = MI_WINDOW(mi);
   Display *disp = MI_DISPLAY(mi);
+  GLfloat color[4] = { 1, 1, 0, 1 };
 
   if (!e->glx_context)
     return;
@@ -984,11 +985,10 @@ ENTRYPOINT void draw_engine(ModeInfo *mi)
 
   mi->polygon_count = display(mi);
 
-  glColor3f (1, 1, 0);
   if (do_titles)
       print_texture_label (mi->dpy, e->font_data,
                            mi->xgwa.width, mi->xgwa.height,
-                           1, e->engine_name);
+                           1, e->engine_name, color);
 
   if(mi->fps_p) do_fps(mi);
   glFinish(); 

@@ -871,6 +871,7 @@ draw_spheremonics (ModeInfo *mi)
 
   if (cc->button_down_p)
     {
+      GLfloat color[4] = {1.0, 1.0, 0.0, 1.0};
       char buf[200];
       sprintf (buf,
                ((cc->m[0]<10 && cc->m[1]<10 && cc->m[2]<10 && cc->m[3]<10 &&
@@ -880,10 +881,9 @@ draw_spheremonics (ModeInfo *mi)
                cc->m[0], cc->m[1], cc->m[2], cc->m[3],
                cc->m[4], cc->m[5], cc->m[6], cc->m[7]);
 
-      glColor3f(1.0, 1.0, 0.0);
       print_texture_label (mi->dpy, cc->font_data,
                            mi->xgwa.width, mi->xgwa.height,
-                           1, buf);
+                           1, buf, color);
     }
 
   if (!static_parms)

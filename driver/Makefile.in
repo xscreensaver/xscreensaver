@@ -274,7 +274,7 @@ MOTIF_LIBS	= $(LIBS_PRE) $(XDPMS_LIBS) $(XDPMS_LIBS) @MOTIF_LIBS@ \
 TEST_SRCS	= test-passwd.c test-uid.c      test-xdpms.c    test-grab.c   \
 		  test-fade.c   test-xinerama.c test-vp.c       test-randr.c  \
 	          xdpyinfo.c    test-screens.c  test-yarandom.c test-xinput.c \
-	          test-xkb.c    test-wayland-lock.c
+	          test-xkb.c    test-wayland-lock.c $(WAYLAND_LOCK_SRCS)
 TEST_EXES	= test-passwd   test-uid        test-xdpms      test-grab     \
 		  test-fade     test-xinerama   test-vp         test-randr    \
 		  xdpyinfo      test-screens    test-yarandom   test-xinput   \
@@ -553,6 +553,7 @@ install-gnome:: xscreensaver.desktop xscreensaver-settings.desktop
 # into /usr/lib/systemd/user/
 # This is the standard spot for multi-user installations.
 # For single user installations, it can go in $HOME/.config/systemd/user/
+# Only install this file if this is a systemd-based distro.
 install-systemd:: xscreensaver.service
 	@dir="$(DESTDIR)$(SYSTEMD_DIR)"					     ;\
 	 name="$<"							     ;\
@@ -567,7 +568,8 @@ uninstall-systemd:
 
 # xscreensaver.service
 # into /usr/share/xscreensaver/
-# Nothing uses this, but the manual's installation instructions reference it.
+# Nothing uses this directly, but let's put a copy here in case we
+# guessed wrong about whether this is a systemd-based distro.
 install-systemd:: xscreensaver.service
 	@dir="$(DESTDIR)$(GTK_SHAREDIR)"				     ;\
 	 name="$<"							     ;\
@@ -1344,6 +1346,12 @@ wayland-idle.o: $(srcdir)/wayland-dpy.h
 wayland-idle.o: $(srcdir)/wayland-idle.h
 wayland-idle.o: $(srcdir)/wayland-protocols/ext-idle-notify-v1-client-protocol.h
 wayland-idle.o: $(srcdir)/wayland-protocols/idle-client-protocol.h
+wayland-lock.o: ../config.h
+wayland-lock.o: $(UTILS_SRC)/blurb.h
+wayland-lock.o: $(srcdir)/wayland-dpyI.h
+wayland-lock.o: $(srcdir)/wayland-dpy.h
+wayland-lock.o: $(srcdir)/wayland-lock.h
+wayland-lock.o: $(srcdir)/wayland-protocols/ext-session-lock-v1-client-protocol.h
 windows.o: $(srcdir)/atoms.h
 windows.o: ../config.h
 windows.o: $(srcdir)/exec.h

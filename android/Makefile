@@ -5,6 +5,9 @@ export TERM=dumb
 GRADLE = ./gradlew --warning-mode all $(GRADLE_FLAGS)
 THUMBDIR = .
 
+# Using $(MAKE) directly means the shell executes things even with "make -n"
+MAKE2 = $(MAKE)
+
 default:: debug
 all:: release
 
@@ -34,10 +37,10 @@ clean::
 distdepend:: local.properties
 
 # Set this to the set of platforms you want to compile for in debug mode.
-# E.g., if you are running an x86 emulator, there's no point in compiling
-# for a dozen other platforms.  Release builds override this to "all".
+# There's no point in compiling for platforms your emulator doesn't use.
 #
-export APP_ABI = all
+DEBUG_ABI = arm64-v8a
+RELEASE_ABI = all
 
 
 # TODO:
@@ -56,12 +59,13 @@ ANDROID_BASE_HACKS=		\
 	sonar			\
 	sproingies		\
 
-# These are the ones that currently work, at least to some degree:
+# These are the ones that work:
 #
 export ANDROID_HACKS=		\
 	$(ANDROID_BASE_HACKS)	\
 	abstractile		\
 	alienbeacon		\
+	amigajuggler		\
 	anemone			\
 	anemotaxis		\
 	antinspect		\
@@ -148,6 +152,7 @@ export ANDROID_HACKS=		\
 	flipflop		\
 	flipscreen3d		\
 	fliptext		\
+	floppy			\
 	flow			\
 	fluidballs		\
 	fluxcore		\
@@ -174,6 +179,7 @@ export ANDROID_HACKS=		\
 	gltext			\
 	goldenapollian		\
 	goop			\
+	graphstat		\
 	grav			\
 	gravitywell		\
 	greynetic		\
@@ -246,6 +252,7 @@ export ANDROID_HACKS=		\
 	pinion			\
 	pipes			\
 	platonicfolding		\
+	polarnight		\
 	polyominoes		\
 	polytopes		\
 	pong			\
@@ -357,6 +364,10 @@ molecules.h::
 	cd ../hacks/glx && \
 	./molecules.sh molecules.h ../images/molecules/*.pdb
 
+graphstat.h::
+	cd ../hacks/glx && \
+	./../../utils/bin2c graphstat.txt graphstat.h
+
 images_png_h:
 	cd ../hacks/images && make
 
@@ -439,7 +450,7 @@ xscreensaver/res/drawable/%.png:
 
 thumbs::
 	@for f in $(ANDROID_HACKS) $(ANDROID_TODO) ; do			\
-	  $(MAKE) xscreensaver/res/drawable/$$f.png ;			\
+	  $(MAKE2) xscreensaver/res/drawable/$$f.png ;			\
 	done
 
 clean_thumbs::
@@ -488,12 +499,28 @@ list_tarfiles:
 run_check::
 	../hacks/check-configs.pl --build-android $(ANDROID_HACKS)
 
+APK_DEBUG_DIR = xscreensaver/build/outputs/apk/debug/
+APK_REL_DIR   = xscreensaver/build/outputs/apk/release/
+APK_DEBUG     = $(APK_DEBUG_DIR)xscreensaver-debug.apk
+APK_UNSIGNED  = $(APK_REL_DIR)xscreensaver-release-unsigned.apk
+APK_UNALIGNED = $(APK_REL_DIR)xscreensaver-release-unaligned.apk
+APK_SIGNED    = $(APK_REL_DIR)xscreensaver-release.apk
+
 # Requires $ANDROID_HACKS in the environment
 assembledebug:
-	$(GRADLE) assembleDebug
+	APP_ABI=$(DEBUG_ABI) NDK_DEBUG=1 $(GRADLE) assembleDebug
+	@if ! ( unzip -l "$(APK_DEBUG)" | grep -q '\.so$$' ); then \
+	   echo "no .so in $(APK_DEBUG)" >&2 ; exit 1 ; \
+	 fi
+
 assemblerelease:
-	APP_ABI=all $(GRADLE) assembleRelease
-ALL_DEPS = local.properties m6502.h molecules.h run_check images_png_h
+	APP_ABI=$(RELEASE_ABI) $(GRADLE) assembleRelease
+	@if ! ( unzip -l "$(APK_UNSIGNED)" | grep -q '\.so$$' ); then \
+	   echo "no .so in $(APK_UNSIGNED)" >&2 ; exit 1 ; \
+	 fi
+
+ALL_DEPS = local.properties m6502.h molecules.h graphstat.h \
+	   run_check images_png_h
 debug::	  $(ALL_DEPS) assembledebug
 release:: $(ALL_DEPS) assemblerelease
 
@@ -502,11 +529,6 @@ KEYSTORE = xscreensaver.jks
 $(KEYSTORE):
 	keytool -genkey -v -keystore $@ \
 	-alias xscreensaver -keyalg RSA -keysize 2048 -validity 10000
-
-APK_DIR       = xscreensaver/build/outputs/apk/release/
-APK_UNSIGNED  = $(APK_DIR)xscreensaver-release-unsigned.apk
-APK_UNALIGNED = $(APK_DIR)xscreensaver-release-unaligned.apk
-APK_SIGNED    = $(APK_DIR)xscreensaver-release.apk
 
   TOOLDIR = $(shell ls -d $$HOME/Library/Android/sdk/build-tools/* | tail -1)
  ZIPALIGN = $(TOOLDIR)/zipalign
@@ -528,7 +550,7 @@ apk:: release
 	 head -1`;							    \
   HEAD="xscreensaver-$$VERS" ;						    \
   if [ ! -s $(APK_SIGNED) -o $(APK_UNSIGNED) -nt $(APK_SIGNED) ]; then	\
-    $(MAKE) sign_release ;						\
+    $(MAKE2) sign_release ;						\
   fi ;									\
   set -x ;								\
   cp -p $(APK_SIGNED) ../archive/$$HEAD.apk

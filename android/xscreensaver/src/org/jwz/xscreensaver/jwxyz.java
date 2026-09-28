@@ -628,8 +628,9 @@ public class jwxyz
         float r1 = target_width  / (float) width;
         float r2 = target_height / (float) height;
         float r = (r1 > r2 ? r2 : r1);
-        LOG ("%s: resize %.1f: %d x %d => %d x %d", name,
-             r, width, height, (int) (width * r), (int) (height * r));
+        LOG ("%s: resize %.1f: %d x %d => %d x %d in %d x %d", name,
+             r, width, height, (int) (width * r), (int) (height * r),
+             target_width, target_height);
         matrix.preScale (r, r);
       }
 
@@ -671,9 +672,14 @@ public class jwxyz
 
         String permission = "";
 
-        if (Build.VERSION.SDK_INT >= 34) {
+        /* Maybe you can only get the "allow access to photos?" prompt if
+           you run the XScreenSaver *app* and not if you just dive right
+           in to the screensaver list in Preferences? */
+
+     /* if (Build.VERSION.SDK_INT >= 34) {
             permission = Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED;
-        } else if (Build.VERSION.SDK_INT >= 33) {
+        } else */
+        if (Build.VERSION.SDK_INT >= 33) {
             permission = Manifest.permission.READ_MEDIA_IMAGES;
         } else {
             permission = Manifest.permission.READ_EXTERNAL_STORAGE;

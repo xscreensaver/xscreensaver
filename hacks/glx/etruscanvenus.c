@@ -2401,7 +2401,6 @@ static void display_etruscanvenus(ModeInfo *mi)
     if (ev->view == VIEW_WALK)
     {
       ev->dumove = cos(walk_direction*M_PI/180.0)*walk_speed*M_PI/4096.0;
-      ev->dvmove = sin(walk_direction*M_PI/180.0)*walk_speed*M_PI/4096.0;
       ev->umove += ev->dumove;
       if (ev->umove >= 2.0*M_PI)
       {
@@ -2415,6 +2414,8 @@ static void display_etruscanvenus(ModeInfo *mi)
         ev->vmove = 2.0*M_PI-ev->vmove;
         ev->side = -ev->side;
       }
+      ev->dvmove = (ev->side*sin(walk_direction*M_PI/180.0)*
+                    walk_speed*M_PI/4096.0);
       ev->vmove += ev->dvmove;
       if (ev->vmove >= 2.0*M_PI)
         ev->vmove -= 2.0*M_PI;

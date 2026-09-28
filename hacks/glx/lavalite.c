@@ -1415,6 +1415,7 @@ draw_lavalite (ModeInfo *mi)
   lavalite_configuration *bp = &bps[MI_SCREEN(mi)];
   Display *dpy = MI_DISPLAY(mi);
   Window window = MI_WINDOW(mi);
+  static const float fps_color[4] = {1, 1, 0, 1};
 
   if (!bp->glx_context)
     return;
@@ -1524,8 +1525,7 @@ draw_lavalite (ModeInfo *mi)
   glCallList (bp->ball_list);
   glPopMatrix ();
 
-  glColor3f(1,1,0);
-  if (mi->fps_p) do_fps (mi);
+  if (mi->fps_p) do_fps_color (mi, fps_color);
   glFinish();
 
   glXSwapBuffers(dpy, window);

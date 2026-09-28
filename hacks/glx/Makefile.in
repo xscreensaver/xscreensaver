@@ -153,7 +153,7 @@ SRCS		= xscreensaver-gl-visual.c normals.c erase-gl.c fps-gl.c \
 		  highvoltage_model.c hopffibration.c hopfanimations.c \
 		  platonicfolding.c klondike.c klondike-game.c dumpsterfire.c \
 		  dumpster_model.c xshadertoy.c worldpieces.c countries.c \
-		  triangle.c quaternion.c
+		  triangle.c quaternion.c floppy.c floppy_model.c graphstat.c
 
 GLSL_SRCS	= glsl/alienbeacon.glsl glsl/batteredplanet.glsl \
 		  glsl/elementalring.glsl glsl/fluxcore.glsl \
@@ -171,7 +171,8 @@ GLSL_SRCS	= glsl/alienbeacon.glsl glsl/batteredplanet.glsl \
 		  glsl/bestill4-0.glsl glsl/bestill5-0.glsl \
 		  glsl/downfall.glsl glsl/trizm.glsl glsl/rigrekt.glsl \
 		  glsl/noxfire.glsl glsl/darktransit.glsl \
-		  glsl/goldenapollian.glsl glsl/trainmandala.glsl
+		  glsl/goldenapollian.glsl glsl/trainmandala.glsl \
+		  glsl/amigajuggler.glsl glsl/polarnight.glsl
 
 SCRIPTS		= mapscroller.pl $(GLSL_EXES)
 
@@ -230,7 +231,7 @@ OBJS		= xscreensaver-gl-visual.o normals.o erase-gl.o fps-gl.o \
 		  skulloop.o kallisti.o kallisti_model.o highvoltage.o \
 		  highvoltage_model.o platonicfolding.o klondike.o \
 		  klondike-game.o dumpsterfire.o xshadertoy.o worldpieces.o \
-		  countries.o triangle.o quaternion.o
+		  countries.o triangle.o quaternion.o floppy.o graphstat.o
 
 GL_EXES		= cage gears moebius pipes sproingies stairs superquadrics \
 		  morph3d rubik atlantis lament bubble3d glplanet pulsar \
@@ -256,7 +257,7 @@ GL_EXES		= cage gears moebius pipes sproingies stairs superquadrics \
 		  squirtorus nakagin chompytower hextrail papercube \
 		  cubocteversion skulloop kallisti highvoltage hopffibration \
 		  platonicfolding klondike dumpsterfire xshadertoy \
-		  worldpieces
+		  worldpieces floppy graphstat
 GLE_EXES	= extrusion
 GLSL_EXES	= alienbeacon batteredplanet elementalring fluxcore \
 		  gimbalharmonics hexplasma logarithmiccircles neongravity \
@@ -264,7 +265,7 @@ GLSL_EXES	= alienbeacon batteredplanet elementalring fluxcore \
 		  starnest stripeytorus synthwavecity topologica truchetzoom \
 		  prococean driftclouds universeball bubblecolors bestill \
 		  downfall trizm rigrekt noxfire darktransit goldenapollian \
-		  trainmandala
+		  trainmandala amigajuggler polarnight
 SUID_EXES	= sonar
 SETCAP_EXES	= sonar
 GL_UTIL_EXES	= xscreensaver-gl-visual
@@ -359,13 +360,13 @@ GL_MEN		= xscreensaver-gl-visual.man \
 		  prococean.man driftclouds.man universeball.man \
 		  bubblecolors.man bestill.man downfall.man trizm.man \
 		  rigrekt.man noxfire.man darktransit.man goldenapollian.man \
-		  trainmandala.man
+		  trainmandala.man amigajuggler.man polarnight.man
 MEN		= @GL_MEN@
 RETIRED_MEN	= glforestfire.man
 EXTRAS		= README Makefile.in dxf2gl.pl vrml2gl.pl wfront2gl.pl \
 		  xshadertoy-download.pl xshadertoy-compile.pl \
 		  molecules.sh countries-build.pl starwars.txt zalgo.txt \
-		  *.dxf glsl/README
+		  graphstat.txt *.dxf glsl/README
 
 TARFILES	= $(SRCS) $(HDRS) $(SCRIPTS) $(GLSL_SRCS) $(GL_MEN) \
 		  $(RETIRED_MEN) $(EXTRAS)
@@ -1279,13 +1280,23 @@ DUMPSTERFIRE=dumpsterfire.o dumpster_model.o gllist.o $(EASE) $(HACK_TRACK_OBJS)
 dumpsterfire:			$(DUMPSTERFIRE)
 	$(CC_HACK) -o $@	$(DUMPSTERFIRE) $(HACK_LIBS)
 
-xshadertoy:	xshadertoy.o	$(HACK_TRACK_OBJS)
-	$(CC_HACK) -o $@ $@.o	$(HACK_TRACK_OBJS) $(HACK_LIBS)
+floppy_dxf::
+	$(DXF2GL) --smooth --layers --normalize floppy.dxf floppy_model.c
+FLOPPY=floppy.o floppy_model.o gllist.o $(EASE) $(HACK_TRACK_OBJS)
+floppy:				$(FLOPPY)
+	$(CC_HACK) -o $@	$(FLOPPY) $(HACK_LIBS)
 
+graphstat.h: graphstat.txt
+	$(UTILS_SRC)/bin2c $< $@
+graphstat.o: graphstat.h
+graphstat:	graphstat.o	$(HACK_OBJS)
+	$(CC_HACK) -o $@ $@.o	$(HACK_OBJS) $(HACK_LIBS)
 
 
 # Shadertoy-based savers:
 
+xshadertoy:	xshadertoy.o	$(HACK_TRACK_OBJS)
+	$(CC_HACK) -o $@ $@.o	$(HACK_TRACK_OBJS) $(HACK_LIBS)
 
 SHCC = $(srcdir)/xshadertoy-compile.pl
 CC_GLSL = $(SHCC) --quiet --name
@@ -1384,6 +1395,12 @@ goldenapollian: glsl/goldenapollian.glsl $(SHCC)
 	$(CC_GLSL) $@ $<
 
 trainmandala: glsl/trainmandala.glsl $(SHCC)
+	$(CC_GLSL) $@ $<
+
+amigajuggler: glsl/amigajuggler.glsl $(SHCC)
+	$(CC_GLSL) $@ $<
+
+polarnight: glsl/polarnight.glsl $(SHCC)
 	$(CC_GLSL) $@ $<
 
 ##############################################################################
@@ -2653,6 +2670,43 @@ fliptext.o: $(UTILS_SRC)/xft.h
 fliptext.o: $(UTILS_SRC)/yarandom.h
 fliptext.o: $(HACK_SRC)/xlockmoreI.h
 fliptext.o: $(HACK_SRC)/xlockmore.h
+floppy_model.o: ../../config.h
+floppy_model.o: $(HACK_SRC)/fps.h
+floppy_model.o: $(srcdir)/gllist.h
+floppy_model.o: $(HACK_SRC)/recanim.h
+floppy_model.o: $(HACK_SRC)/screenhackI.h
+floppy_model.o: $(UTILS_SRC)/colors.h
+floppy_model.o: $(UTILS_SRC)/erase.h
+floppy_model.o: $(UTILS_SRC)/font-retry.h
+floppy_model.o: $(UTILS_SRC)/grabclient.h
+floppy_model.o: $(UTILS_SRC)/hsv.h
+floppy_model.o: $(UTILS_SRC)/resources.h
+floppy_model.o: $(UTILS_SRC)/usleep.h
+floppy_model.o: $(UTILS_SRC)/visual.h
+floppy_model.o: $(UTILS_SRC)/xft.h
+floppy_model.o: $(UTILS_SRC)/yarandom.h
+floppy_model.o: $(HACK_SRC)/xlockmoreI.h
+floppy.o: ../../config.h
+floppy.o: $(HACK_SRC)/fps.h
+floppy.o: $(srcdir)/gllist.h
+floppy.o: $(srcdir)/gltrackball.h
+floppy.o: $(srcdir)/quaternion.h
+floppy.o: $(HACK_SRC)/recanim.h
+floppy.o: $(srcdir)/rotator.h
+floppy.o: $(HACK_SRC)/screenhackI.h
+floppy.o: $(UTILS_SRC)/colors.h
+floppy.o: $(UTILS_SRC)/easing.h
+floppy.o: $(UTILS_SRC)/erase.h
+floppy.o: $(UTILS_SRC)/font-retry.h
+floppy.o: $(UTILS_SRC)/grabclient.h
+floppy.o: $(UTILS_SRC)/hsv.h
+floppy.o: $(UTILS_SRC)/resources.h
+floppy.o: $(UTILS_SRC)/usleep.h
+floppy.o: $(UTILS_SRC)/visual.h
+floppy.o: $(UTILS_SRC)/xft.h
+floppy.o: $(UTILS_SRC)/yarandom.h
+floppy.o: $(HACK_SRC)/xlockmoreI.h
+floppy.o: $(HACK_SRC)/xlockmore.h
 flurry.o: ../../config.h
 flurry.o: $(srcdir)/flurry.h
 flurry.o: $(HACK_SRC)/fps.h
@@ -3242,6 +3296,24 @@ grab-ximage.o: $(UTILS_SRC)/xft.h
 grab-ximage.o: $(UTILS_SRC)/xshm.h
 grab-ximage.o: $(UTILS_SRC)/yarandom.h
 grab-ximage.o: $(HACK_SRC)/xlockmoreI.h
+graphstat.o: ../../config.h
+graphstat.o: $(HACK_SRC)/fps.h
+graphstat.o: $(srcdir)/graphstat.h
+graphstat.o: $(HACK_SRC)/recanim.h
+graphstat.o: $(HACK_SRC)/screenhackI.h
+graphstat.o: $(srcdir)/texfont.h
+graphstat.o: $(UTILS_SRC)/colors.h
+graphstat.o: $(UTILS_SRC)/erase.h
+graphstat.o: $(UTILS_SRC)/font-retry.h
+graphstat.o: $(UTILS_SRC)/grabclient.h
+graphstat.o: $(UTILS_SRC)/hsv.h
+graphstat.o: $(UTILS_SRC)/resources.h
+graphstat.o: $(UTILS_SRC)/usleep.h
+graphstat.o: $(UTILS_SRC)/visual.h
+graphstat.o: $(UTILS_SRC)/xft.h
+graphstat.o: $(UTILS_SRC)/yarandom.h
+graphstat.o: $(HACK_SRC)/xlockmoreI.h
+graphstat.o: $(HACK_SRC)/xlockmore.h
 gravitywell.o: ../../config.h
 gravitywell.o: $(HACK_SRC)/fps.h
 gravitywell.o: $(srcdir)/gltrackball.h

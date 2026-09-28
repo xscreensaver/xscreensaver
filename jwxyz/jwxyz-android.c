@@ -1,4 +1,4 @@
-/* xscreensaver, Copyright © 2016-2025 Jamie Zawinski <jwz@jwz.org>
+/* xscreensaver, Copyright © 2016-2026 Jamie Zawinski <jwz@jwz.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -107,6 +107,7 @@ jwxyz_logv(Bool error, const char *fmt, va_list args)
 /* Handle an abort on Android
    TODO: Test that Android handles aborts properly
  */
+// Also defined in jwzgles.c and jwxyz-cocoa.m
 void
 jwxyz_abort (const char *fmt, ...)
 {
@@ -493,11 +494,6 @@ doinit (jobject jwxyz_obj, struct running_hack *rh, JNIEnv *env,
     { "chooseRandomImages", "True" },
 
 # ifndef __OPTIMIZE__
-    /* Gradle is such a piece of shit.  Android always does -O builds, even in
-       debug, and there's no way to stop that.  I tried all kinds of nonsense
-       in xscreensaver/build.gradle "buildTypes { debug { cmake {" and nothing
-       works. There's no way to conditionally compile on debug versus release.
-     */
     { "doFPS", "True" },
 # endif
   };
@@ -587,8 +583,10 @@ doinit (jobject jwxyz_obj, struct running_hack *rh, JNIEnv *env,
     strcmp (progname, "slip") &&
     strcmp (progname, "testx11");
 
-  Log ("init: %s @ %dx%d: using JWXYZ_%s", progname, w, h,
-       rh->jwxyz_gl_p ? "GL" : "IMAGE");
+  Log ("init: %s @ %dx%d: using JWXYZ_%s for %s", progname, w, h,
+       rh->jwxyz_gl_p ? "GL" : "IMAGE",
+       (rh->xsft->visual == DEFAULT_VISUAL ? "DEFAULT_VISUAL" :
+        rh->xsft->visual == GL_VISUAL ? "GL_VISUAL" : "?"));
 
   rh->egl_p = rh->jwxyz_gl_p || rh->xsft->visual == GL_VISUAL;
 
@@ -1506,8 +1504,6 @@ get_string_resource_window (Window window, char *name)
   if (jvalue)
     ret = jstring_dup (env, jvalue);
 
-  if (!strcmp (name, "doFPS")) ret = strdup("true");  // ####
-
   Log("pref %s = %s", name, (ret ? ret : "(null)"));
   return ret;
 }
@@ -1547,7 +1543,7 @@ textclient_mobile_url_string (Display *dpy, const char *url)
     memcpy (body2, body, L);
     body2[L] = 0;
   } else {
-    // Returns null when the background URL has not yet finished loading.
+    // Returns blank when the background URL has not yet finished loading.
     body2 = strdup ("");
   }
 
@@ -1790,7 +1786,8 @@ jwxyz_unicode_character_name (Display *dpy, Font fid, unsigned long uc)
 
 /* Called from utils/grabclient.c */
 char *
-jwxyz_draw_random_image (Display *dpy, Drawable drawable, GC gc)
+jwxyz_draw_random_image (Display *dpy, Drawable drawable, GC gc,
+                         XRectangle *geom)
 {
   Window window = RootWindow (dpy, 0);
   struct running_hack *rh = window->window.rh;
@@ -1845,10 +1842,16 @@ jwxyz_draw_random_image (Display *dpy, Drawable drawable, GC gc)
 
   AndroidBitmap_lockPixels (env, jbitmap, (void **) &img->data);
 
-  XPutImage (dpy, drawable, gc, img, 0, 0,
-             (drawable->frame.width  - bmp_info.width) / 2,
-             (drawable->frame.height - bmp_info.height) / 2,
+  int x = (drawable->frame.width  - bmp_info.width) / 2;
+  int y = (drawable->frame.height - bmp_info.height) / 2;
+  XPutImage (dpy, drawable, gc, img, 0, 0, x, y,
              bmp_info.width, bmp_info.height);
+  if (geom) {
+    geom->x = x;
+    geom->y = y;
+    geom->width  = bmp_info.width;
+    geom->height = bmp_info.height;
+  }
 
   AndroidBitmap_unlockPixels (env, jbitmap);
   img->data = NULL;

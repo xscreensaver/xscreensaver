@@ -622,6 +622,7 @@ ENTRYPOINT void draw_surface(ModeInfo * mi)
   surfacestruct *sp = &surface[MI_SCREEN(mi)];
   Display *display = MI_DISPLAY(mi);
   Window window = MI_WINDOW(mi);
+  static const float fps_color[4] = {1, 1, 0, 1};
 
   if (!sp->glx_context)
     return;
@@ -630,9 +631,8 @@ ENTRYPOINT void draw_surface(ModeInfo * mi)
 
   glXMakeCurrent(display, window, *sp->glx_context);
   draw(mi);
-  glColor3f(1,1,0);
   if (mi->fps_p)
-    do_fps(mi);
+    do_fps_color(mi,fps_color);
   glFinish();
   glXSwapBuffers(display, window);
 }

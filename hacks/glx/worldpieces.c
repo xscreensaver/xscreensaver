@@ -2121,6 +2121,7 @@ draw_planet (ModeInfo * mi)
   /* Display the top left label of the part of the globe we are looking at.
    */
   {
+    GLfloat color[4] = {1, 1, 0, 1};
     char buf[1000];
     GLfloat lat_angle = -gp->orient.a * 180/M_PI;
     GLfloat lon_angle =  gp->orient.o * 180/M_PI;
@@ -2138,15 +2139,13 @@ draw_planet (ModeInfo * mi)
              100 * gp->country_idx / all_countries.count
              );
 
-    glColor3f (1, 1, 0);
     print_texture_label (MI_DISPLAY(mi), gp->title_font,
                          MI_WIDTH(mi), MI_HEIGHT(mi),
-                         1, buf);
+                         1, buf, color);
   }
 
   glPopMatrix();
 
-  glColor3f (1, 1, 1);
   if (mi->fps_p) do_fps (mi);
   glFinish();
   glXSwapBuffers(dpy, window);

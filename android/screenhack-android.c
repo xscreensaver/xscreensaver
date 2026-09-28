@@ -165,9 +165,7 @@ clear_gl_error (void)
 }
 
 
-// needs to be implemented in Android...
-/* Copy the back buffer to the front buffer.
- */
+// I guess this is implicit
 void
 glXSwapBuffers (Display *dpy, Window window)
 {

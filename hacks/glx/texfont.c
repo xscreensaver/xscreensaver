@@ -1179,9 +1179,9 @@ print_texture_label (Display *dpy,
                      texture_font_data *data,
                      int window_width, int window_height,
                      int position,
-                     const char *string)
+                     const char *string,
+                     const GLfloat color[4])
 {
-  GLfloat color[4]  = { 1, 1, 1, 1 };
   GLfloat color2[4] = { 0, 0, 0, 1 };
   Bool tex_p = False, texs_p = False, text_p = False;
   Bool depth_p = False, fog_p = False, cull_p = False;
@@ -1195,12 +1195,6 @@ print_texture_label (Display *dpy,
   depth_p = glIsEnabled (GL_DEPTH_TEST);
 
   glGetIntegerv (GL_VIEWPORT, ovp);
-
-  /* This call will fail with an OpenGL ES 3.0 context. color will maintain
-     its initial value of {1,1,1,1} in this case. We clear the potential
-     error afterwards. */
-  clear_gl_error();
-  glGetFloatv (GL_CURRENT_COLOR, color);
 
   /* Should the outline be light or dark? */
   if ((color[0] * 0.2126 + color[1] * 0.7152 + color[2] * 0.0722) > 0.4)

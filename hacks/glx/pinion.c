@@ -148,6 +148,7 @@ draw_label (ModeInfo *mi)
 
   if (*label)
     {
+      GLfloat color[4] = {0.8, 0.8, 0.0, 1.0};
       texture_font_data *fd;
       if (MI_WIDTH(mi) >= 500 && MI_HEIGHT(mi) >= 375)
         fd = pp->font1;
@@ -156,10 +157,9 @@ draw_label (ModeInfo *mi)
       else
         fd = pp->font3;
 
-      glColor3f (0.8, 0.8, 0);
       print_texture_label (mi->dpy, fd,
                            mi->xgwa.width, mi->xgwa.height,
-                           1, label);
+                           1, label, color);
     }
 }
 

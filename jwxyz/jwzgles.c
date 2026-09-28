@@ -221,8 +221,19 @@
 
 #undef  Assert
 
-//extern void jwxyz_abort (const char *fmt, ...) __dead2;
 #define Assert(C,S) do { if (!(C)) { jwxyz_abort("jwzgles: %s",S); }} while(0)
+
+#if !defined(HAVE_COCOA) && !defined(HAVE_ANDROID)
+// Also defined in jwxyz-cocoa.m and jwxyz-android.c
+void jwxyz_abort (const char *fmt, ...)
+{
+  va_list args;
+  va_start (args, fmt);
+  vfprintf (stderr, fmt, args);
+  va_end (args);
+  exit(1);
+}
+#endif
 
 typedef struct { GLfloat x, y, z; }    XYZ;
 typedef struct { GLfloat x, y, z, w; } XYZW;
@@ -385,6 +396,7 @@ struct jwzgles_state {  /* global state */
 # endif // TRACK_MATRIXES
 
   GLfloat current_color[4];
+  Bool glsl_p;	// Whether glUseProgram has ever been called with non-zero
 };
 
 
@@ -1228,8 +1240,14 @@ jwzgles_glColor4fv (const GLfloat *v)
         }
       else				/* outside glBegin */
         {
-          glColor4f (v[0], v[1], v[2], v[3]);
-          CHECK("glColor4");
+          if (! state->glsl_p)
+            {
+              // This crashes in the Android emulator when GLSL is in use,
+              // in which case this would have done nothing anyway.
+              glColor4f (v[0], v[1], v[2], v[3]);
+              CHECK("glColor4");
+            }
+
           memcpy (state->current_color, v, sizeof(state->current_color));
         }
     }
@@ -3061,12 +3079,13 @@ jwzgles_glSelectBuffer (GLsizei size, GLuint *buf)
 void
 jwzgles_glGenTextures (GLuint n, GLuint *ret)
 {
-  Assert (!state->compiling_verts,
+  // state might be null if this is an X11 Android context just starting up
+  Assert (!state || !state->compiling_verts,
           "glGenTextures not allowed inside glBegin");
   /* technically legal, but stupid! */
-  Assert (!state->compiling_list,
+  Assert (!state || !state->compiling_list,
           "glGenTextures not allowed inside glNewList");
-  if (! state->replaying_list)
+  if (!state || !state->replaying_list)
     LOG1 ("direct %-12s", "glGenTextures");
   glGenTextures (n, ret);  /* the real one */
   CHECK("glGenTextures");
@@ -3107,8 +3126,9 @@ jwzgles_glTexImage2D (GLenum target,
                       const GLvoid *data)
 {
   GLvoid *d2 = (GLvoid *) data;
-  Assert (!state->compiling_verts, "glTexImage2D not allowed inside glBegin");
-  Assert (!state->compiling_list,  /* technically legal, but stupid! */
+  Assert (!state || !state->compiling_verts,
+          "glTexImage2D not allowed inside glBegin");
+  Assert (!state || !state->compiling_list, /* technically legal, but stupid */
           "glTexImage2D not allowed inside glNewList");
 
 # ifndef HAVE_GLSL
@@ -3139,7 +3159,8 @@ jwzgles_glTexImage2D (GLenum target,
   if (type == GL_UNSIGNED_INT_8_8_8_8_REV)
     type = GL_UNSIGNED_BYTE;
 
-  if (! state->replaying_list)
+  // state might be null if this is an X11 Android context just starting up
+  if (!state || !state->replaying_list)
     LOG10 ("direct %-12s %s %d %s %d %d %d %s %s 0x%lX", "glTexImage2D", 
            mode_desc(target), level, mode_desc(internalFormat),
            width, height, border, mode_desc(format), mode_desc(type),
@@ -4105,7 +4126,8 @@ void jwzgles_glLoadIdentity (void)
 void
 jwzgles_glGetFloatv (GLenum pname, GLfloat *params)
 {
-  if (! state->replaying_list)
+  // state might be null if this is an X11 Android context just starting up
+  if (!state || !state->replaying_list)
     LOG2 ("direct %-12s %s", "glGetFloatv", mode_desc(pname));
 
   switch (pname)
@@ -4398,7 +4420,7 @@ jwzgles_glBufferData (GLenum target, GLsizeiptr size, const void *data,
 void
 jwzgles_glTexParameterf (GLuint target, GLuint pname, GLfloat param)
 {
-  Assert (!state->compiling_verts,
+  Assert (!state || !state->compiling_verts,
           "glTexParameterf not allowed inside glBegin");
 
   /* We don't *really* implement mipmaps, so just turn this off. */
@@ -4415,7 +4437,8 @@ jwzgles_glTexParameterf (GLuint target, GLuint pname, GLfloat param)
       param == GL_CLAMP)
     return;
 
-  if (state->compiling_list)
+  // state might be null if this is an X11 Android context just starting up
+  if (state && state->compiling_list)
     {
       void_int vv[3];
       vv[0].i = target;
@@ -4426,7 +4449,7 @@ jwzgles_glTexParameterf (GLuint target, GLuint pname, GLfloat param)
     }
   else
     {
-      if (! state->replaying_list)
+      if (!state || !state->replaying_list)
         LOG4 ("direct %-12s %s %s %7.3f", "glTexParameterf", 
               mode_desc(target), mode_desc(pname), param);
       glTexParameterf (target, pname, param);  /* the real one */
@@ -4444,13 +4467,14 @@ jwzgles_glTexParameteri (GLuint target, GLuint pname, GLuint param)
 void
 jwzgles_glBindTexture (GLuint target, GLuint texture)
 {
-  Assert (!state->compiling_verts,
+  // state might be null if this is an X11 Android context just starting up
+  Assert (!state || !state->compiling_verts,
           "glBindTexture not allowed inside glBegin");
 
   /* We implement 1D textures as 2D textures. */
   if (target == GL_TEXTURE_1D) target = GL_TEXTURE_2D;
 
-  if (state->compiling_list)
+  if (state && state->compiling_list)
     {
       void_int vv[2];
       vv[0].i = target;
@@ -4462,7 +4486,7 @@ jwzgles_glBindTexture (GLuint target, GLuint texture)
   /* Do it immediately as well, for generate_texture_coords */
   /* else */
     {
-      if (! state->replaying_list)
+      if (!state || !state->replaying_list)
         LOG3 ("direct %-12s %s %d", "glBindTexture", 
               mode_desc(target), texture);
       glBindTexture (target, texture);  /* the real one */
@@ -4716,6 +4740,31 @@ void jwzgles_glViewport (GLuint x, GLuint y, GLuint w, GLuint h)
 }
 
 
+void
+jwzgles_glUseProgram (GLuint p)
+{
+  // state might be null if this is an X11 Android context just starting up
+  Assert (!state || !state->compiling_verts,
+          "glUseProgram not allowed inside glBegin");
+
+  if (state && state->compiling_list)
+    {
+      void_int vv[2];
+      vv[0].i = p;
+      list_push ("glUseProgram", (list_fn_cb) &jwzgles_glUseProgram,
+                 PROTO_I, vv);
+    }
+  else
+    {
+      if (!state || !state->replaying_list)
+        LOG2 ("direct %-12s %d", "glUseProgram", p);
+      if (p) state->glsl_p = True;
+      glUseProgram (p);  /* the real one */
+      CHECK("glUseProgram");
+    }
+}
+
+
 /* The following functions are present in both OpenGL 1.1 and in OpenGLES 1,
    but are allowed within glNewList/glEndList, so we must wrap them to allow
    them to either be recorded in lists, or run directly.
@@ -4828,15 +4877,15 @@ void jwzgles_glViewport (GLuint x, GLuint y, GLuint w, GLuint h)
 #define WRAP(NAME,SIG) \
 void jwzgles_##NAME (ARGS_##SIG)					\
 {									\
-  Assert (!state->compiling_verts,					\
+  Assert (!state || !state->compiling_verts,				\
           STRINGIFY(NAME) " not allowed inside glBegin");		\
-  if (state->compiling_list) {						\
+  if (state && state->compiling_list) {					\
     void_int vv[10];							\
     FILL_##SIG								\
     list_push (STRINGIFY(NAME), (list_fn_cb) &jwzgles_##NAME,		\
 	       PROTO_##SIG, vv);					\
   } else {                                                          	\
-    if (! state->replaying_list)                                   	\
+    if (!state || !state->replaying_list)                             	\
       WLOG (NAME, LOGS_##SIG);				        	\
     NAME (VARS_##SIG);							\
     CHECK(STRINGIFY(NAME));						\

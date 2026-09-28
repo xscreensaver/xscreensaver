@@ -53,6 +53,11 @@ Requirements for inclusion with the XScreenSaver collection
     should be a clock of some kind.  Nobody needs to know what time it is
     with such frequency.  Fight The Tyranny Of The Clock.
 
+  - No contributions built with, or assisted by, LLMs or any kind of
+    "generative AI" tools will be considered.  If you didn't bother
+    writing it, I'm not going to bother reading it.  XScreenSaver is
+    art by humans for humans.
+
 
 ==========================================================================
 The XScreenSaver API

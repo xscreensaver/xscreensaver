@@ -923,6 +923,9 @@ static inline double get_current_julian_date(void)
 }
 
 
+# undef sun
+# define sun the_sun  /* Solaris still exists, apparently */
+
 /* Get the direction of the sun on the Julian date given by jd.  The
    function calculates the latitude and longitude of the subsolar point,
    i.e., the point on earth for which the sun is perpendicular.  The
@@ -3392,7 +3395,6 @@ ENTRYPOINT void draw_platonicfolding(ModeInfo *mi)
 
   display_platonicfolding(mi);
 
-  glColor3f (1, 1, 1);
   if (MI_IS_FPS(mi))
     do_fps (mi);
 

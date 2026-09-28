@@ -1766,15 +1766,14 @@ draw_geodesic (ModeInfo *mi)
 
   if (do_labels && bp->mode == 0)
     {
-      glColor3f (1, 1, 0);
+      GLfloat color[4] = {1, 1, 0, 1};
       print_texture_label (mi->dpy, bp->font,
                            mi->xgwa.width, mi->xgwa.height,
-                           1, bp->desc);
+                           1, bp->desc, color);
     }
 
   glPopMatrix ();
 
-  glColor3f (1, 1, 1);
   if (mi->fps_p) do_fps (mi);
   glFinish();
 

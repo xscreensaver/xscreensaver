@@ -2819,6 +2819,7 @@ draw_juggle (ModeInfo *mi)
   jugglestruct *sp = &juggles[MI_SCREEN(mi)];
   Display *dpy = MI_DISPLAY(mi);
   Window window = MI_WINDOW(mi);
+  GLfloat color[4] = {1, 1, 0, 1};
 
   Trajectory *traj = NULL;
   Object *o = NULL;
@@ -2993,10 +2994,9 @@ draw_juggle (ModeInfo *mi)
 	}
   }
 
-  glColor3f (1, 1, 0);
   print_texture_label (mi->dpy, sp->font_data,
                        mi->xgwa.width, mi->xgwa.height,
-                       1, sp->pattern);
+                       1, sp->pattern, color);
 
 #ifdef MEMTEST
   if((int)(sp->time/10) % 1000 == 0)
@@ -3011,7 +3011,6 @@ draw_juggle (ModeInfo *mi)
 
   glPopMatrix ();
 
-  glColor3f (1, 1, 1);
   if (mi->fps_p) do_fps (mi);
   glFinish();
 
