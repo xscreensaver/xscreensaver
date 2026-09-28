@@ -12,6 +12,7 @@ Source0:	https://www.jwz.org/xscreensaver/xscreensaver-%{version}.tar.gz
 Vendor:		Jamie Zawinski <jwz@jwz.org>
 Buildroot:	%{_tmppath}/%{name}-root
 Patch1:         netwaresmp-xscreensaver-6.16.patch
+Patch2:         xscreensaver-6.16-graphstat.patch
 
 # Red Hat uses an epoch number to make RPM believe that their old RPM with
 # number "1:5.45" is newer than your "6.14".  The technical term for this
@@ -95,6 +96,7 @@ More than 270 display modes are included in this package.
 
 # %patch<#> is deprecated as of RHEL 10, use %patch -P <#> instead.
 %patch -P 1 -p1 
+%patch -P 2 -p1 
 
 #autoreconf -v -f -I /usr/share/gettext/m4
 autoreconf -v -f 
