@@ -148,8 +148,8 @@ dd=%{_builddir}/%{name}-%{version}
 
 cat $dd/allfiles.txt
 
-%find_lang %{name}
-cat %{name}.lang >> $dd/allfiles.txt
+#%find_lang %{name}
+#cat %{name}.lang >> $dd/allfiles.txt
 
 chmod -R a+r,u+w,og-w "$RPM_BUILD_ROOT"
 
