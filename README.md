@@ -296,11 +296,11 @@ Most Linux distributions use an outdated xscreensaver program which lacks curren
 
 ### Installing the xscreensaver Code Base
 
-You can clone the xscreensaver code base from github as follows using
+You can clone this fork of xscreensaver code base from github as follows using
 the 'git clone' command, or you can download the xscreensaver-6.17-0.tar.gz
 archive directly from github, then untar and extract the files.
 
-#### Cloning from Github
+#### Cloning our fork from Github
   
 ```sh
 git clone https://github.com/xscreensaver/xscreensaver
@@ -318,10 +318,12 @@ Receiving objects: 100% (2199/2199), 18.37 MiB | 30.94 MiB/s, done.
 Resolving deltas: 100% (796/796), done.
 ```
 
+Upstream `xscreensaver` cannot be cloned from GitHub as the source is distributed directly by `jwz`.
+
 #### Downloading 
 
-You can also download the xscreensaver-6.17-0.tar.gz archive directly
-from github from the releases section for the xscreensaver-6.17 code base:
+You can also download this fork of xscreensaver-6.17-0.tar.gz archive directly
+from github from the releases section for the forked xscreensaver-6.17 code base:
 
 - [xscreensaver-6.17.tar.gz](https://github.com/xscreensaver/xscreensaver/archive/refs/tags/v6.17.tar.gz) 
 
@@ -559,8 +561,8 @@ Jeffrey Merkey &lt;[jeffmerkey@gmail.com](mailto:jeffmerkey@gmail.com)&gt;, Cosi
 
 ## **Issues / problems / help**
 
-If you have any issues, please log them at <https://github.com/jeffmerkey/netware-xscreensaver/issues>
+If you have any issues, please log them at <https://github.com/jeffmerkey/netware-xscreensaver/issues>. `jwz` is unable to accept issues regarding forks or versions modified in distribution.
 
-If you have any suggestions for improvements then pull requests are
-welcomed, or raise an issue.
+If you have any suggestions for improvements on our fork then pull requests are
+welcomed, or raise an issue against this repository.
 
