@@ -67,7 +67,7 @@ extern void get_screen_viewport (saver_screen_info *ssi,
 
 extern void cycle_timer (XtPointer si, XtIntervalId *id);
 extern void sleep_until_idle (saver_info *si, Bool until_idle_p);
-
+extern double get_fade_milliseconds(saver_preferences *p);
 
 /* =======================================================================
    subprocs

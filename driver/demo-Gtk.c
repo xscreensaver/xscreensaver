@@ -114,6 +114,9 @@ static int mode_menu_order[] = {
 enum { COL_ENABLED, COL_NAME, COL_LAST };
 typedef enum { D_NONE, D_LAUNCH, D_GNOME, D_KDE } dialog_button;
 
+static int fade_timer_order[] = { TIMER_SECONDS, TIMER_MILLISECONDS };
+
+Bool timer_changed_p = FALSE;
 
 typedef struct {
 
@@ -219,6 +222,7 @@ G_DEFINE_TYPE (XScreenSaverApp, xscreensaver_app, GTK_TYPE_APPLICATION)
   W(grab_image_button)		\
   W(fade_button)		\
   W(unfade_button)		\
+  W(fade_timer)		\
   W(preview)			\
   W(preview_notebook)		\
   W(text_radio)			\
@@ -1343,6 +1347,8 @@ flush_dialog_changes_and_save (state *s)
   /* Flush the non-hack-specific settings down into the prefs struct.
    */
 
+# define MILLISECONDS(PREF,WIDGET) \
+    PREF = parse_milliseconds(gtk_entry_get_text (GTK_ENTRY (win->WIDGET)));
 # define SECONDS(PREF,WIDGET) \
     hack_time_text (s, gtk_entry_get_text (GTK_ENTRY (win->WIDGET)), \
                     &(PREF), TRUE)
@@ -1392,13 +1398,33 @@ flush_dialog_changes_and_save (state *s)
 
   CHECKBOX (p2->fade_p,       fade_button);
   CHECKBOX (p2->unfade_p,     unfade_button);
-  SECONDS  (p2->fade_seconds, fade_spinbutton);
 
+  if (p2->fade_timer == TIMER_SECONDS)
+    {
+      if (timer_changed_p != TRUE)
+        SECONDS  (p2->fade_seconds, fade_spinbutton);
+    }
+  else
+    {
+      MILLISECONDS (p2->fade_milliseconds, fade_spinbutton);
+    }
+  timer_changed_p = FALSE;
+
+# undef MILLISECONDS
 # undef SECONDS
 # undef MINUTES
 # undef CHECKBOX
 # undef PATHNAME
 # undef TEXT
+
+  /* Map the mode menu to `fade_timer' enum values. */
+  {
+    GtkComboBox *opt = GTK_COMBO_BOX (win->fade_timer);
+    int index = gtk_combo_box_get_active (opt);
+    if (index < 0 || index >= countof(fade_timer_order)) abort();
+    p2->fade_timer = fade_timer_order[index];
+    p->fade_timer = -1;
+  }
 
   /* Map the mode menu to `saver_mode' enum values. */
   {
@@ -1501,6 +1527,8 @@ flush_dialog_changes_and_save (state *s)
   COPY(fade_p);
   COPY(unfade_p);
   COPY(fade_seconds);
+  COPY(fade_milliseconds);
+  COPY(fade_timer);
 
   COPY(grab_desktop_p);
   COPY(grab_video_p);
@@ -1529,6 +1557,7 @@ flush_dialog_changes_and_save (state *s)
   COPYSTR(text_file);
   COPYSTR(text_program);
   COPYSTR(text_url);
+
 # undef COPYSTR
 
   populate_prefs_page (s);
@@ -1589,7 +1618,6 @@ pref_changed_event_cb (GtkWidget *widget, GdkEvent *event, gpointer user_data)
   pref_changed_cb (widget, user_data);
   return GDK_EVENT_PROPAGATE;
 }
-
 
 /* Called when text is changed in the search field. */
 G_MODULE_EXPORT gboolean
@@ -1683,6 +1711,68 @@ dpms_sanity_event_cb (GtkWidget *widget, GdkEvent *event, gpointer user_data)
   return GDK_EVENT_PROPAGATE;
 }
 
+
+/* Callback on menu items in the "timer" options menu.
+ */
+G_MODULE_EXPORT void
+fade_timer_item_cb (GtkWidget *widget, gpointer user_data)
+{
+  XScreenSaverWindow *win = XSCREENSAVER_WINDOW (user_data);
+  state *s = &win->state;
+  timer_changed_p = TRUE;
+
+  if (s->flushing_p) return;  /* Called as a spurious side-effect */
+  if (s->initializing_p) return;
+
+  int menu_index = gtk_combo_box_get_active (GTK_COMBO_BOX (widget));
+  fade_timer_mode ftm = fade_timer_order[menu_index];
+  GtkSpinButton *spin_button = GTK_SPIN_BUTTON (win->fade_spinbutton);
+
+  saver_preferences *p = &s->prefs;
+  p->fade_timer = ftm;
+
+  gdouble new_sb_value = -1;
+  int max = 10;
+
+  // Swap between fade_seconds and fade_milliseconds, depending on fade_timer.
+  if (p->fade_timer == TIMER_SECONDS)
+    {
+      p->fade_milliseconds = gtk_spin_button_get_value(spin_button);
+      new_sb_value = (double) p->fade_seconds;
+    }
+  else
+    {
+      new_sb_value = (double) p->fade_milliseconds;
+      max = 1000;
+    }
+
+  /*
+    Disable the sping button 'value-changed' event. This is because the
+    'gtk_spin_button_set_value' already causes the pref_changed_vm to be
+    invoked, and causrsa race condition when changing the fade timer from
+    milliseconds to seconds, causing the value of seconds being set to 10.
+  */
+  guint signal_id = g_signal_lookup ("value-changed", GTK_TYPE_SPIN_BUTTON);
+  gulong id = g_signal_handler_find(
+    win->fade_spinbutton,
+    G_SIGNAL_MATCH_ID ,
+    signal_id,
+    0,
+    NULL,
+    NULL,
+    NULL
+  );
+  if (id != 0) g_signal_handler_block(win->fade_spinbutton,id);
+
+  // Update the maximum value for the spin button and set its value.
+  gtk_spin_button_set_range(spin_button, 0, max);
+  gtk_spin_button_set_value(spin_button, new_sb_value);
+
+  pref_changed_cb (widget, user_data);
+
+  // Re-enable the spin button 'value-changed' event.
+  if (id != 0) g_signal_handler_unblock(win->fade_spinbutton, id);
+}
 
 
 /* Callback on menu items in the "mode" options menu.
@@ -2716,6 +2806,9 @@ populate_prefs_page (state *s)
 # define FMT_SECONDS(NAME,N) \
     gtk_spin_button_set_value (GTK_SPIN_BUTTON (win->NAME), \
                                (double) ((N) / 1000))
+# define FMT_MILLISECONDS(NAME,N) \
+    gtk_spin_button_set_value (GTK_SPIN_BUTTON (win->NAME), \
+                               (double) ((N)))
 
   FMT_MINUTES (timeout_spinbutton,      p->timeout);
   FMT_MINUTES (cycle_spinbutton,        p->cycle);
@@ -2723,9 +2816,16 @@ populate_prefs_page (state *s)
   FMT_MINUTES (dpms_standby_spinbutton, p->dpms_standby);
   FMT_MINUTES (dpms_suspend_spinbutton, p->dpms_suspend);
   FMT_MINUTES (dpms_off_spinbutton,     p->dpms_off);
-  FMT_SECONDS (fade_spinbutton,         p->fade_seconds);
+
+  // Set the value of the spin button, depending on the fade tiemr selected.
+  if (p->fade_timer == TIMER_SECONDS)
+    FMT_SECONDS (fade_spinbutton,         p->fade_seconds);
+  else
+    FMT_MILLISECONDS (fade_spinbutton,    p->fade_milliseconds);
+
 # undef FMT_MINUTES
 # undef FMT_SECONDS
+# undef FMT_MILLISECONDS
 
 # define TOGGLE_ACTIVE(NAME,ACTIVEP) \
     gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (win->NAME), (ACTIVEP))
@@ -2830,7 +2930,7 @@ populate_prefs_page (state *s)
 
         model_built_p = TRUE;
 
-        if (! signal_connected_p)
+        if (! signal_connected_p || timer_changed_p == FALSE)
           {
             g_signal_connect (G_OBJECT (cbox), "changed",
                               G_CALLBACK (pref_changed_cb), (gpointer) win);
@@ -2848,6 +2948,13 @@ populate_prefs_page (state *s)
       if (mode_menu_order[i] == p->mode)
         break;
     gtk_combo_box_set_active (opt, i);
+    update_list_sensitivity (s);
+  }
+
+  /* Map the 'fade_timer to the combobox */
+  {
+    GtkComboBox *opt = GTK_COMBO_BOX (win->fade_timer);
+    gtk_combo_box_set_active (opt, p->fade_timer);
     update_list_sensitivity (s);
   }
 
@@ -5427,6 +5534,13 @@ xscreensaver_window_realize (GtkWidget *self, gpointer user_data)
   hack_environment (s);  /* must be before initialize_sort_map() */
   load_init_file (s->dpy, p);
   initialize_sort_map (s);
+
+  // Change the maximum of the sping button depending on the fade timer loaded.
+  GtkSpinButton *spin_button = GTK_SPIN_BUTTON (win->fade_spinbutton);
+  int max = 10;
+  if (p->fade_timer == TIMER_MILLISECONDS)
+    max = 1000;
+  gtk_spin_button_set_range(spin_button, 0, max);
 
   s->gl_visual = get_best_gl_visual (s);
   s->dialog = g_object_new (XSCREENSAVER_DIALOG_TYPE, NULL);

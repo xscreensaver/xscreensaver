@@ -1532,6 +1532,7 @@ main_loop (Display *dpy)
   Bool authenticated_p = False;
   Bool ignore_motion_p = False;
   Bool wayland_p = False;
+  Bool is_paused_p = False;
   const char *active_how = 0;
 
   enum { UNBLANKED, BLANKED, LOCKED, AUTH } current_state = UNBLANKED;
@@ -1955,6 +1956,14 @@ main_loop (Display *dpy)
                     clientmessage_response (dpy, &xev, False,
                                             "screen is locked");
                 }
+              else if (msg == XA_PAUSE) {
+                is_paused_p = True;
+                clientmessage_response (dpy, &xev, True, "paused");
+              }
+              else if (msg == XA_UNPAUSE) {
+                is_paused_p = False;
+                clientmessage_response (dpy, &xev, True, "unpaused");
+              }
               else
                 {
                 BAD_CM:
@@ -2179,6 +2188,15 @@ main_loop (Display *dpy)
        */
       switch (current_state) {
       case UNBLANKED:
+
+        // If the pause flag is set, then reset the timers to allow the user defined
+        // time to elapse, before starting the screen saver.
+        if (is_paused_p) {
+          blanked_at = now;
+          locked_at = now;
+          break;
+        }
+
         if (!locking_disabled_p &&
             (force_lock_p ||
              (lock_p && 

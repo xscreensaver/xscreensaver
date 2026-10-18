@@ -1,0 +1,69 @@
+.TH XScreenSaver 1 "27-Apr-97" "X Version 11"
+.SH NAME
+netwaresmp - Novell Netware SMP console screensaver
+.SH SYNOPSIS
+.B netwaresmp
+[\-cpus \fI number of cpus\fP] [-speedup \fI divisor\fP] [-wormsize \fI pixels\fP] [\-display \fIhost:display.screen\fP] [\-foreground \fIcolor\fP] [\-background \fIcolor\fP] [\-window] [\-root] [\-mono] [\-shape \fI <0-5>\fP] [\-install] [\-visual \fIvisual\fP] 
+.SH DESCRIPTION
+The \fInetwaresmp\fP screensaver written by Jeffrey Merkey <jeffmerkey@gmail.com> and Cosimo Streppone <cosimo@cpan.org>, based on PopSquares, Deco hacks, loadsnake, and Novell's Netware SMP.  The original Netware SMP screensaver was written by Jeffrey Merkey at Novell in 1994.  This version is a rewrite of the original which functions exactly the same way as it did in Netware SMP.  Each worm represents a running system cpu processor.  As system utilization increases for each cpu, the corresponding worm for that processor gets longer and moves more quicky across the screen.  As overall system load increases, all the worms slightly increase in speed.  This screensaver is very useful for monitoring cpu loading in a system since you can visually see processor utilization and loading by simply observing the worms. 
+.SH OPTIONS
+.I netwaresmp
+accepts the following options:
+.TP 8
+.B \-cpus
+Number of cpus to start.  The default is the actual number of cpus detected from /proc/cpuinfo.  If you specify more cpus than are installed in your system, only the worms that are mapped to an actual processor will grow longer and faster when cpu load increases for that processor.  If you specify less cpus than are installed in your system, the program will default the display to the actual detected cpus.  
+.TP 8
+.B \-speedup
+speedup divisor to increase worm speed.  functions as powers of 2 i.e. speedup=4 runs at 4 times the speed, etc.  Default value is 1.
+.TP 8
+.B \-wormsize
+size of the worm head in pixels in a range between 10 and 80.  Default value is 30.  Can be any value but works best if you use multiples of 2 to map to graphics screen dimensions (which are typically numbers which are multiples of 2 or 10).
+.TP 8
+.B \-window
+Draw on a newly-created window.  This is the default.
+.TP 8
+.B \-root
+Draw on the root window.
+.TP 8
+.B \-mono 
+If on a color display, pretend we're on a monochrome display.
+.TP 8
+.B \-shape 
+Specify worm drawing mode:  
+0 for squares (default), 
+1 for circles, 
+2 for snipes (from the NetWare game "Snipes", the first distributed network game run over a local area network), 
+3 for triangles, 
+4 for classic (retro text-based NetWare SMP screensaver), 
+5 for trees,
+.TP 8
+.B \-install
+Install a private colormap for the window.
+.TP 8
+.B \-visual \fIvisual\fP
+Specify which visual to use.  Legal values are the name of a visual class,
+or the id number (decimal or hex) of a specific visual.
+.SH ENVIRONMENT
+.PP
+.TP 8
+.B DISPLAY
+to get the default host and display number.
+.TP 8
+.B XENVIRONMENT
+to get the name of a resource file that overrides the global resources
+stored in the RESOURCE_MANAGER property.
+.SH SEE ALSO
+.BR X (1),
+.BR xscreensaver (1)
+.SH COPYRIGHT
+Copyright \(co 1994-2024 by Jamie Zawinski, Jeffrey Merkey, Cosimo Streppone, 
+and others.  Permission to use, copy, modify, distribute, and sell this software
+and its documentation for any purpose is hereby granted without fee, provided 
+that the above copyright notice appear in all copies and that both that 
+copyright notice and this permission notice appear in supporting documentation. No representations are made about the suitability of this software for any 
+purpose.  It is provided "as is" without express or implied warranty.
+.SH AUTHORS
+Jeffrey Merkey <jeffmerkey@gmail.com> and Cosimo Streppone <cosimo@cpan.org>, 
+based on PopSquares, Deco hacks, loadsnake, and Novell's Netware SMP.  The 
+original Netware SMP screensaver was written by Jeffrey Merkey at Novell in
+1994.  

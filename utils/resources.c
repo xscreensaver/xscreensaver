@@ -241,6 +241,17 @@ parse_time (const char *string, Bool seconds_default_p, Bool silent_p)
   return ((h * 60 * 60) + (m * 60) + s);
 }
 
+
+int
+parse_milliseconds(const char *string)
+{
+  unsigned int ms;
+  int result = sscanf(string, "%u", &ms);
+  if (result == 0) return 500; // Return default if faile to parse.
+  return ms;
+}
+
+
 static unsigned int 
 get_time_resource (Display *dpy, char *res_name, char *res_class, Bool sec_p)
 {

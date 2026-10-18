@@ -49,7 +49,9 @@
 *verbose:		False
 *fade:			True
 *unfade:		True
+*fadeTimer:		Seconds
 *fadeSeconds:		0:00:03
+*fadeMilliseconds:	500
 *fadeTicks:		20
 *splash:		True
 *splashDuration:	0:00:05
@@ -415,6 +417,7 @@ XScreenSaver.bourneShell:		/bin/sh
 				wander --root				    \n\
 				xflame --root				    \n\
 				xmatrix --root				    \n\
+				netwaresmp --root			    \n\
 @GL_KLUDGE@ GL: 				gflux --root				    \n\
 -				nerverot --root				    \n\
 				xrayswarm --root			    \n\
@@ -729,6 +732,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.neontriangulator.name:Neon Triangulator
 *hacks.nerverot.name:       Nerve Rot
 *hacks.noseguy.name:        Nose Guy
+*hacks.netwaresmp.name:     Netware SMP
 *hacks.noxfire.name:        Nox Fire
 *hacks.pacman.name:         Pac-Man
 *hacks.papercube.name:      Paper Cube

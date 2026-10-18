@@ -19,6 +19,7 @@ extern double get_float_resource (Display*,char*,char*);
 extern unsigned int get_pixel_resource (Display*,Colormap,char*,char*);
 extern unsigned int get_minutes_resource (Display*,char*,char*);
 extern unsigned int get_seconds_resource (Display*,char*,char*);
+extern int parse_milliseconds(const char *string);
 extern int parse_time (const char *string, Bool seconds_default_p,
                        Bool silent_p);
 extern Pixmap

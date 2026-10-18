@@ -104,6 +104,11 @@ usage: %s -<option>\n\
                 really need to do this, since xscreensaver notices when the\n\
                 .xscreensaver file has changed and re-reads it as needed.\n\
 \n\
+  -pause        Pauses and resets the screensaver timer, causing the\n\
+                screensaver not to activate afer the defined timeout.\n\
+\n\
+  -unpause      Resumes the screensaver activation timeout.\n\
+\n\
   -time         Prints the time at which the screensaver last activated or\n\
                 deactivated (roughly, how long the user has been idle or\n\
                 non-idle -- but not quite, since it only tells you when the\n\
@@ -190,6 +195,8 @@ main (int argc, char **argv)
       else if (!strncmp (s, "-version", L))    cmd = &XA_SCREENSAVER_VERSION;
       else if (!strncmp (s, "-time", L))       cmd = &XA_SCREENSAVER_STATUS;
       else if (!strncmp (s, "-watch", L))      cmd = &XA_WATCH;
+      else if (!strncmp (s, "-pause", L))      cmd = &XA_PAUSE;
+      else if (!strncmp (s, "-unpause", L))    cmd = &XA_UNPAUSE;
       else if (!strncmp (s, "-help", L))
         {
           fprintf (stderr, usage, progname, screensaver_version, year);

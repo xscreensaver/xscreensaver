@@ -13,15 +13,17 @@
 "*dpmsOff:		4:00:00",
 "*grabDesktopImages:	True",
 "*grabVideoFrames:	False",
-"*chooseRandomImages:	True",
-"*imageDirectory:	/Library/Desktop Pictures/",
+"*chooseRandomImages:	False",
+"*imageDirectory:	",
 "*nice:			10",
 "*memoryLimit:		0",
 "*lock:			False",
 "*verbose:		False",
 "*fade:			True",
 "*unfade:		True",
+"*fadeTimer: Seconds",
 "*fadeSeconds:		0:00:03",
+"*fadeMilliseconds: 500",
 "*fadeTicks:		20",
 "*splash:		True",
 "*splashDuration:	0:00:05",
@@ -40,7 +42,6 @@
 "*manualCommand: xdg-open man:%s || \
 		    x-terminal-emulator -e /bin/sh -c 'man \"%s\"'",
 "*dateFormat:		%I:%M %p, %a %b %e",
-"*newLoginCommand:	no-such-login-manager",
 "XScreenSaver.pointerHysteresis:		10",
 "XScreenSaver.bourneShell:		/bin/sh",
 "*dialogTheme:			default",
@@ -253,7 +254,7 @@
 				compass --root				    \\n\
 				deluxe --root				    \\n\
 -				demon --root				    \\n\
-- GL: 				extrusion --root			    \\n\
+  GL: 				extrusion --root			    \\n\
 -				loop --root				    \\n\
 				penetrate --root			    \\n\
 				petri --root				    \\n\
@@ -267,6 +268,7 @@
 				wander --root				    \\n\
 				xflame --root				    \\n\
 				xmatrix --root				    \\n\
+				netwaresmp --root			    \\n\
   GL: 				gflux --root				    \\n\
 -				nerverot --root				    \\n\
 				xrayswarm --root			    \\n\
@@ -419,7 +421,6 @@
   GL: 				handsy --root				    \\n\
   GL: 				maze3d --root				    \\n\
   GL: 				peepers --root				    \\n\
-  GL: 				polarnight --root			    \\n\
   GL: 				razzledazzle --root			    \\n\
 				vfeedback --root			    \\n\
   GL: 				deepstars --root			    \\n\
@@ -467,12 +468,8 @@
   GL: 				rigrekt --root				    \\n\
   GL: 				trizm --root				    \\n\
   GL: 				universeball --root			    \\n\
-  GL: 				amigajuggler --root			    \\n\
-  GL: 				floppy --root				    \\n\
-  GL: 				graphstat --root			    \\n\
   GL: 				worldpieces --root			    \\n",
 "*hacks.alienbeacon.name:    Alien Beacon",
-"*hacks.amigajuggler.name:   Amiga Juggler",
 "*hacks.antinspect.name:     Ant Inspect",
 "*hacks.antmaze.name:        Ant Maze",
 "*hacks.antspotlight.name:   Ant Spotlight",
@@ -542,7 +539,6 @@
 "*hacks.glsnake.name:        GL Snake",
 "*hacks.gltext.name:         GL Text",
 "*hacks.goldenapollian.name: Golden Apollian",
-"*hacks.graphstat.name:      Graph Stat",
 "*hacks.gravitywell.name:    Gravity Well",
 "*hacks.hexplasma.name:      Hex Plasma",
 "*hacks.hexstrut.name:       Hex Strut",
@@ -571,12 +567,12 @@
 "*hacks.neontriangulator.name:Neon Triangulator",
 "*hacks.nerverot.name:       Nerve Rot",
 "*hacks.noseguy.name:        Nose Guy",
+"*hacks.netwaresmp.name:     Netware SMP",
 "*hacks.noxfire.name:        Nox Fire",
 "*hacks.pacman.name:         Pac-Man",
 "*hacks.papercube.name:      Paper Cube",
 "*hacks.photopile.name:      Photo Pile",
 "*hacks.platonicfolding.name:Platonic Folding",
-"*hacks.polarnight.name:     Polar Night",
 "*hacks.popsquares.name:     Pop Squares",
 "*hacks.prococean.name:      Proc Ocean",
 "*hacks.projectiveplane.name:Projective Plane",

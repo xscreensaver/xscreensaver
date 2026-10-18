@@ -54,6 +54,7 @@ extern gboolean dpms_sanity_cb (GtkWidget *, gpointer user_data);
 extern gboolean dpms_sanity_event_cb (GtkWidget *, GdkEvent *, gpointer data);
 extern gboolean image_text_pref_changed_event_cb (GtkWidget *, GdkEvent *,
                                                   gpointer user_data);
+extern void fade_timer_item_cb (GtkWidget *, gpointer user_data);
 extern void mode_menu_item_cb (GtkWidget *, gpointer user_data);
 extern void switch_page_cb (GtkNotebook *, GtkWidget *, 
                             gint page_num, gpointer user_data);

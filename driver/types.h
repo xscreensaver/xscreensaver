@@ -34,6 +34,10 @@ typedef enum {
   TEXT_DATE, TEXT_LITERAL, TEXT_FILE, TEXT_PROGRAM, TEXT_URL
 } text_mode;
 
+typedef enum {
+  TIMER_SECONDS, TIMER_MILLISECONDS
+} fade_timer_mode;
+
 typedef struct saver_preferences saver_preferences;
 typedef struct saver_screen_info saver_screen_info;
 
@@ -62,7 +66,10 @@ struct saver_preferences {
 
   Bool fade_p;			/* whether to fade to black, if possible */
   Bool unfade_p;		/* whether to fade from black, if possible */
-  Time fade_seconds;		/* how long that should take */
+  fade_timer_mode fade_timer;       /* fade timer to use seconds or milliseconds */
+  Time fade_seconds;		 /* how long that should take */
+  long fade_milliseconds; /* how long in milliseconds that should take */
+
   Bool splash_p;		/* whether to do a splash screen at startup */
 
   Bool install_cmap_p;		/* whether we should use our own colormap

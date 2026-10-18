@@ -837,6 +837,7 @@ prefs_ok_cb (Widget button, XtPointer client_data, XtPointer ignored)
   COPY(lock_timeout);
   COPY(passwd_timeout);
   COPY(fade_seconds);
+  COPY(fade_milliseconds);
   COPY(verbose_p);
   COPY(install_cmap_p);
   COPY(fade_p);

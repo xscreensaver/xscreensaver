@@ -17,6 +17,8 @@ xscreensaver-command - control a running xscreensaver process
 \-\-suspend | \
 \-\-exit | \
 \-\-restart | \
+\-\-pause | \
+\-\-unpause | \
 \-\-time | \
 \-\-watch | \
 \-\-version]
@@ -102,6 +104,13 @@ Causes the screensaver process to exit and then restart with the same command
 line arguments as last time.  You shouldn't really need to do this,
 since xscreensaver notices when the \fI.xscreensaver\fP file has
 changed and re-reads it as needed.
+.TP 8
+.B \-\-pause
+Pauses and resets the screensaver timer, causing the
+screensaver not to activate afer the defined timeout.
+.TP 8
+.B \-\-unpause
+Resumes the screensaver activation timeout.
 .TP 8
 .B \-\-time
 Prints the time at which the screensaver last activated or 

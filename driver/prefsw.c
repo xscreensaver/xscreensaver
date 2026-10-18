@@ -160,7 +160,9 @@ static const char * const prefs[] = {
   "memoryLimit",		/* not saved */
   "fade",
   "unfade",
+  "fadeTimer",
   "fadeSeconds",
+  "fadeMilliseconds",
   "fadeTicks",			/* not saved */
   "logFile",			/* not saved */
   "ignoreUninstalledPrograms",
@@ -599,7 +601,13 @@ write_init_file (Display *dpy,
       CHECK("memoryLimit")	continue;  /* don't save */
       CHECK("fade")		type = pref_bool, b = p->fade_p;
       CHECK("unfade")		type = pref_bool, b = p->unfade_p;
+      CHECK("fadeTimer") type = pref_str,
+                         s = (
+                           p->fade_timer == TIMER_SECONDS ? "Seconds" :
+                           "Milliseconds"
+                         );
       CHECK("fadeSeconds")	type = pref_time, t = p->fade_seconds;
+      CHECK("fadeMilliseconds")	type = pref_int, i = p->fade_milliseconds;
       CHECK("fadeTicks")	continue;  /* don't save */
       CHECK("captureStdout")	continue;  /* don't save */
       CHECK("logFile")		continue;  /* don't save */
@@ -833,6 +841,7 @@ load_init_file (Display *dpy, saver_preferences *p)
   p->fade_p	    = get_boolean_resource (dpy, "fade", "Boolean");
   p->unfade_p	    = get_boolean_resource (dpy, "unfade", "Boolean");
   p->fade_seconds   = 1000 * get_seconds_resource (dpy, "fadeSeconds", "Time");
+  p->fade_milliseconds   = get_integer_resource (dpy, "fadeMilliseconds", "Integer");
   p->install_cmap_p = get_boolean_resource (dpy, "installColormap", "Boolean");
   p->nice_inferior  = get_integer_resource (dpy, "nice", "Nice");
   p->splash_p       = get_boolean_resource (dpy, "splash", "Boolean");
@@ -906,6 +915,13 @@ load_init_file (Display *dpy, saver_preferences *p)
     if (s) free (s);
     if (p->selected_hack < 0 || p->selected_hack >= p->screenhacks_count)
       p->selected_hack = -1;
+  }
+
+  {
+    char *s = get_string_resource (dpy, "fadeTimer", "String");
+    if      (s && !strcasecmp (s, "Milliseconds"))   p->fade_timer = TIMER_MILLISECONDS;
+    else                                             p->fade_timer = TIMER_SECONDS;
+    if (s) free (s);
   }
 
   {
@@ -1336,7 +1352,7 @@ stop_the_insanity (saver_preferences *p)
   if (p->passwd_timeout <= 0) p->passwd_timeout = 30000;	 /* 30 secs */
   if (p->timeout < 15000) p->timeout = 15000;			 /* 15 secs */
   if (p->cycle != 0 && p->cycle < 2000) p->cycle = 2000;	 /*  2 secs */
-  if (p->fade_seconds <= 0)
+  if (p->fade_seconds <= 0 && p->fade_milliseconds < 50)
     p->fade_p = False;
   if (! p->fade_p) p->unfade_p = False;
 

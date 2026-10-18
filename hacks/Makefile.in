@@ -117,7 +117,7 @@ SRCS		= xscreensaver-getimage.c \
 		  demon.c loop.c t3d.c penetrate.c deluxe.c compass.c \
 		  squiral.c xflame.c wander.c spotlight.c critical.c \
 		  phosphor.c xmatrix.c petri.c shadebobs.c xsublim.c ccurve.c \
-		  blaster.c bumps.c ripples.c xspirograph.c \
+		  blaster.c bumps.c ripples.c xspirograph.c netwaresmp.c \
 		  nerverot.c xrayswarm.c hyperball.c zoom.c whirlwindwarp.c \
 		  rotzoomer.c whirlygig.c speedmine.c vermiculate.c \
 		  ximage-loader.c webcollage-helper.c twang.c apollonian.c \
@@ -156,7 +156,7 @@ OBJS		= attraction.o blitspin.o bouboule.o braid.o bubbles.o \
 		  demon.o loop.o t3d.o penetrate.o deluxe.o compass.o \
 		  squiral.o xflame.o wander.o spotlight.o critical.o \
 		  phosphor.o xmatrix.o petri.o shadebobs.o xsublim.o ccurve.o \
-		  blaster.o bumps.o ripples.o xspirograph.o \
+		  blaster.o bumps.o ripples.o xspirograph.o netwaresmp.o \
 		  nerverot.o xrayswarm.o hyperball.o zoom.o whirlwindwarp.o \
 		  rotzoomer.o whirlygig.o speedmine.o vermiculate.o \
 		  ximage-loader.o webcollage-helper.o twang.o apollonian.o \
@@ -185,7 +185,7 @@ EXES		= attraction blitspin bouboule braid decayscreen deco \
 		  interference truchet bsod crystal discrete distort kumppa \
 		  demon loop penetrate deluxe compass squiral xflame \
 		  wander spotlight phosphor xmatrix petri shadebobs \
-		  ccurve blaster bumps ripples xspirograph \
+		  ccurve blaster bumps ripples xspirograph netwaresmp \
 		  nerverot xrayswarm zoom whirlwindwarp rotzoomer \
 		  speedmine vermiculate twang apollonian euler2d \
 		  polyominoes fluidballs anemone halftone \
@@ -243,7 +243,7 @@ MEN		= anemone.man apollonian.man attraction.man \
 	          swirl.man triangle.man truchet.man \
 	          twang.man vermiculate.man vidwhacker.man \
 	          wander.man webcollage.man whirlwindwarp.man \
-	          xflame.man xjack.man xlyap.man xmatrix.man \
+	          xflame.man xjack.man xlyap.man xmatrix.man netwaresmp.man \
 	          xrayswarm.man xspirograph.man zoom.man halftone.man \
 		  eruption.man popsquares.man metaballs.man \
 		  barcode.man piecewise.man cloudlife.man \
@@ -750,6 +750,9 @@ phosphor:	phosphor.o	$(HACK_OBJS) $(TEXT) $(COL) $(PNG) $(TTY)
 
 xmatrix:	xmatrix.o	$(HACK_OBJS) $(TEXT) $(PNG)
 	$(CC_HACK) -o $@ $@.o	$(HACK_OBJS) $(TEXT) $(PNG) $(PNG_LIBS) $(TEXT_LIBS)
+
+netwaresmp:	netwaresmp.o	$(HACK_OBJS) $(TEXT) $(COL) 
+	$(CC_HACK) -o $@ $@.o	$(HACK_OBJS) $(DBE) $(TEXT) $(COL) $(HACK_LIBS) $(TEXT_LIBS) 
 
 petri:		petri.o		$(HACK_OBJS) $(COL) $(SPL)
 	$(CC_HACK) -o $@ $@.o	$(HACK_OBJS) $(COL) $(SPL) $(HACK_LIBS)

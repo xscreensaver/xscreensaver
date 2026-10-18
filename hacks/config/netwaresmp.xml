@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<screensaver name="netwaresmp" _label="NetwareSMP">
+
+  <command arg="-root"/>
+
+  <video href="https://www.youtube.com/watch?v=G2Jk-tMz-eU"/>
+
+  <number id="cpus" type="spinbutton" _label="cpus" arg="--cpus %" 
+          low="1" high="64" default="1"/>
+
+  <number id="speedup" type="slider" arg="--speedup %" 
+          _label="Worm Speedup" _low-label="Slow" _high-label="Fast"
+          low="1" high="16" default="1"/>
+
+  <number id="delay" type="slider" arg="--delay %"
+          _label="System Load Average Delay (ms)" _low-label="Low" _high-label="High"
+          low="10000" high="100000" default="100000"
+          convert="invert"/>
+
+  <number id="wormsize" type="spinbutton" arg="--wormsize %"
+          _label="Wormsize" low="10" high="80" default="30"/>
+
+  <select id="shape" >
+    <option id="squares"  _label="Squares Drawing Mode"/>
+    <option id="circles"  _label="Circles Drawing Mode" arg-set="--shape 1"/>
+    <option id="snipes"   _label="Snipes Drawing Mode"  arg-set="--shape 2"/>
+    <option id="triangle" _label="Triangles Drawing Mode" arg-set="--shape 3"/>
+    <option id="classic"  _label="Classic Drawing Mode"  arg-set="--shape 4"/>
+    <option id="trees"    _label="Trees Drawing Mode"    arg-set="--shape 5"/>
+  </select>
+
+  <boolean id="mono"  _label="Mono Color Mode" arg-set="--mono"/>
+  <boolean id="stats" _label="Select Stats Display Popup" arg-set="--stats"/>
+
+  <string id="fg" _label="Foreground color" arg="--fg %" default="#FF0000"/>
+  <string id="bg" _label="Background color" arg="--bg %" default="#000000"/>
+
+
+  <_description>
+Draws a worm for each system cpu that grows longer and faster as the machine 
+load increases for a particular processor .  A rewrite of the classic Novell 
+Netware SMP console screensaver.  
+
+Originally written at Novell for NetWare SMP in 1994 by Jeffrey V. Merkey.  
+Re-written by Jeffrey Merkey and Cosimo Streppone for xscreensaver based 
+on PopSquares, Deco hacks, loadsnake, and the original Netware SMP screensaver; 2024.
+  </_description>
+</screensaver>

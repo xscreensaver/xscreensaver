@@ -630,9 +630,17 @@ If this is true, then when the screensaver deactivates, desktop will fade back
 ininstead of appearing immediately.  This is only done if \fIfade\fP is true
 as well.  Default: true.
 .TP 8
+.B fadeTimer\fP (class \fBString\fP)
+If \fIfade\fP is true, this defines if the fade duration will be in
+seconds or milliseconds. Default Seconds.
+.TP 8
 .B fadeSeconds\fP (class \fBTime\fP)
-If \fIfade\fP is true, this is how long the fade will be in 
+If \fIfade\fP is true, this is how long the fade will be in
 seconds. Default 3 seconds.
+.TP 8
+.B fadeMilliseconds\fP (class \fBInteger\fP)
+If \fIfade\fP is true, this is how long the fade will be in
+milliseconds. Default 500 milliseconds.
 .TP 8
 .B ignoreUninstalledPrograms\fP (class \fBBoolean\fP)
 There may be programs in the list that are not installed on the system,

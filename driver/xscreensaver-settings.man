@@ -275,7 +275,7 @@ immediately.  This is only done if \fIFade To Black\fP is also selected.
 .TP 4
 .B Fade Duration
 When fading or unfading are selected, this controls how long the fade will
-take.
+take. The fade duration can be in \fIseconds\fP or \fImilliseconds\fP.
 .SS Theme
 This option menu lists the color schemes available for use on the
 unlock dialog.

@@ -550,7 +550,7 @@ blank_screen (saver_info *si)
       /* This will take several seconds to complete. */
       user_active_p = fade_screens (si->app, si->dpy,
                                     current_windows, si->nscreens,
-                                    p->fade_seconds / 1000.0,
+                                    get_fade_milliseconds(p),
                                     True,  /* out_p */
                                     True,  /* from_desktop_p */
                                     &si->fade_state);
@@ -603,7 +603,7 @@ unblank_screen (saver_info *si)
 
   if (unfade_p)
     {
-      double seconds = p->fade_seconds / 1000.0;
+      double seconds = get_fade_milliseconds(p);
       double ratio = 1/3.0;
       Window *current_windows = (Window *)
 	calloc(sizeof(Window), si->nscreens);
@@ -1171,4 +1171,17 @@ reset_watchdog_timer (saver_info *si)
              (int)  (when - now) / (60 * 60),
              (int) ((when - now) % (60 * 60)) / 60,
              (int)  (when - now) % 60);
+}
+
+
+double
+get_fade_milliseconds(saver_preferences *p)
+{
+  double milliseconds = 3000.0;
+
+  milliseconds = (p->fade_timer == TIMER_SECONDS ?
+    p->fade_seconds : p->fade_milliseconds
+  ) / 1000.0;
+
+  return milliseconds;
 }
