@@ -69,12 +69,19 @@ For example, the release v6.17-0 contains the following packages in the release 
 ### **RPM Based Packages (RedHat, CentOS, SuSe)**
 
 - [xscreensaver-6.17-0.src.rpm](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver-6.17-0.src.rpm)
+#### x86_64 Architecture
 - [xscreensaver-6.17-0.x86_64.rpm](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver-6.17-0.x86_64.rpm)
+#### ARM64 Architecture
+- [xscreensaver-6.17-0.aarch64.rpm](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver-6.17-0.aarch64.rpm) 
+
 
 ### **Debian Based Packages (Debian, Ubuntu)**
 
 - [xscreensaver-6.17-0.sdeb](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver-6.17-0.sdeb)
+#### x86_64 Architecture
 - [xscreensaver_6.17-0_amd64.deb](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver_6.17-0_amd64.deb)
+#### ARM64 Architecture
+- [xscreensaver_6.17-0_arm64.deb](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver_6.17-0_arm64.deb) 
 
 ### **Removing a Previous Installation of Outdated Versions of XScreensaver**
 

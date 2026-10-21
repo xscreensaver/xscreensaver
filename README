@@ -100,13 +100,15 @@ release section:
 
 RPM BASED PACKAGES (REDHAT, CENTOS, SUSE)
 
--   xscreensaver-6.17-0.src.rpm
--   xscreensaver-6.17-0.x86_64.rpm
+-   xscreensaver-6.17-0.src.rpm #### x86_64 Architecture
+-   xscreensaver-6.17-0.x86_64.rpm #### ARM64 Architecture
+-   xscreensaver-6.17-0.aarch64.rpm
 
 DEBIAN BASED PACKAGES (DEBIAN, UBUNTU)
 
--   xscreensaver-6.17-0.sdeb
--   xscreensaver_6.17-0_amd64.deb
+-   xscreensaver-6.17-0.sdeb #### x86_64 Architecture
+-   xscreensaver_6.17-0_amd64.deb #### ARM64 Architecture
+-   xscreensaver_6.17-0_arm64.deb
 
 REMOVING A PREVIOUS INSTALLATION OF OUTDATED VERSIONS OF XSCREENSAVER
 
