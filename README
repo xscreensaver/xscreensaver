@@ -23,8 +23,8 @@ RPM BASED PACKAGES (REDHAT, CENTOS, FEDORA, SUSE, ALMA, ROCKY)
 
 DEBIAN BASED PACKAGES (DEBIAN, UBUNTU)
 
--   xscreensaver-6.17-0.sdeb Debian Source
--   xscreensaver_6.17-0_amd64.deb Debian Binary
+-   xscreensaver-6.17-0.sdeb Debian Source #### AMD64 Architecture
+-   xscreensaver_6.17-0_amd64.deb Debian Binary #### ARM64 Architecture
 -   xscreensaver_6.17-0_arm64.deb Debian Binary
 
 

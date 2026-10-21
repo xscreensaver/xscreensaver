@@ -17,10 +17,11 @@
 - [xscreensaver-debuginfo-6.17-0.aarch64.rpm](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver-debuginfo-6.17-0.aarch64.rpm) RPM Debug Info 
 - [xscreensaver-debugsource-6.17-0.aarch64.rpm](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver-debugsource-6.17-0.aarch64.rpm) RPM Debug Source 
 
-
 ### **Debian Based Packages (Debian, Ubuntu)**
 - [xscreensaver-6.17-0.sdeb](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver-6.17-0.sdeb) Debian Source
+#### AMD64 Architecture
 - [xscreensaver_6.17-0_amd64.deb](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver_6.17-0_amd64.deb) Debian Binary 
+#### ARM64 Architecture
 - [xscreensaver_6.17-0_arm64.deb](https://github.com/jeffmerkey/netware-xscreensaver/releases/download/v6.17-0/xscreensaver_6.17-0_arm64.deb) Debian Binary 
 
 ## Table of Contents <!-- omit in toc -->
