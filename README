@@ -10,9 +10,8 @@ NetWare SMP screensaver which is applied as a patch series.
 The RPM’s and DEBs listed below have been tested on Red Hat, Fedora, and
 Ubuntu major release versions and will work on all supported Linux
 Distribtions. This repo is open and public and anyone can review the
-code if they have any concerns, and rebuild any of the RPMs locally to
-verify their content. Instructions for rebuilding the RPMs and DEBs is
-provided below.
+code, and rebuild any of the RPMs locally. Instructions for rebuilding
+the RPMs and DEBs is provided below.
 
 
 Downloads
