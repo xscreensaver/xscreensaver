@@ -7,12 +7,12 @@ This repository contains all of the “official” code from the
 xscreensaver upstream project. It also contains the extremely popular
 NetWare SMP screensaver which is applied as a patch series.
 
-The RPM’s and DEBs listed below have been tested on all Red Hat, Fedora,
-and Ubuntu major release versions and will work on almost all Linux
+The RPM’s and DEBs listed below have been tested on Red Hat, Fedora, and
+Ubuntu major release versions and will work on all supported Linux
 Distribtions. This repo is open and public and anyone can review the
-code if they have concerns, and rebuild any of the RPMs locally to
-verify. This project is dedicated to being open, and to attributing
-recognition to contributors to the project.
+code if they have any concerns, and rebuild any of the RPMs locally to
+verify their content. Instructions for rebuilding the RPMs and DEBs is
+provided below.
 
 
 Downloads
