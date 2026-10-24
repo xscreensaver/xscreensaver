@@ -12,19 +12,30 @@ Source Code Downloads
 
 RPM BASED PACKAGES (REDHAT, CENTOS, FEDORA, SUSE, ALMA, ROCKY)
 
--   xscreensaver-6.17-0.src.rpm RPM Source #### x86_64 Architecture
+-   xscreensaver-6.17-0.src.rpm RPM Source
+
+x86_64 Architecture
+
 -   xscreensaver-6.17-0.x86_64.rpm RPM Binary
 -   xscreensaver-debuginfo-6.17-0.x86_64.rpm RPM Debug Info
--   xscreensaver-debugsource-6.17-0.x86_64.rpm RPM Debug Source ####
-    ARM64 Architecture
+-   xscreensaver-debugsource-6.17-0.x86_64.rpm RPM Debug Source
+
+ARM64 Architecture
+
 -   xscreensaver-6.17-0.aarch64.rpm RPM Binary
 -   xscreensaver-debuginfo-6.17-0.aarch64.rpm RPM Debug Info
 -   xscreensaver-debugsource-6.17-0.aarch64.rpm RPM Debug Source
 
 DEBIAN BASED PACKAGES (DEBIAN, UBUNTU)
 
--   xscreensaver-6.17-0.sdeb Debian Source #### AMD64 Architecture
--   xscreensaver_6.17-0_amd64.deb Debian Binary #### ARM64 Architecture
+-   xscreensaver-6.17-0.sdeb Debian Source
+
+AMD64 Architecture
+
+-   xscreensaver_6.17-0_amd64.deb Debian Binary
+
+ARM64 Architecture
+
 -   xscreensaver_6.17-0_arm64.deb Debian Binary
 
 
