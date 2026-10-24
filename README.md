@@ -1,8 +1,8 @@
 # Novell Netware SMP console screensaver for X11, Gnome, KDE Plasma, and Wayland Desktops
 
-This repository contains all of the "official" code from the xscreensaver upstream project.  It also contains the extremely popular NetWare SMP screensaver which is applied as a patch series.  Future releases of the repo will be removing malicious code from the upstream project tarballs, such as "timebombs" and "easter eggs" published by the maintainer of the "official" upstream xscreensaver project.  This malicious code has been criticized and rejected by the Linux Community Distro projects such as Debian Linux.  
+This repository contains all of the "official" code from the xscreensaver upstream project.  It also contains the extremely popular NetWare SMP screensaver which is applied as a patch series.
 
-The RPM's and DEBs listed below have been tested on all Red Hat and Fedora major release versions and will work on almost all Linux Distribtions.  This repo is open and public and anyone can review the code if they have concerns, and rebuild any of the RPMs locally to verify.   This project is dedicated to being open, and to attributing recognition to contributors to the project.  
+The RPM's and DEBs listed below have been tested on all Red Hat, Fedora, and Ubuntu major release versions and will work on almost all Linux Distribtions.  This repo is open and public and anyone can review the code if they have concerns, and rebuild any of the RPMs locally to verify.   This project is dedicated to being open, and to attributing recognition to contributors to the project.  
 
 ## Downloads
 
