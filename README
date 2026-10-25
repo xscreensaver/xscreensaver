@@ -5,16 +5,33 @@ NOVELL NETWARE SMP CONSOLE SCREENSAVER FOR X11, GNOME, KDE PLASMA, AND WAYLAND D
 
 This repository contains all of the “official” code from the
 xscreensaver upstream project. It also contains the extremely popular
-NetWare SMP screensaver which is applied as a patch series.
+NetWare SMP screensaver which is applied as a patch series. The upstream
+“official” project for xscreensaver published by Jamie Zawinski does not
+provide any tested binaries, QA tested code, or any visibility into
+contributors to his project. This repo and it’s modules use an automated
+test harness which checks the code for memory leaks, bugs, and malicious
+code.
+
+This repository is maintained by Jeff Merkey. Jeff Merkey was the Chief
+Scientist of Novell and authored the NetWare SMP Operating System which
+dominated Local Area Network computing in the 1990’s. Jeff Merkey is
+also the author of numerous patents in the field of computer science and
+he is a retired hardware designer and developed storage architectures
+for supercomputers and Network Forensics. In the late 1990’s and early
+2000’s he was involved in development of Gallium-Arsenide chipsets for
+SCI (Scalable Coherent Interface) and massively parallel interface
+software. He created strong affinity multi-processor scheduling which is
+used in all major operatings systems today. Some of his patents and
+research papers can be accessed here.
+
+
+Downloads
 
 The RPM’s and DEBs listed below have been tested on Red Hat, Fedora, and
 Ubuntu major release versions and will work on all supported Linux
 Distribtions. This repo is open and public and anyone can review the
 code, and rebuild any of the RPMs locally. Instructions for rebuilding
 the RPMs and DEBs is provided below.
-
-
-Downloads
 
 Source Code Downloads
 
