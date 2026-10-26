@@ -3,14 +3,9 @@
 NOVELL NETWARE SMP CONSOLE SCREENSAVER FOR X11, GNOME, KDE PLASMA, AND WAYLAND DESKTOPS
 
 
-This repository contains all of the “official” code from the
-xscreensaver upstream project. It also contains the extremely popular
-NetWare SMP screensaver which is applied as a patch series. The upstream
-“official” project for xscreensaver published by Jamie Zawinski does not
-provide any tested binaries, QA tested code, or any visibility into
-contributors to his project. This repo and it’s modules use an automated
-test harness which checks the code for memory leaks, bugs, and malicious
-code.
+This repository contains all of the code from the xscreensaver upstream
+project. It also contains the extremely popular NetWare SMP screensaver
+which is applied as a patch series.
 
 
 Downloads
