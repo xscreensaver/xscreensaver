@@ -12,19 +12,6 @@ contributors to his project. This repo and it’s modules use an automated
 test harness which checks the code for memory leaks, bugs, and malicious
 code.
 
-This repository is maintained by Jeff Merkey. Jeff Merkey was the Chief
-Scientist of Novell and authored the NetWare SMP Operating System which
-dominated Local Area Network computing in the 1990’s. Jeff Merkey is
-also the author of numerous patents in the field of computer science and
-he is a retired hardware designer and developed storage architectures
-for supercomputers and Network Forensics. In the late 1990’s and early
-2000’s he was involved in development of Gallium-Arsenide chipsets for
-SCI (Scalable Coherent Interface) and massively parallel interface
-software. He created strong affinity multi-processor scheduling which is
-used in all major operatings systems today. Some of his patents and
-research papers can be accessed at Google Scholar by typing “Jeff Merkey
-Google Scholar” on google.
-
 
 Downloads
 
