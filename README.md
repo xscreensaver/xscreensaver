@@ -254,15 +254,13 @@ a media file or DVD.
 
 ## **Configuring XScreensaver and Obtaining Older Versions**
 
-For detailed instructions on how to install and configure the XScreensaver base program, please refer to the online 
-[Documentation and Manuals for XScreensaver](https://www.jwz.org/xscreensaver/man1.html).  You should also review 
-the [Frequently Asked Questions](https://www.jwz.org/xscreensaver/faq.html) for information about common integration
+For detailed instructions on how to install and configure the XScreensaver base program, please refer to the online Documentation and Manuals for XScreensaver at https://www.jwz.org/xscreensaver/man1.html.  You should also review 
+the Frequently Asked Questions at https://www.jwz.org/xscreensaver/faq.html for information about common integration
 and installation questions and detailed information about the XScreensaver program itself.  
 
-You can report any bugs you encounter regarding the XScreensaver program and utilities by opening a [bug report](https://www.jwz.org/xscreensaver/bugs.html) at the main XScreensaver support website at [www.jwz.org](https://www.jwz.org/xscreensaver/
-).
+You can report any bugs you encounter regarding the XScreensaver program and utilities by opening a bug report at https://www.jwz.org/xscreensaver/bugs.html.
 
-You can download other versions of XScreensaver, including the most recent versions at the [XScreensaver Download Page](https://www.jwz.org/xscreensaver/download.html).
+You can download other versions of XScreensaver, including the most recent versions at the XScreensaver Download Page at https://www.jwz.org/xscreensaver/download.html.
 
 There are several online archives of XScreensaver releases which contain both current and older released versions of the software.  [Open Source Labs](https://ftp2.osuosl.org/pub/blfs/conglomeration/xscreensaver/) publishes a mirror of [XScreensaver versions](https://ftp2.osuosl.org/pub/blfs/conglomeration/xscreensaver/).
 
