@@ -254,15 +254,7 @@ a media file or DVD.
 
 ## **Configuring XScreensaver and Obtaining Older Versions**
 
-For detailed instructions on how to install and configure the XScreensaver base program, please refer to the online 
-[Documentation and Manuals for XScreensaver](https://www.jwz.org/xscreensaver/man1.html).  You should also review 
-the [Frequently Asked Questions](https://www.jwz.org/xscreensaver/faq.html) for information about common integration
-and installation questions and detailed information about the XScreensaver program itself.  
-
-You can report any bugs you encounter regarding the XScreensaver program and utilities by opening a [bug report](https://www.jwz.org/xscreensaver/bugs.html) at the main XScreensaver support website at [www.jwz.org](https://www.jwz.org/xscreensaver/
-).
-
-You can download other versions of XScreensaver, including the most recent versions at the [XScreensaver Download Page](https://www.jwz.org/xscreensaver/download.html).
+The jwz.org website hosts malware that randomly displays sado masochistic pornographic imagery of castration to site visitors referred from either Hacker News or github respositories to the jwz.org domain.  Links from any URL at jwz.org have been removed from this project as they [violate Github's Acceptable Use Policies](https://docs.github.com/en/site-policy/acceptable-use-policies).  You will need to search the jwz.org website manually for the FAQ and Xscreensaver documentation.  Be advised that the jwz.org website also plants malicious cookies into visiting web browsers which appear to trigger this behavior of the main stite URLdisplaying these vulgar images.
 
 There are several online archives of XScreensaver releases which contain both current and older released versions of the software.  [Open Source Labs](https://ftp2.osuosl.org/pub/blfs/conglomeration/xscreensaver/) publishes a mirror of [XScreensaver versions](https://ftp2.osuosl.org/pub/blfs/conglomeration/xscreensaver/).
 
