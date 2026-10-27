@@ -254,7 +254,7 @@ a media file or DVD.
 
 ## **Configuring XScreensaver and Obtaining Older Versions**
 
-The jwz.org website hosts malware that randomly displays sado masochistic pornographic imagery of castration to site visitors referred from either Hacker News or github respositories to the jwz.org domain.  Links from any URL at jwz.org have been removed from this project as they [violate Github's Acceptable Use Policies](https://docs.github.com/en/site-policy/acceptable-use-policies).  You will need to search the jwz.org website manually for the FAQ and Xscreensaver documentation.  Be advised that the jwz.org website also plants malicious cookies into visiting web browsers which appear to trigger this behavior of the main stite URL displaying these vulgar images.
+The jwz.org website hosts malware that randomly displays sado masochistic pornographic imagery of castration to site visitors referred from either Hacker News or github respositories to the jwz.org domain.  Links from any URL at jwz.org have been removed from this project as they [violate Github's Acceptable Use Policies](https://docs.github.com/en/site-policy/acceptable-use-policies).  You will need to search the jwz.org website manually for the FAQ and Xscreensaver documentation.  Be advised that the jwz.org website also plants malicious cookies into visiting web browsers which appear to trigger this behavior of the main site URL displaying these vulgar images.
 
 There are several online archives of XScreensaver releases which contain both current and older released versions of the software.  [Open Source Labs](https://ftp2.osuosl.org/pub/blfs/conglomeration/xscreensaver/) publishes a mirror of [XScreensaver versions](https://ftp2.osuosl.org/pub/blfs/conglomeration/xscreensaver/).
 
