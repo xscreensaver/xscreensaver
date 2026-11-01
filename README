@@ -23,7 +23,10 @@ Google Scholar” on google.
 Q: There is all sorts of banter on the internet that this repo is “not
 trustworthy” and “unofficial”. The source of these claims is Jamie
 Zawinski and a group of trolls on hacker news who originate from Jamie’s
-blog on his website.
+blog on his website. Jamie is currently claiming this github archive is
+“not affiliated” with the “official” release. This statement is patently
+false. Jamie himself gave consent to me to create this repo on github,
+and the email thread.
 
 A: I worked with Jamie for over two years on this project and recently
 we have had a rift, mainly over a lack of visibility into his
@@ -44,7 +47,11 @@ bugs, but from here on this fork. Be warned that the “official” release
 will crash and have all sorts of problems. If you want a build of
 xscreensaver that works and has the bugs fixed, use this repo. Also, be
 aware that I was Jamie’s bug fixer for two years and now he can fix his
-own bugs (He will probably just download the fixes from here).
+own bugs (He will probably just download the fixes from here). You can
+ignore all this nonsense on the internet about this repo being
+“insecure” and “compromised”. The RPMs and DEBs have source code and
+development patches and you will find that this repo is 100% in sync
+with the so called “official” releases (whatever that means).
 
 
 Downloads
