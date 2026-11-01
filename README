@@ -38,21 +38,19 @@ QA tested code. His xscreensaver project was riddled with bugs and
 broken build scripts and I worked for several years helping him track
 this stuff down. He also has a HUGE ego and anyone who calls him out on
 his conduct gets stepped on. This repo is absolutely trustworthy, and
-unlike his “official” release which is a bug infested pile of junk.
-Since Jamie is no longer speaking to me, then you can be assured that
-anything you download from jwz.org will be substandard code. It’s pretty
-simple, I am 10 times the engineer Jamie is, and he is jealous and
-scared of me and this repo. Unlike his development process which has
-ZERO visibility, this repo is open and free. I will still fix Jamie’s
-bugs, but from here on this fork. Be warned that the “official” release
-will crash and have all sorts of problems. If you want a build of
-xscreensaver that works and has the bugs fixed, use this repo. Also, be
-aware that I was Jamie’s bug fixer for two years and now he can fix his
-own bugs (He will probably just download the fixes from here). You can
-ignore all this nonsense on the internet about this repo being
-“insecure” and “compromised”. The RPMs and DEBs have source code and
-development patches and you will find that this repo is 100% in sync
-with the so called “official” releases (whatever that means).
+unlike his “official” release which is historicaly buggy. Since Jamie is
+no longer speaking to me, then you can be assured that anything you
+download from jwz.org will be substandard code. Unlike his development
+process which has ZERO visibility, this repo is open and free. I will
+still fix bugs in the upstream versions, but from here on this fork. Be
+warned that the “official” release contains timebombs, easter eggs, and
+other malicious code placed there by Jamie, and that code will be
+removed from this repo at the next release of Xscreensaver. Also, be
+aware that I was Jamie’s bug fixer for two years. You can ignore all
+this nonsense on the internet about this repo being “insecure” and
+“compromised”. The RPMs and DEBs have source code and development
+patches and you will find that this repo is 100% in sync with the so
+called “official” releases (whatever that means).
 
 
 Downloads
